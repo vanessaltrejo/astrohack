@@ -64,7 +64,7 @@ Estado: ⬜ pendiente · 🟦 en curso · ✅ hecho. Cada paso tiene un ID (S#) 
 ### Fase 0 · Arranque (~30 min)
 | ID | Paso | Resultado esperado | Estado |
 |---|---|---|---|
-| S0.1 | Repo: `git init`, remoto `github.com/vanessaltrejo/astrohack`, `.gitignore` (excluir `cubos/*.fits` y `.DS_Store`), estructura de carpetas (sec. 5.1) | Primer commit con tracker + plan | ⬜ |
+| S0.1 | Repo: `git init`, remoto `github.com/vanessaltrejo/astrohack`, `.gitignore` (excluir `cubos/*.fits` y `.DS_Store`), estructura de carpetas (sec. 5.1) | Primer commit con tracker + plan | ✅ |
 | S0.2 | Entorno: `pip install streamlit plotly astropy` (si falla → Plan B) | `python -c "import streamlit, plotly, astropy"` sin error | ⬜ |
 | S0.3 | Roles + bitácora de IA abierta (sec. 7) | Nombres en la tabla | ⬜ |
 | S0.4 | Dudas de la sec. 6 enviadas a organizadores | Respuesta sobre 5+3 vs 8+10 | ⬜ |
