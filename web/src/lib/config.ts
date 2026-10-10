@@ -1,7 +1,12 @@
-/** Nombre del tablero: cámbialo aquí y se actualiza en título, cabecera y pie. */
-export const APP_NAME = "Huellas";
+/** Nombre del tablero (y del equipo): cámbialo aquí y se actualiza en título, cabecera y pie. */
+export const APP_NAME = "Sparks";
 export const APP_TAGLINE = "Moléculas prebióticas en IRAS 16293-2422, línea por línea";
-export const TEAM_NAME_DEFAULT = "";
+export const TEAM_NAME_DEFAULT = "Sparks";
+
+/** Identificación del dato, para la cabecera. */
+export const SOURCE_LABEL = "IRAS 16293-2422";
+export const PROJECT_LABEL = "ALMA 2013.1.00278.S";
+export const BAND_LABEL = "Banda 7 · 349 GHz";
 
 /** Declaración de uso de IA (texto pendiente de redactar por el equipo). */
 export const AI_DECLARATION =

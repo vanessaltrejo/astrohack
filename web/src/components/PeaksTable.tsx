@@ -1,12 +1,15 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { Search, ArrowUpDown, ArrowUp, ArrowDown, Plus } from "lucide-react";
 import type { Peak, PeakCandidate, Peaks, PosKey, WinKey } from "@/lib/data";
 import { POSITION_KEYS, WINDOW_KEYS } from "@/lib/data";
 import { POSITION_LABELS } from "@/lib/config";
 import { speciesInfo } from "@/lib/species";
 import { f } from "@/lib/format";
 import { Pending } from "./ui";
+import { Tex, SYM } from "./Tex";
 
 const FLAG_ES: Record<string, string> = {
   blend: "mezcla",
@@ -23,15 +26,17 @@ export interface PeaksTableProps {
   peaks: Peaks | null;
   peaksState: "ok" | "missing" | "error";
   active: PosKey;
+  vAdopted: number | null;
   onZoom: (win: WinKey, pos: PosKey, freqGHz: number) => void;
   onLog: (win: WinKey, pos: PosKey, peak: Peak, cand: PeakCandidate) => void;
 }
 
-export default function PeaksTable({ peaks, peaksState, active, onZoom, onLog }: PeaksTableProps) {
+export default function PeaksTable({ peaks, peaksState, active, vAdopted, onZoom, onLog }: PeaksTableProps) {
   const [posFilter, setPosFilter] = useState<"activa" | "todas">("activa");
   const [winFilter, setWinFilter] = useState<"todas" | WinKey>("todas");
   const [q, setQ] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "snr", dir: -1 });
+  const [tbody] = useAutoAnimate<HTMLTableSectionElement>({ duration: 150, easing: "cubic-bezier(0,0,0,1)" });
 
   const rows = useMemo<Row[]>(() => {
     if (!peaks) return [];
@@ -82,32 +87,41 @@ export default function PeaksTable({ peaks, peaksState, active, onZoom, onLog }:
 
   if (!peaks) return <Pending what={peaksState === "error" ? "peaks.json (con errores de lectura)" : "peaks.json"} />;
 
-  const th = (key: SortKey, label: string, right = false) => (
-    <th className={right ? "r" : ""} aria-sort={sort.key === key ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
-      <button
-        type="button"
-        className="inline-flex items-center gap-1 hover:text-ink"
-        onClick={() => setSort((s) => ({ key, dir: s.key === key ? ((-s.dir) as 1 | -1) : key === "id" || key === "freq" ? 1 : -1 }))}
-      >
-        {label}
-        <span aria-hidden className="text-[0.7em]">
-          {sort.key === key ? (sort.dir === 1 ? "▲" : "▼") : "△"}
-        </span>
-      </button>
-    </th>
-  );
+  const th = (key: SortKey, label: React.ReactNode, right = false) => {
+    const on = sort.key === key;
+    const Icon = on ? (sort.dir === 1 ? ArrowUp : ArrowDown) : ArrowUpDown;
+    return (
+      <th className={right ? "r" : ""} aria-sort={on ? (sort.dir === 1 ? "ascending" : "descending") : "none"}>
+        <button
+          type="button"
+          className={`inline-flex items-center gap-1 hover:text-ink ${on ? "text-ink" : ""}`}
+          onClick={() => setSort((s) => ({ key, dir: s.key === key ? ((-s.dir) as 1 | -1) : key === "id" || key === "freq" ? 1 : -1 }))}
+        >
+          {label}
+          <Icon className="icon opacity-70" aria-hidden />
+        </button>
+      </th>
+    );
+  };
+
+  // la mejor candidata es la más cercana a la velocidad adoptada
+  const rank = (cands: PeakCandidate[]) =>
+    vAdopted === null ? cands : [...cands].sort((a, b) => Math.abs(a.v_kms - vAdopted) - Math.abs(b.v_kms - vAdopted));
 
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center gap-3">
-        <input
-          type="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar especie, id, bandera o frecuencia"
-          className="field w-80 py-1 text-sm"
-          aria-label="Buscar en la tabla de picos"
-        />
+        <label className="field-icon">
+          <Search className="icon" aria-hidden />
+          <input
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Especie, pico, bandera o frecuencia"
+            className="field w-72 py-1 text-[0.8rem]"
+            aria-label="Buscar en la tabla de picos"
+          />
+        </label>
         <div className="seg" role="group" aria-label="Filtrar por posición">
           <button type="button" aria-pressed={posFilter === "activa"} onClick={() => setPosFilter("activa")}>
             {POSITION_LABELS[active]}
@@ -123,29 +137,35 @@ export default function PeaksTable({ peaks, peaksState, active, onZoom, onLog }:
             </button>
           ))}
         </div>
-        <span className="ml-auto text-sm text-muted">
-          <span className="num text-ink">{filtered.length}</span> de {rows.length} picos. Clic en una fila para ampliarla
-          en el espectro (±5 MHz).
+        <span className="ml-auto text-[0.78rem] text-muted">
+          <span className="text-ink">{filtered.length}</span> de {rows.length} picos
         </span>
       </div>
-      <div className="plate max-h-[30rem] overflow-auto">
+      <div className="plate max-h-[34rem] overflow-auto">
         <table className="dtable">
           <thead>
             <tr>
               {th("id", "Pico")}
               <th>Ventana</th>
               <th>Posición</th>
-              {th("freq", "ν LSRK (GHz)", true)}
-              {th("snr", "SNR", true)}
-              {th("fwhm", "FWHM (km/s)", true)}
+              {th("freq", <Tex>{SYM.nuObs + String.raw`\ (\mathrm{GHz})`}</Tex>, true)}
+              {th("snr", <Tex>{SYM.snr}</Tex>, true)}
+              {th("fwhm", <Tex>{SYM.fwhm + String.raw`\ (\mathrm{km\,s^{-1}})`}</Tex>, true)}
               <th>Banderas</th>
-              {th("ncand", "Candidatas (v, Δν)")}
+              {th(
+                "ncand",
+                <>
+                  Candidatas <span className="font-normal">(</span>
+                  <Tex>{String.raw`v,\ \Delta\nu`}</Tex>
+                  <span className="font-normal">)</span>
+                </>,
+              )}
             </tr>
           </thead>
-          <tbody>
+          <tbody ref={tbody}>
             {filtered.map((r) => {
               const fGHz = r.peak.fit?.ok && r.peak.fit.center_GHz ? r.peak.fit.center_GHz : r.peak.freq_GHz;
-              const cands = r.peak.candidates ?? [];
+              const cands = rank(r.peak.candidates ?? []);
               return (
                 <tr
                   key={`${r.pos}-${r.peak.id}`}
@@ -156,25 +176,25 @@ export default function PeaksTable({ peaks, peaksState, active, onZoom, onLog }:
                     if (e.key === "Enter") onZoom(r.win, r.pos, fGHz);
                   }}
                 >
-                  <td className="num whitespace-nowrap text-ink">{r.peak.id}</td>
+                  <td className="id whitespace-nowrap text-ink">{r.peak.id}</td>
                   <td>{r.win}</td>
                   <td>{POSITION_LABELS[r.pos]}</td>
-                  <td className="r num">{f(fGHz, 5)}</td>
-                  <td className="r num text-ink">{f(r.peak.snr, 1)}</td>
-                  <td className="r num">{f(r.peak.fit?.fwhm_kms, 2)}</td>
+                  <td className="r">{f(fGHz, 5)}</td>
+                  <td className="r text-ink">{f(r.peak.snr, 1)}</td>
+                  <td className="r">{f(r.peak.fit?.fwhm_kms, 2)}</td>
                   <td className="text-ink-2">
                     {(r.peak.flags ?? []).map((x) => FLAG_ES[x] ?? x).join(", ") || <span className="text-muted">—</span>}
                   </td>
-                  <td>
+                  <td className="max-w-[30rem]">
                     <div className="flex flex-wrap gap-1">
-                      {cands.slice(0, 4).map((c) => {
+                      {cands.slice(0, 3).map((c, i) => {
                         const info = speciesInfo(c.species);
                         return (
                           <button
                             key={c.catalog_id}
                             type="button"
                             className="chip"
-                            aria-pressed="true"
+                            aria-pressed={i === 0}
                             title={`Añadir a Evidencia: ${info.name}, ${c.rest_MHz.toFixed(3)} MHz, Eu ${c.Eu_K} K, log I ${c.logI_300K}`}
                             onClick={(e) => {
                               e.stopPropagation();
@@ -183,15 +203,26 @@ export default function PeaksTable({ peaks, peaksState, active, onZoom, onLog }:
                           >
                             <span className="dot" style={{ background: info.color }} />
                             {info.formula}
-                            <span className="num text-[0.72rem] text-ink-2">
-                              {f(c.v_kms, 2)} · {c.delta_MHz >= 0 ? "+" : "−"}
+                            <span className={`text-[0.7rem] ${i === 0 ? "text-ink-2" : "text-muted"}`}>
+                              {f(c.v_kms, 2)}, {c.delta_MHz >= 0 ? "+" : "−"}
                               {Math.abs(c.delta_MHz).toFixed(2)}
                             </span>
+                            <Plus className="icon opacity-50" aria-hidden />
                           </button>
                         );
                       })}
-                      {cands.length > 4 ? <span className="text-xs text-muted">+{cands.length - 4} más</span> : null}
-                      {cands.length === 0 ? <span className="text-muted">sin candidata en catálogo</span> : null}
+                      {cands.length > 3 ? (
+                        <span
+                          className="self-center text-[0.72rem] text-muted"
+                          title={cands
+                            .slice(3)
+                            .map((c) => `${speciesInfo(c.species).formula} ${f(c.v_kms, 2)} km/s`)
+                            .join("\n")}
+                        >
+                          +{cands.length - 3}
+                        </span>
+                      ) : null}
+                      {cands.length === 0 ? <span className="text-muted">sin candidata en el catálogo</span> : null}
                     </div>
                   </td>
                 </tr>
@@ -199,14 +230,8 @@ export default function PeaksTable({ peaks, peaksState, active, onZoom, onLog }:
             })}
           </tbody>
         </table>
-        {filtered.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-muted">Ningún pico cumple el filtro. Borra la búsqueda o cambia la posición.</p>
-        ) : null}
+        {filtered.length === 0 ? <p className="px-4 py-6 text-sm text-muted">Ningún pico cumple el filtro.</p> : null}
       </div>
-      <p className="mt-2 text-xs text-muted">
-        Cada candidata muestra la velocidad que implicaría (km/s) y Δν (MHz): frecuencia predicha a la v adoptada por el
-        pipeline menos la del pico. Pulsa una candidata para añadirla al registro de evidencia.
-      </p>
     </div>
   );
 }

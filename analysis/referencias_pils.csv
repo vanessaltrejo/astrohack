@@ -1,0 +1,8 @@
+especie,posicion,Tex_K,N_cm2,FWHM_kms,v_kms,limite_superior,referencia,nota
+CH3CN,B,110,4.0e16,1.0,2.7,no,"Calcutt et al. 2018, A&A 616, A90 (Tabla 1)","v=0 opticamente gruesa; N derivada de v8=1"
+C2H5CN,B,110,3.6e15,1.0,2.7,no,"Calcutt et al. 2018, A&A 616, A90 (Tabla 1)","9 % de CH3CN"
+CH2DOH,B,300,7.1e17,1.0,2.6,no,"Jorgensen et al. 2018, A&A 620, A170 (Tabla 1)","grupo caliente; CH2DOH/CH3OH = 0.071"
+CH3CHO,B,125,1.2e17,1.0,2.6,no,"Jorgensen et al. 2018, A&A 620, A170 (Tabla 1)","grupo frio (~125 K)"
+CH3OCHO,B,300,2.6e17,1.0,2.6,no,"Jorgensen et al. 2018, A&A 620, A170 (Tabla 1)","grupo caliente"
+CH3OH,B,300,1.0e19,1.0,2.6,no,"Jorgensen et al. 2018, A&A 620, A170 (Tabla 1)","de CH3-18OH x 560; = N(CH2DOH)/0.071"
+Glycine-I,B,300,9.2e14,1.0,2.6,si,"Drozdovskaya et al. 2019, MNRAS 490, 50 (Apendice A)","limite superior; no detectada (tambien Ceccarelli et al. 2000)"

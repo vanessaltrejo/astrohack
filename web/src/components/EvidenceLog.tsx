@@ -1,5 +1,6 @@
 "use client";
 
+import { Download, Plus, Trash2 } from "lucide-react";
 import { COLUMN_LABELS, EVIDENCE_COLUMNS, emptyRow, toCsv, type EvidenceColumn, type EvidenceRow } from "@/lib/evidence";
 
 export interface EvidenceLogProps {
@@ -61,18 +62,19 @@ export default function EvidenceLog({ rows, setRows, team, setTeam, flashId }: E
           />
         </label>
         <button type="button" className="btn" onClick={() => setRows((rs) => [...rs, emptyRow(team)])}>
-          Añadir fila vacía
+          <Plus className="icon" />
+          Fila vacía
         </button>
-        <button type="button" className="btn" onClick={exportCsv} disabled={rows.length === 0}>
+        <button type="button" className="btn btn-primary" onClick={exportCsv} disabled={rows.length === 0}>
+          <Download className="icon" />
           Exportar CSV
         </button>
-        <span className="ml-auto text-sm text-muted">
-          <span className="num text-ink">{rows.length}</span> filas. Se guardan en este navegador; exporta el CSV para
-          entregarlo.
+        <span className="ml-auto text-[0.78rem] text-muted">
+          <span className="text-ink">{rows.length}</span> filas, guardadas en este navegador
         </span>
       </div>
       {rows.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-rule-strong px-6 py-8 text-sm text-ink-2">
+        <div className="pending-stripes rounded border border-dashed border-rule-strong px-6 py-8 text-sm text-ink-2">
           <p className="font-semibold text-ink">El registro está vacío</p>
           <p className="mt-1 max-w-[62ch]">
             Pulsa “Registrar” en una huella molecular o una candidata en la tabla de picos: la fila se rellena con la
@@ -80,7 +82,7 @@ export default function EvidenceLog({ rows, setRows, team, setTeam, flashId }: E
           </p>
         </div>
       ) : (
-        <div className="plate max-h-[32rem] overflow-auto">
+        <div className="plate max-h-[calc(100dvh-14rem)] overflow-auto">
           <table className="dtable">
             <thead>
               <tr>
@@ -103,13 +105,13 @@ export default function EvidenceLog({ rows, setRows, team, setTeam, flashId }: E
                       title="Borrar fila"
                       onClick={() => setRows((rs) => rs.filter((x) => x._id !== r._id))}
                     >
-                      ✕
+                      <Trash2 className="icon" />
                     </button>
                   </td>
                   {EVIDENCE_COLUMNS.map((c) => (
                     <td key={c} className="p-1">
                       <input
-                        className={`field w-full ${NUMERIC.has(c) ? "num text-[0.74rem]" : ""}`}
+                        className={`field w-full ${NUMERIC.has(c) ? "text-[0.76rem]" : ""}`}
                         style={{ minWidth: WIDE[c] ?? "7rem" }}
                         value={r[c]}
                         aria-label={`${COLUMN_LABELS[c]}`}
@@ -123,8 +125,8 @@ export default function EvidenceLog({ rows, setRows, team, setTeam, flashId }: E
           </table>
         </div>
       )}
-      <p className="mt-2 text-xs text-muted">
-        Las columnas son las de <span className="num">data/evidencia_plantilla.csv</span>, en el mismo orden.
+      <p className="caption mt-2">
+        Las columnas son las de <span className="id">data/evidencia_plantilla.csv</span>, en el mismo orden. Exporta el CSV para entregarlo.
       </p>
     </div>
   );

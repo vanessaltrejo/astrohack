@@ -1,32 +1,27 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
-import { APP_NAME, APP_TAGLINE } from "@/lib/config";
+import { APP_NAME, APP_TAGLINE, SOURCE_LABEL } from "@/lib/config";
+import "@fontsource-variable/newsreader/opsz.css";
+import "@fontsource-variable/newsreader/opsz-italic.css";
+import "@fontsource/ibm-plex-sans/300.css";
+import "@fontsource/ibm-plex-sans/400.css";
+import "@fontsource/ibm-plex-sans/400-italic.css";
+import "@fontsource/ibm-plex-sans/500.css";
+import "@fontsource/ibm-plex-sans/600.css";
+import "@fontsource/ibm-plex-mono/400.css";
+import "@fontsource/ibm-plex-mono/500.css";
+import "katex/dist/katex.min.css";
 import "./globals.css";
 
-const display = localFont({
-  src: "./fonts/bricolage.woff2",
-  variable: "--nf-display",
-  weight: "200 800",
-  display: "swap",
-});
-
-const mono = localFont({
-  src: "./fonts/martian.woff2",
-  variable: "--nf-mono",
-  weight: "100 800",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: `${APP_NAME} · IRAS 16293-2422`,
+  title: `${APP_NAME} · ${SOURCE_LABEL}`,
   description: APP_TAGLINE,
 };
 
-export const viewport: Viewport = { themeColor: "#0F1126", colorScheme: "dark" };
+export const viewport: Viewport = { themeColor: "#0B1120", colorScheme: "dark" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" className={`${display.variable} ${mono.variable}`}>
+    <html lang="es">
       <body>{children}</body>
     </html>
   );

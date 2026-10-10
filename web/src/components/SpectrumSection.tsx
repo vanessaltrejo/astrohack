@@ -1,14 +1,19 @@
 "use client";
 
-import { useMemo } from "react";
-import type { CatalogLine, Meta, Peak, PosKey, WinKey, WindowSpectra } from "@/lib/data";
+import { useMemo, useRef, useState } from "react";
+import { BookOpen, Eye, EyeOff, Grid2x2, Layers, Crosshair, Eraser } from "lucide-react";
+import VelocitySlider from "./VelocitySlider";
+import SpectrumTooltip from "./SpectrumTooltip";
+import type { CatalogLine, Meta, Peak, PosKey, Verdict, WinKey, WindowSpectra } from "@/lib/data";
 import { POSITION_KEYS, WINDOW_KEYS } from "@/lib/data";
-import { POSITION_LABELS, V_MAX, V_MIN, V_STEP } from "@/lib/config";
+import { POSITION_LABELS } from "@/lib/config";
 import { POSITION_COLORS, speciesInfo } from "@/lib/species";
 import { sliceFreq } from "@/lib/spectro";
 import { f } from "@/lib/format";
-import SpectrumView from "./SpectrumView";
-import { MethodTip } from "./ui";
+import { useRestartAnimation } from "@/lib/motion";
+import SpectrumView, { type HoverInfo } from "./SpectrumView";
+import { Tex, SYM } from "./Tex";
+import { VERDICT } from "./ui";
 
 export interface SpectrumSectionProps {
   meta: Meta;
@@ -31,6 +36,9 @@ export interface SpectrumSectionProps {
   speciesOn: Set<string>;
   toggleSpecies: (s: string) => void;
   setAllSpecies: (on: boolean) => void;
+  verdictOf: (sp: string) => Verdict | null;
+  hoverSpecies: string | null;
+  setHoverSpecies: (s: string | null) => void;
   minLogI: number;
   setMinLogI: (x: number) => void;
   lineCounts: Map<string, number>;
@@ -44,11 +52,22 @@ export interface SpectrumSectionProps {
   onRangeChange: (x: [number, number] | null, y: [number, number] | null) => void;
   selRange: [number, number] | null;
   setSelRange: (r: [number, number] | null) => void;
+  onMethod: () => void;
+  busy: boolean;
+  laneSpecies: string[];
+  flashRange: [number, number] | null;
+  /** cambia cuando v se fija desde fuera (aislar, marcas): el valor parpadea una vez */
+  vPulse: number;
 }
+
+const GROUP_ORDER: (Verdict | "sin puntuar")[] = ["fuerte", "tentativa", "descartada", "insuficiente", "sin puntuar"];
 
 export default function SpectrumSection(p: SpectrumSectionProps) {
   const shown = [p.active, ...p.overlay.filter((x) => x !== p.active)];
   const wm = p.meta.windows[p.win];
+  const plotRef = useRef<HTMLDivElement | null>(null);
+  useRestartAnimation(plotRef, "fade-swap", `${p.active}-${p.win}`);
+  const [hover, setHover] = useState<HoverInfo | null>(null);
 
   const sel = useMemo(() => {
     if (!p.selRange) return null;
@@ -60,196 +79,139 @@ export default function SpectrumSection(p: SpectrumSectionProps) {
       sum += s.y[i];
       if (s.y[i] > s.y[k]) k = i;
     }
-    return {
-      n: s.y.length,
-      f0: Math.min(...s.x),
-      f1: Math.max(...s.x),
-      max: s.y[k],
-      fmax: s.x[k],
-      area: (sum - s.y.length * p.baseline) * wm.step_kms,
-    };
+    return { n: s.y.length, f0: Math.min(...s.x), f1: Math.max(...s.x), max: s.y[k], fmax: s.x[k], area: (sum - s.y.length * p.baseline) * wm.step_kms };
   }, [p.selRange, p.spectra, p.active, p.baseline, wm.step_kms]);
 
-  const nVisible = p.visibleLines.length;
+  // especies agrupadas por veredicto (una fila por grupo, no un muro de chips)
+  const { speciesKeys, verdictOf } = p;
+  const groups = useMemo(() => {
+    const g = new Map<Verdict | "sin puntuar", string[]>();
+    for (const sp of speciesKeys) {
+      const k = verdictOf(sp) ?? "sin puntuar";
+      g.set(k, [...(g.get(k) ?? []), sp]);
+    }
+    return GROUP_ORDER.filter((k) => g.has(k)).map((k) => [k, g.get(k)!] as const);
+  }, [speciesKeys, verdictOf]);
+
+  const vStart = p.meta.positions[p.active].v_start_kms;
 
   return (
     <div>
-      {/* fila 1: ventana, posición, marco */}
-      <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-        <div className="flex items-center gap-2">
-          <div className="seg" role="group" aria-label="Ventana espectral">
-            {WINDOW_KEYS.map((w) => (
-              <button key={w} type="button" aria-pressed={p.win === w} onClick={() => p.setWin(w)}>
-                {w}
-              </button>
-            ))}
-          </div>
-          <span className="num text-muted">
-            {f(p.meta.windows[p.win].range_GHz[0], 3)}–{f(p.meta.windows[p.win].range_GHz[1], 3)} GHz
-          </span>
+      {/* controles: ventana · posiciones · opciones */}
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+        <div className="seg" role="group" aria-label="Ventana espectral">
+          {WINDOW_KEYS.map((w) => (
+            <button key={w} type="button" aria-pressed={p.win === w} onClick={() => p.setWin(w)} title={`${f(p.meta.windows[w].range_GHz[0], 3)}–${f(p.meta.windows[w].range_GHz[1], 3)} GHz`}>
+              {w}
+            </button>
+          ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Posiciones">
+        <div className="flex flex-wrap items-center gap-1.5" role="group" aria-label="Posiciones">
           {POSITION_KEYS.map((pos) => {
             const isActive = pos === p.active;
             const isShown = shown.includes(pos);
             return (
               <span
                 key={pos}
-                className="inline-flex items-center rounded-full border"
-                style={{ borderColor: isShown ? POSITION_COLORS[pos] : "var(--color-rule)" }}
+                className="inline-flex items-center overflow-hidden rounded-[3px] border"
+                style={{ borderColor: isActive ? POSITION_COLORS[pos] : isShown ? "var(--color-rule-strong)" : "var(--color-rule)" }}
               >
                 <button
                   type="button"
                   aria-pressed={isActive}
                   onClick={() => p.setActive(pos)}
-                  title="Hacer activa: fija σ, picos, huellas y la velocidad inicial"
-                  className={`flex items-center gap-1.5 rounded-l-full py-0.5 pl-2.5 pr-2 text-sm ${
-                    isActive ? "bg-plate-2 font-semibold text-ink" : "text-ink-2"
-                  }`}
+                  title="Posición activa: fija σ, picos, huellas y la velocidad inicial"
+                  className={`flex items-center gap-1.5 py-0.5 pl-2 pr-2 text-[0.8rem] ${isActive ? "bg-plate-2 font-semibold text-ink" : "text-ink-2 hover:text-ink"}`}
                 >
-                  <span aria-hidden className="inline-block h-[2px] w-4" style={{ background: POSITION_COLORS[pos] }} />
+                  <span aria-hidden className="inline-block h-[2px] w-3.5" style={{ background: POSITION_COLORS[pos] }} />
                   {POSITION_LABELS[pos]}
                 </button>
-                <button
-                  type="button"
-                  disabled={isActive}
-                  aria-pressed={isShown}
-                  aria-label={`Superponer ${POSITION_LABELS[pos]}`}
-                  title={isActive ? "Posición activa" : "Superponer en el gráfico"}
-                  onClick={() => p.toggleOverlay(pos)}
-                  className="border-l border-rule px-2 py-0.5 text-xs text-muted disabled:opacity-40"
-                >
-                  {isActive ? "activa" : isShown ? "quitar" : "superponer"}
-                </button>
+                {!isActive ? (
+                  <button
+                    type="button"
+                    aria-pressed={isShown}
+                    aria-label={`Superponer ${POSITION_LABELS[pos]}`}
+                    title={isShown ? "Quitar del gráfico" : "Superponer en el gráfico"}
+                    onClick={() => p.toggleOverlay(pos)}
+                    className={`border-l border-rule px-1.5 py-0.5 ${isShown ? "text-ink" : "text-muted hover:text-ink"}`}
+                  >
+                    <Layers className="icon" />
+                  </button>
+                ) : null}
               </span>
             );
           })}
         </div>
 
         <div className="ml-auto flex items-center gap-1">
-          <label className="btn btn-quiet cursor-pointer">
-            <input type="checkbox" checked={p.rest} onChange={(e) => p.setRest(e.target.checked)} />
-            Mostrar reposo
-          </label>
-          <label className="btn btn-quiet cursor-pointer">
-            <input type="checkbox" checked={p.guides} onChange={(e) => p.setGuides(e.target.checked)} />
-            Líneas guía
-          </label>
-          <MethodTip />
-        </div>
-      </div>
-
-      {/* fila 2: velocidad, el control protagonista */}
-      <div className="mt-4 grid grid-cols-[auto_1fr_auto] items-center gap-x-6">
-        <label htmlFor="vslider" className="flex items-baseline gap-2">
-          <span className="text-ink-2">
-            v<sub>LSR</sub>
-          </span>
-          <span className="num text-[2.1rem] font-medium leading-none text-ink" aria-live="polite">
-            {p.v.toFixed(2)}
-          </span>
-          <span className="text-sm text-muted">km/s</span>
-        </label>
-        <div className="relative">
-          <input
-            id="vslider"
-            className="vslider"
-            type="range"
-            min={V_MIN}
-            max={V_MAX}
-            step={V_STEP}
-            value={p.v}
-            onChange={(e) => p.setV(Number(e.target.value))}
-            aria-valuetext={`${p.v.toFixed(2)} kilómetros por segundo`}
-          />
-          <div className="num pointer-events-none flex justify-between px-[5px] text-[0.7rem] text-muted" aria-hidden>
-            {Array.from({ length: V_MAX - V_MIN + 1 }, (_, i) => (
-              <span key={i}>{V_MIN + i}</span>
-            ))}
-          </div>
-        </div>
-        <div className="flex flex-col items-start gap-1">
-          <button type="button" className="btn btn-quiet" onClick={() => p.setV(p.meta.positions[p.active].v_start_kms)}>
-            Inicial de {POSITION_LABELS[p.active]}: <span className="num">{f(p.meta.positions[p.active].v_start_kms, 2)}</span>
+          <button type="button" className="btn btn-quiet" aria-pressed={p.rest} onClick={() => p.setRest(!p.rest)} title="Eje en frecuencia de reposo (desplaza el espectro a la v elegida)">
+            {p.rest ? <Eye className="icon" /> : <EyeOff className="icon" />}
+            Reposo
           </button>
-          {p.vPipeline !== null ? (
-            <button type="button" className="btn btn-quiet" onClick={() => p.setV(Math.round(p.vPipeline! / V_STEP) * V_STEP)}>
-              Adoptada por el pipeline: <span className="num">{f(p.vPipeline, 2)}</span>
-            </button>
-          ) : null}
+          <button type="button" className="btn btn-quiet" aria-pressed={p.guides} onClick={() => p.setGuides(!p.guides)} title="Líneas guía verticales en cada transición visible">
+            <Grid2x2 className="icon" />
+            Guías
+          </button>
+          <button type="button" className="btn btn-quiet" onClick={p.onMethod} title="Convenciones y fórmulas">
+            <BookOpen className="icon" />
+            Método
+          </button>
         </div>
       </div>
 
-      {/* fila 3: especies e intensidad mínima */}
-      <div className="mt-4 flex flex-wrap items-center gap-1.5">
-        {p.speciesKeys.map((sp) => {
-          const info = speciesInfo(sp);
-          const on = p.speciesOn.has(sp);
+      {/* velocidad */}
+      <div className="mt-4 border-y border-rule py-3">
+        <VelocitySlider v={p.v} setV={p.setV} vStart={vStart} vAdopted={p.vPipeline} pulse={p.vPulse} stepKms={wm.step_kms} />
+      </div>
+
+      {/* especies por veredicto */}
+      <div className="mt-3 flex flex-wrap items-start gap-x-5 gap-y-2">
+        {groups.map(([k, sps]) => {
+          const vd = k === "sin puntuar" ? null : VERDICT[k];
           return (
-            <button
-              key={sp}
-              type="button"
-              className="chip"
-              aria-pressed={on}
-              onClick={() => p.toggleSpecies(sp)}
-              title={`${info.name} — ${p.lineCounts.get(sp) ?? 0} líneas en ${p.win} sobre el umbral`}
-            >
-              <span className="dot" style={{ background: info.color }} />
-              {info.formula}
-              <span className="num text-[0.72rem] text-muted">{p.lineCounts.get(sp) ?? 0}</span>
-            </button>
+            <div key={k} className="flex flex-wrap items-center gap-1.5">
+              <span className="label mr-0.5 inline-flex items-center gap-1" title={vd ? vd.sentence : "sin puntuación del pipeline"}>
+                {vd ? <vd.Icon className="icon" style={{ color: vd.color }} aria-hidden /> : null}
+                {k}
+              </span>
+              {sps.map((sp) => {
+                const info = speciesInfo(sp);
+                return (
+                  <button
+                    key={sp}
+                    type="button"
+                    className="chip"
+                    aria-pressed={p.speciesOn.has(sp)}
+                    onClick={() => p.toggleSpecies(sp)}
+                    onMouseEnter={() => p.setHoverSpecies(sp)}
+                    onMouseLeave={() => p.setHoverSpecies(null)}
+                    title={`${info.name}: ${p.lineCounts.get(sp) ?? 0} líneas en ${p.win} sobre el umbral`}
+                  >
+                    <span className="dot" style={{ background: info.color }} />
+                    {info.formula}
+                    <span className="text-[0.68rem] text-muted">{p.lineCounts.get(sp) ?? 0}</span>
+                  </button>
+                );
+              })}
+            </div>
           );
         })}
-        <span className="mx-1 h-4 w-px bg-rule" aria-hidden />
-        <button type="button" className="btn btn-quiet" onClick={() => p.setAllSpecies(true)}>
-          Todas
-        </button>
-        <button type="button" className="btn btn-quiet" onClick={() => p.setAllSpecies(false)}>
-          Ninguna
-        </button>
-        <label className="ml-auto flex items-center gap-2 text-sm text-ink-2">
-          log I<sub className="-ml-1.5">300K</sub> ≥
-          <input
-            type="range"
-            min={-12}
-            max={-2}
-            step={0.1}
-            value={p.minLogI}
-            onChange={(e) => p.setMinLogI(Number(e.target.value))}
-            className="w-36"
-          />
-          <span className="num w-12 text-ink">{f(p.minLogI, 1)}</span>
-        </label>
+        <div className="ml-auto flex items-center gap-3">
+          <button type="button" className="btn btn-quiet py-0.5" onClick={() => p.setAllSpecies(p.speciesOn.size < p.speciesKeys.length)}>
+            {p.speciesOn.size < p.speciesKeys.length ? "Todas" : "Ninguna"}
+          </button>
+          <label className="flex items-center gap-2 text-[0.78rem] text-ink-2">
+            <Tex>{SYM.logI + String.raw` \geq`}</Tex>
+            <input type="range" min={-12} max={-2} step={0.1} value={p.minLogI} onChange={(e) => p.setMinLogI(Number(e.target.value))} className="w-28" />
+            <span className="w-10 text-ink">{f(p.minLogI, 1)}</span>
+          </label>
+        </div>
       </div>
 
-      {/* leyenda */}
-      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1 text-[0.8rem] text-ink-2">
-        {shown.map((pos) => (
-          <span key={pos} className="inline-flex items-center gap-1.5">
-            <span className="inline-block h-[2px] w-5" style={{ background: POSITION_COLORS[pos] }} />
-            {POSITION_LABELS[pos]}
-            {pos === p.active ? <span className="text-muted">(activa)</span> : null}
-          </span>
-        ))}
-        <span className="inline-flex items-center gap-1.5">
-          <span className="inline-block h-3 w-5 rounded-[2px] bg-[rgba(236,230,214,0.16)]" />
-          ±1σ = <span className="num">{f(p.sigma * 1000, 1)}</span> mJy/beam
-        </span>
-        <span className="inline-flex items-center gap-1.5">
-          <span aria-hidden className="text-[0.7rem] text-ink-2">▼</span>
-          {p.peaks
-            ? `${p.peaks.length} picos detectados en ${POSITION_LABELS[p.active]}`
-            : p.peaksState === "error"
-              ? "peaks.json no se pudo leer"
-              : "picos: análisis en curso"}
-        </span>
-        <span className="ml-auto text-muted">
-          {nVisible} líneas del catálogo visibles. Arrastra para ampliar; doble clic para ver todo.
-        </span>
-      </div>
-
-      <div className="plate mt-2 overflow-hidden">
+      <div id="espectro-plot" ref={plotRef} className="plate relative mt-3 scroll-mt-24 overflow-hidden">
+        <span className={`hairline-progress ${p.busy ? "busy" : ""}`} aria-hidden />
+        <SpectrumTooltip hover={hover} rest={p.rest} v={p.vPlot} sigma={p.sigma} baseline={p.baseline} vRef={p.vPipeline} />
         <SpectrumView
           spectra={p.spectra}
           active={p.active}
@@ -258,7 +220,12 @@ export default function SpectrumSection(p: SpectrumSectionProps) {
           rest={p.rest}
           guides={p.guides}
           lines={p.visibleLines}
-          laneSpecies={p.speciesKeys}
+          laneSpecies={p.laneSpecies}
+          hoverSpecies={p.hoverSpecies}
+          flashRange={p.flashRange}
+          annotateUnidentified
+          vRef={p.vPipeline}
+          onHoverPoint={setHover}
           peaks={p.peaks}
           sigma={p.sigma}
           baseline={p.baseline}
@@ -269,31 +236,45 @@ export default function SpectrumSection(p: SpectrumSectionProps) {
         />
       </div>
 
-      <div className="mt-2 flex min-h-[2.2rem] flex-wrap items-center gap-x-6 gap-y-1 text-sm text-ink-2">
-        {sel ? (
-          <>
-            <span className="text-ink">Selección en {POSITION_LABELS[p.active]}</span>
-            <span>
-              <span className="num">
-                {f(sel.f0, 5)}–{f(sel.f1, 5)}
-              </span>{" "}
-              GHz, <span className="num">{sel.n}</span> canales
-            </span>
-            <span>
-              máximo <span className="num">{f(sel.max, 3)}</span> Jy/beam en <span className="num">{f(sel.fmax, 5)}</span> GHz
-              (SNR <span className="num">{f((sel.max - p.baseline) / p.sigma, 1)}</span>)
-            </span>
-            <span>
-              ∑(S − base)·Δv = <span className="num">{f(sel.area, 3)}</span> Jy/beam·km/s
-            </span>
-            <button type="button" className="btn btn-quiet" onClick={() => p.setSelRange(null)}>
-              Limpiar selección
-            </button>
-          </>
-        ) : (
-          <span className="text-muted">
-            Usa “Box Select” en la barra del gráfico para medir un intervalo: canales, máximo, SNR y área integrada.
+      {/* leyenda + medición de la selección */}
+      <div className="mt-2 flex min-h-[1.8rem] flex-wrap items-center gap-x-5 gap-y-1 text-[0.78rem] text-ink-2">
+        {shown.map((pos) => (
+          <span key={pos} className="inline-flex items-center gap-1.5">
+            <span className="inline-block h-[2px] w-5" style={{ background: POSITION_COLORS[pos] }} />
+            {POSITION_LABELS[pos]}
           </span>
+        ))}
+        <span className="inline-flex items-center gap-1.5">
+          <span className="inline-block h-3 w-5 bg-[rgba(242,246,250,0.1)]" />
+          <Tex>{String.raw`\pm 1\sigma = ` + f(p.sigma * 1000, 1) + String.raw`\ \mathrm{mJy\,beam^{-1}}`}</Tex>
+        </span>
+        {p.peaks ? (
+          <span className="inline-flex items-center gap-1.5">
+            <span aria-hidden className="text-[0.7rem]">▼</span>
+            {p.peaks.length} picos
+          </span>
+        ) : p.peaksState === "error" ? (
+          <span className="text-critical">peaks.json no se pudo leer</span>
+        ) : null}
+        {sel ? (
+          <span className="ml-auto inline-flex flex-wrap items-center gap-x-4 gap-y-1">
+            <Crosshair className="icon text-accent" />
+            <span>
+              {f(sel.f0, 5)}–{f(sel.f1, 5)} GHz, {sel.n} canales
+            </span>
+            <span>
+              máx. {f(sel.max, 3)} Jy/beam, S/N {f((sel.max - p.baseline) / p.sigma, 1)}
+            </span>
+            <span>
+              <Tex>{String.raw`\textstyle\sum (S - b)\,\Delta v`}</Tex> = {f(sel.area, 3)} Jy/beam·km/s
+            </span>
+            <button type="button" className="btn btn-quiet py-0.5" onClick={() => p.setSelRange(null)}>
+              <Eraser className="icon" />
+              Limpiar
+            </button>
+          </span>
+        ) : (
+          <span className="ml-auto text-muted">{p.visibleLines.length} transiciones visibles</span>
         )}
       </div>
     </div>

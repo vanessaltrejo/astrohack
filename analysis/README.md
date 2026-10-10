@@ -15,6 +15,7 @@ pip install -r analysis/requirements.txt
 python analysis/pipeline.py            # ~40-50 s con figuras; --no-figures: ~6 s
 python analysis/validate_outputs.py    # comprueba el contrato docs/DATA_SCHEMA.md (salida 0 = OK)
 python analysis/sensibilidad.py        # opcional, ~40 s: veredictos con umbrales alternativos
+python analysis/verificar_candidatas.py  # ~5 s: patrón de Boltzmann + contraste con PILS + picos compartidos
 ```
 
 `export_web.py` (meta, catalog, continuum, spectra base) no necesita volver a ejecutarse;
@@ -183,6 +184,26 @@ S           = min(1, −log10(FAP)/6)      # FAP 1e-6 → 1; 1e-3 → 0.5; 0.05 
 de especies *fuerte* (si hay < 3, se añaden las *tentativa*); peso
 `1/(σ_ajuste² + σ_catálogo² + 0.10²)` en km/s (0.10 km/s ≈ ½ canal como suelo sistemático).
 Error = `1.2533·MAD/√n`.
+
+### Comprobación independiente: patrón de Boltzmann y literatura (`verificar_candidatas.py`)
+
+Dos pruebas que el pipeline no hace, automatizadas en `analysis/verificar_candidatas.py`
+(lee los JSON publicados; no toca `pipeline.py`):
+
+1. **Patrón de una sola temperatura.** Para cada especie × posición con ≥ 3 coincidencias
+   limpias se ajusta `log10(amp) = cte + logI₃₀₀ − Eu·(1/T − 1/300)/ln 10` en una rejilla
+   30–800 K. Se publica `T_rot`, la dispersión (dex) y `patron_ok` (dispersión ≤ 0.35 dex y
+   T no pegada al borde). Una especie real da un patrón coherente; una alineación casual, no
+   (glicina en B_offset: 0.53 dex, T → borde). `T_rot` es una comprobación, **no** una Tex:
+   la opacidad aplana las líneas brillantes y la sube (CH₃CN: ~380 K frente a 110 K en PILS).
+2. **Literatura.** `analysis/referencias_pils.csv` (curada a mano, con cita por fila:
+   Calcutt+2018, Jørgensen+2018, Drozdovskaya+2019) da Tex, N, FWHM y v hacia B. El script
+   marca `coherente_v` (±0.3 km/s), `coherente_fwhm` (factor 1.6) y `coherente_T` (factor
+   2.5). Las FWHM de B salen anchas cuando hay absorción adyacente: se anota.
+
+Salidas: `outputs/verificacion_boltzmann.csv`, `outputs/picos_compartidos.csv` (picos
+reclamados por más de una especie, con propuesta de dueño por velocidad) y
+`figuras/boltzmann_<pos>.png`. Resumen en `docs/VERIFICACION_CANDIDATAS.md`.
 
 ### Comprobación independiente: correlación cruzada
 
