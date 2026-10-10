@@ -1,0 +1,309 @@
+@import "tailwindcss";
+
+/*
+ * Huellas — tokens.
+ * Noche índigo (no negro neutro) + tinta de papel cálido, como una carta estelar impresa.
+ * El color “fuerte” lo ponen las especies; la interfaz se queda en tinta.
+ */
+@theme {
+  --color-night: #0f1126;
+  --color-plate: #191c38;
+  --color-plate-2: #212548;
+  --color-rule: #2c3160;
+  --color-rule-strong: #3d4379;
+  --color-ink: #ece6d6;
+  --color-ink-2: #b6b7cb;
+  --color-muted: #8189a9;
+  --color-focus: #9aa8ff;
+  --color-good: #0ca30c;
+  --color-warning: #fab219;
+  --color-serious: #ec835a;
+  --color-critical: #d03b3b;
+
+  --font-display: var(--nf-display), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--nf-mono), ui-monospace, monospace;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+  }
+}
+
+body {
+  background: var(--color-night);
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.5;
+  font-variation-settings: "wdth" 100, "opsz" 14;
+  overflow-x: hidden;
+}
+
+@layer components {
+/* números: monoespaciada, cifras tabulares */
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.86em;
+  letter-spacing: -0.01em;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* ---------- títulos ---------- */
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 760;
+  font-variation-settings: "wdth" 75, "opsz" 96;
+  letter-spacing: -0.035em;
+  line-height: 0.9;
+}
+
+.section-title {
+  font-weight: 650;
+  font-variation-settings: "wdth" 82, "opsz" 48;
+  letter-spacing: -0.02em;
+  font-size: 1.9rem;
+  line-height: 1.05;
+}
+
+.lede {
+  color: var(--color-ink-2);
+  max-width: 68ch;
+}
+
+/* ---------- controles ---------- */
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--color-rule-strong);
+  border-radius: 999px;
+  padding: 2px;
+  background: var(--color-plate);
+}
+.seg button {
+  padding: 0.2rem 0.85rem;
+  border-radius: 999px;
+  color: var(--color-ink-2);
+  font-size: 0.85rem;
+}
+.seg button[aria-pressed="true"] {
+  background: var(--color-ink);
+  color: var(--color-night);
+  font-weight: 600;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.12rem 0.6rem 0.12rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-rule);
+  font-size: 0.82rem;
+  color: var(--color-muted);
+  background: transparent;
+  white-space: nowrap;
+}
+.chip[aria-pressed="true"] {
+  color: var(--color-ink);
+  border-color: var(--color-rule-strong);
+  background: var(--color-plate-2);
+}
+.chip .dot {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 2px;
+  flex: none;
+}
+.chip[aria-pressed="false"] .dot {
+  opacity: 0.3;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid var(--color-rule-strong);
+  color: var(--color-ink);
+  font-size: 0.82rem;
+  background: var(--color-plate);
+}
+.btn:hover {
+  background: var(--color-plate-2);
+}
+.btn-quiet {
+  border-color: transparent;
+  color: var(--color-ink-2);
+  background: transparent;
+}
+.btn-quiet:hover {
+  color: var(--color-ink);
+  background: var(--color-plate-2);
+}
+
+input[type="range"] {
+  accent-color: var(--color-ink);
+}
+
+/* control de velocidad: la pista se dibuja a mano para que el pulgar sea grande en proyector */
+.vslider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: ew-resize;
+}
+.vslider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: var(--color-rule-strong);
+}
+.vslider::-moz-range-track {
+  height: 2px;
+  background: var(--color-rule-strong);
+}
+.vslider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 26px;
+  margin-top: -12px;
+  border-radius: 3px;
+  background: var(--color-ink);
+  border: 3px solid var(--color-night);
+}
+.vslider::-moz-range-thumb {
+  width: 10px;
+  height: 22px;
+  border-radius: 3px;
+  background: var(--color-ink);
+  border: 3px solid var(--color-night);
+}
+
+.field {
+  background: var(--color-night);
+  border: 1px solid var(--color-rule);
+  border-radius: 4px;
+  padding: 0.15rem 0.4rem;
+  color: var(--color-ink);
+  font-size: 0.8rem;
+}
+.field:focus {
+  border-color: var(--color-focus);
+  outline: none;
+}
+
+/* ---------- tablas ---------- */
+.dtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+.dtable th {
+  text-align: left;
+  font-weight: 500;
+  color: var(--color-muted);
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--color-rule-strong);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--color-plate);
+  z-index: 1;
+}
+.dtable td {
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--color-rule);
+  vertical-align: top;
+}
+.dtable tbody tr:hover {
+  background: var(--color-plate-2);
+}
+.dtable td.r,
+.dtable th.r {
+  text-align: right;
+}
+
+/* ---------- tooltip “método” ---------- */
+.tip {
+  position: relative;
+  display: inline-flex;
+}
+.tip > .tip-body {
+  position: absolute;
+  z-index: 40;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 25rem;
+  padding: 0.8rem 0.9rem;
+  border: 1px solid var(--color-rule-strong);
+  background: var(--color-plate-2);
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: var(--color-ink-2);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.45);
+  visibility: hidden;
+  opacity: 0;
+}
+.tip:hover > .tip-body,
+.tip:focus-within > .tip-body {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* panel: la superficie de gráfico */
+.plate {
+  background: var(--color-plate);
+  border: 1px solid var(--color-rule);
+  border-radius: 8px;
+}
+
+/* plotly: sin barra de herramientas flotante opaca */
+.js-plotly-plot .plotly .modebar {
+  background: transparent !important;
+}
+.js-plotly-plot .plotly .modebar-btn path {
+  fill: var(--color-muted) !important;
+}
+.js-plotly-plot .plotly .modebar-btn.active path,
+.js-plotly-plot .plotly .modebar-btn:hover path {
+  fill: var(--color-ink) !important;
+}
+
+.pending-stripes {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 10px,
+    rgb(255 255 255 / 0.025) 10px 20px
+  );
+}
+
+  .mapmark:focus,
+  .mapmark:focus-visible {
+    outline: none;
+  }
+  .mapmark:focus-visible .mapmark-hit {
+    stroke: var(--color-focus);
+  }
+}

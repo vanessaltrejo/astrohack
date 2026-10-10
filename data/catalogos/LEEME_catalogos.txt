@@ -1,0 +1,9 @@
+CATÁLOGO LOCAL DE APOYO, NO LISTA DE DETECCIONES
+348 entradas de 15 especies/estados seleccionados, reposo 348820–349790 MHz.
+Las especies fueron elegidas para incluir moléculas plausibles y alternativas; la inclusión no demuestra presencia. Esta selección NO agota todos los contaminantes.
+Frecuencias de laboratorio en reposo; el espectro tiene frecuencias LSRK observadas. Aplicar Doppler una sola vez.
+log10_I_300K_nm2_MHz es log10 de intensidad integrada a 300 K en convención JPL/CDMS. NO es log10(Aij), ni intensidad predicha en la fuente. E_superior_K = E_inferior_cm_1*1.438776877 + frecuencia_MHz*4.799243073e-5.
+No se entrega Aij para evitar una conversión sin verificar funciones de partición, estados y degeneraciones. Para LTE, consultar la entrada completa y su documentación en CASSIS/CDMS/JPL.
+QN son campos fijos originales; consultar formato_QN y documentación de cada entrada. Varias filas pueden corresponder al mismo rasgo espectral no resuelto. No contarlas como evidencias independientes.
+La incertidumbre de frecuencia forma parte de la comparación. Registrar catálogo, etiqueta y versión desde su página original. Las URLs y SHA256 de los catálogos completos consultados están en procedencia_catalogos.json.
+Fuentes: https://cdms.astro.uni-koeln.de/classic/entries/ y https://spec.jpl.nasa.gov/

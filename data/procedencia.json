@@ -1,0 +1,140 @@
+{
+  "version": "1.0",
+  "fecha_preparacion_UTC": "2026-10-09",
+  "proyecto": "2013.1.00278.S",
+  "MOUS": "uid://A001/X120/X13a",
+  "origen": "ALMA ARI-L; 12 m; no es el producto combinado 12 m + ACA del artículo PILS",
+  "unidad": "Jy/beam",
+  "marco_frecuencias": "LSRK",
+  "transformacion": "Recorte espacial, sin promediar canales ni alterar intensidades. Espectros: píxel más cercano a cada coordenada solicitada, no suma de apertura.",
+  "advertencia": "ARI-L indica que sus imágenes ilustran el contenido y no son productos finales science-ready. Se verificaron estructura, coordenadas y utilidad educativa del subconjunto. No se recalibraron visibilidades ni se inspeccionó el weblog completo.",
+  "ventanas": [
+    {
+      "nombre": "W1",
+      "spw_original": 2,
+      "rango_GHz": [
+        348.834448336,
+        349.30244562603093
+      ],
+      "canales": 1918,
+      "paso_MHz": 0.244130041748,
+      "paso_kms_aprox": 0.20966760507934412,
+      "beam_arcsec": [
+        0.75114176458068,
+        0.61131063413268
+      ],
+      "PA_deg": -79.88055814216,
+      "pixel_arcsec": 0.10999999995451198,
+      "forma": [
+        1918,
+        64,
+        64
+      ],
+      "fuente_url": "https://almascience.eso.org/dataPortal/member.uid___A001_X120_X13a.ari_l.IRAS16293-2422_sci.spw2_349068MHz.12m.cube.I.pbcor.fits",
+      "SODA_ID": "member.uid___A001_X120_X13a.ari_l.IRAS16293-2422_sci.spw2_349068MHz.12m.cube.I.pbcor.fits",
+      "SODA_POS": "CIRCLE 248.09458 -24.475833 0.0025",
+      "corte_indices_python": {
+        "x": [
+          42,
+          106
+        ],
+        "y": [
+          38,
+          102
+        ]
+      },
+      "posiciones_extraidas": {
+        "B_offset": {
+          "pixel_x_0": 54,
+          "pixel_y_0": 46,
+          "ra_deg_real": 248.0940936440771,
+          "dec_deg_real": -24.47577002233051
+        },
+        "B_pico": {
+          "pixel_x_0": 50,
+          "pixel_y_0": 48,
+          "ra_deg_real": 248.09422793427086,
+          "dec_deg_real": -24.4757089116645
+        },
+        "A": {
+          "pixel_x_0": 18,
+          "pixel_y_0": 11,
+          "ra_deg_real": 248.09530225933386,
+          "dec_deg_real": -24.476839466507474
+        }
+      },
+      "archivo_bytes": 31432320
+    },
+    {
+      "nombre": "W2",
+      "spw_original": 3,
+      "rango_GHz": [
+        349.303181377,
+        349.7711787139497
+      ],
+      "canales": 1918,
+      "paso_MHz": 0.2441300662231,
+      "paso_kms_aprox": 0.20938645958980415,
+      "beam_arcsec": [
+        0.8264156179093199,
+        0.57557992352364
+      ],
+      "PA_deg": 88.36111421366,
+      "pixel_arcsec": 0.10999999995451198,
+      "forma": [
+        1918,
+        64,
+        64
+      ],
+      "fuente_url": "https://almascience.eso.org/dataPortal/member.uid___A001_X120_X13a.ari_l.IRAS16293-2422_sci.spw3_349537MHz.12m.cube.I.pbcor.fits",
+      "SODA_ID": "member.uid___A001_X120_X13a.ari_l.IRAS16293-2422_sci.spw3_349537MHz.12m.cube.I.pbcor.fits",
+      "SODA_POS": "CIRCLE 248.09458 -24.475833 0.0025",
+      "corte_indices_python": {
+        "x": [
+          42,
+          106
+        ],
+        "y": [
+          38,
+          102
+        ]
+      },
+      "posiciones_extraidas": {
+        "B_offset": {
+          "pixel_x_0": 54,
+          "pixel_y_0": 46,
+          "ra_deg_real": 248.0940936440771,
+          "dec_deg_real": -24.47577002233051
+        },
+        "B_pico": {
+          "pixel_x_0": 50,
+          "pixel_y_0": 48,
+          "ra_deg_real": 248.09422793427086,
+          "dec_deg_real": -24.4757089116645
+        },
+        "A": {
+          "pixel_x_0": 18,
+          "pixel_y_0": 11,
+          "ra_deg_real": 248.09530225933386,
+          "dec_deg_real": -24.476839466507474
+        }
+      },
+      "archivo_bytes": 31432320
+    }
+  ],
+  "posiciones_solicitadas": {
+    "B_offset": {
+      "ra_deg": 248.09408333333332,
+      "dec_deg": -24.475777777777775
+    },
+    "B_pico": {
+      "ra_deg": 248.09422793,
+      "dec_deg": -24.47570891
+    },
+    "A": {
+      "ra_deg": 248.09530226,
+      "dec_deg": -24.47683947
+    }
+  },
+  "continuo_url": "https://almascience.eso.org/dataPortal/member.uid___A001_X120_X13a.ari_l.IRAS16293-2422_sci.spw0_1_2_3_348815MHz.12m.cont.I.pbcor.fits"
+}

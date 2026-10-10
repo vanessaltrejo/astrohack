@@ -1,0 +1,10 @@
+# Pipeline científico AstroHack SATEM 2026 (probado con Python 3.13)
+# pipeline.py, figures.py, validate_outputs.py, sensibilidad.py
+numpy>=1.26
+pandas>=2.1
+scipy>=1.11        # find_peaks, curve_fit, binomtest
+matplotlib>=3.8    # figuras (sólo si no se usa --no-figures)
+# export_web.py (meta/catalog/continuum; lee el FITS de continuo)
+astropy>=6.0
+# versiones exactas usadas para generar los productos entregados:
+# numpy 2.5.3, pandas 3.0.5, scipy 1.18.1, matplotlib 3.11.2, astropy 8.0.1

@@ -1,0 +1,9 @@
+data/cubos/W*_IRAS16293.fits
+web/node_modules
+web/.next
+web/out
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+.DS_Store
+.env*
