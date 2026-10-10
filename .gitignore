@@ -1,0 +1,20 @@
+# macOS / editores
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Datos originales de la organización: se trabaja con la copia ligera de data/
+"Datos de ALMA/"
+Instrucciones/
+Presentacion de inicio/
+Resultados y Evidencias de los Participantes/
+
+# Cubos FITS (63 MB), nunca al repo
+*.fits
