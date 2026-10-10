@@ -1,4 +1,4 @@
-# AstroHack SATEM 2026 — "Huellas"
+# AstroHack SATEM 2026 — equipo "Sparks" (tablero antes llamado "Huellas")
 
 Team project for an astro-hackathon: identify prebiotic molecules in real ALMA Band 7 spectra of the
 protostar **IRAS 16293‑2422** (ALMA 2013.1.00278.S, PILS; ARI‑L products). 4 people, ~12 active hours.
@@ -12,7 +12,9 @@ Rubric: ID 25 · astrobiology 20 · **creativity/tools 25** · presentation 20 �
   README (Spanish) documents every formula/threshold. Run: `pip install -r analysis/requirements.txt && python analysis/pipeline.py && python analysis/figures.py`.
 - `web/` — Next.js 15 + TS + Tailwind v4 static dashboard (Plotly for spectrum, SVG/D3 for small multiples/map).
   `npm run dev` / `npm run build` / `npm test` (vitest). Data contract: `docs/DATA_SCHEMA.md` → `web/public/data/*.json`.
-- `docs/` — schema, (later) transcript of the organizers' briefing.
+- `docs/` — schema, interpretation guide (GUIA_INTERPRETACION), candidate verification, pipeline explainer, design notes.
+- Root `README.md` / `PLAN_Y_TRACKER.md` belong to the team (vanessaltrejo/astrohack); keep them in sync when structure changes.
+- `analysis/verificar_candidatas.py` — Boltzmann-pattern + PILS-literature check (refs in `analysis/referencias_pils.csv`).
 
 ## Science rules (from organizers — do not violate)
 - Radio Doppler, applied ONCE: ν_rest = ν_LSRK / (1 − v/c), c = 299792.458 km/s. Adopted v: B_offset 2.62±0.03, B_pico 2.61±0.03, A 3.71±0.61 km/s.

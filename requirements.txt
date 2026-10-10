@@ -1,0 +1,2 @@
+# Dependencias del análisis (el tablero web usa npm, ver web/README.md)
+-r analysis/requirements.txt

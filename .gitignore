@@ -1,9 +1,26 @@
-data/cubos/W*_IRAS16293.fits
+# macOS / editores
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# Web (Next.js)
 web/node_modules
 web/.next
 web/out
-__pycache__/
-.ipynb_checkpoints/
-*.pyc
-.DS_Store
 .env*
+
+# Datos originales de la organización: se trabaja con la copia de data/
+Datos de ALMA/
+Instrucciones/
+Presentacion de inicio/
+Resultados y Evidencias de los Participantes/
+
+# Cubos FITS (63 MB), nunca al repo. El continuo y los espectros 1D (pequeños) sí van.
+data/cubos/W*_IRAS16293.fits
