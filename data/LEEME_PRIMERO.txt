@@ -1,0 +1,31 @@
+ASTROHACK SATEM 2026 · DATOS PÚBLICOS v1.0
+IRAS 16293–2422 · proyecto ALMA 2013.1.00278.S · MOUS uid://A001/X120/X13a
+
+1. Descomprime todo el ZIP. No contiene soluciones del jurado.
+2. Ruta ligera: abre espectros/W1_espectros.csv y W2_espectros.csv en Python, hoja de cálculo o tu programa preferido. Frecuencia en GHz LSRK, intensidad en Jy/beam.
+3. Ruta gráfica: CASSIS https://cassis.irap.omp.eu/ (importación ASCII manual: frecuencia MHz, intensidad Jy/beam). Usa B_offset_W1_MHz_Jy.txt y W2. Si el importador no admite encabezado, omite la línea que empieza con #. Configura unidades y marco antes de identificar líneas. La ruta ASCII evita depender del lector FITS 1D de cada versión.
+4. Imágenes: CARTA https://cartavis.org/ abre cubos/W1_IRAS16293.fits, W2_IRAS16293.fits y continuo_IRAS16293.fits. El cubo es 1918x64x64; no son visibilidades ni Measurement Sets.
+5. Python opcional: crea entorno, pip install -r herramientas/requirements.txt; jupyter lab; abre herramientas/Inicio_AstroHack.ipynb. Sin internet puedes trabajar con CSV y catálogo local usando programas ya instalados. No prometemos instalación automática en todos los sistemas.
+6. La señal principal está en B_offset. Se incluyen B_pico y A para extensión. Posiciones exactas, haces, recortes, fuentes y unidades: procedencia.json.
+7. El catálogo local no es lista de detecciones y no incluye todos los contaminantes. Lee catalogos/LEEME_catalogos.txt. Las bases oficiales completas pueden consultarse si hay internet.
+8. No se calibran datos durante el evento. Intensidades/canales nativos conservados. La frecuencia observada LSRK no es frecuencia de reposo. No corregir Doppler dos veces.
+9. ARI-L advierte que sus imágenes no son productos finales science-ready. Este subconjunto se preparó para aprendizaje con verificación de estructura, coordenadas y espectros. La identificación requiere varias líneas, control de mezclas e incertidumbres. No convertir intensidad directamente en abundancia.
+10. Integridad: python herramientas/verificar.py. Debe indicar 0 errores. El verificador no requiere librerías extra. No modifica archivos.
+
+ARCHIVOS
+cubos/: dos recortes de 31.43 MB cada uno + imagen de continuo.
+espectros/: dos CSV y seis espectros en FITS 1D y ASCII. Solo los CSV/ASCII bastan para la ruta principal.
+catalogos/: 348 filas de 15 entradas moleculares, en reposo, y procedencia.
+herramientas/: cuaderno inicial, requisitos, verificador y script para volver a descargar los productos de origen. La descarga no es necesaria para concursar.
+evidencia_plantilla.csv: esquema vacío para resultados.
+procedencia.json / SHA256SUMS.txt: trazabilidad del paquete.
+README_original_ARI_L.txt: advertencia original del proveedor.
+
+CRÉDITOS
+This package makes use of the following ALMA data: ADS/JAO.ALMA#2013.1.00278.S.
+ALMA is a partnership of ESO (representing its member states), NSF (USA) and NINS (Japan), together with NRC (Canada), NSTC and ASIAA (Taiwan), and KASI (Republic of Korea), in cooperation with the Republic of Chile. The Joint ALMA Observatory is operated by ESO, AUI/NRAO and NAOJ.
+Productos ARI-L: citar su proyecto y documentación https://almascience.eso.org/alma-data/aril.
+Contexto PILS: Jørgensen et al. 2016, A&A 595, A117, https://arxiv.org/abs/1607.08733.
+Catálogos: CDMS y JPL; consultar procedencia_catalogos.json y citar la entrada/espectroscopía usada.
+Preparación educativa para SATEM. No implica patrocinio de ALMA, NASA, ESA ni ESO.
+Compilador: Dr. Antonio Hernandez Gómez
