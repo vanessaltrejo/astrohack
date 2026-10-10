@@ -11,7 +11,7 @@ venv/
 .ipynb_checkpoints/
 
 # Datos originales de la organización: se trabaja con la copia ligera de data/
-"Datos de ALMA/"
+Datos de ALMA/
 Instrucciones/
 Presentacion de inicio/
 Resultados y Evidencias de los Participantes/
