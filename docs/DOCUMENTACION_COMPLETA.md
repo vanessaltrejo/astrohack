@@ -141,7 +141,7 @@ Retiramos el código de v1 del repositorio para que no se confunda con el actual
 | `catalogo_local_con_aij.csv` | El catálogo oficial + Aij de la **misma** transición (|tag|, g_sup, E_sup ±0.05 K, Δν < 1 MHz) | `analysis/t2_aij_catalogo_local.py` |
 | `censo_cdms_2026-09.csv` | Censo CDMS estructurado: fórmula, nº de átomos (por columna), estado, año | `analysis/t1_censo_cdms.py` |
 | `catalogo_ampliado.csv` | 7 105 transiciones: 348 oficiales + 6 757 de CDMS/JPL; 6 997 utilizables (con Aij y g_u publicados e incertidumbre ≤ 1 MHz) | `analysis/t2b_catalogo_ampliado.py` |
-| `fichas_moleculas.json` | 436 fichas (descripción, entorno, relevancia biótica). **Borrador de IA, pendiente de verificar** | `analysis/fichas.py` |
+| `fichas_moleculas.json` | 436 fichas (descripción, entorno, análisis prebiótico). Elementos y estado: datos; rutas y textos: **borrador de IA, pendiente de verificar** | `analysis/fichas.py` + `analysis/prebiotico.py` |
 
 Detalles y límites:
 - **Aij**: 340 de 348 filas oficiales lo tienen. Las 8 restantes (glicolaldehído, E_sup 800–1340 K) quedan vacías porque
@@ -222,7 +222,7 @@ y las que faltan pesan en contra.
 ### 6.6 Entorno, `f_entorno`
 Cada molécula tiene una ficha con su entorno típico: núcleo caliente / ubicua = 1.0; nube fría = 0.5; envoltura
 circunestelar o química atmosférica/laboratorio = 0.1. **Por qué**: IRAS 16293 B es un núcleo caliente.
-La **relevancia biótica/prebiótica** se muestra en la ficha pero **no multiplica** el puntaje; si lo hiciera, la
+El **análisis prebiótico** (§9, «Moléculas») se muestra en la ficha pero **no multiplica** el puntaje; si lo hiciera, la
 herramienta favorecería lo que queremos encontrar (p. ej. glicina).
 
 ### 6.7 "Fuera del catálogo"
@@ -298,10 +298,49 @@ Pensada para entenderse sin tener que abrir cada ficha:
   entorno típico y relevancia prebiótica (fichas).
 - **«En nuestro espectro»**: las moléculas que son la candidata más probable de alguna línea y en cuántas (motor).
 - **Lista** (con su propio scroll, ordenada por líneas explicadas) y **ficha** (con su propio scroll): estado, átomos,
-  entorno, relevancia, líneas por posición, complejidad relativa al censo, descripción y condiciones.
+  entorno, **análisis prebiótico**, líneas por posición, complejidad relativa al censo, descripción y condiciones.
+
+#### Análisis prebiótico de cada molécula (`analysis/prebiotico.py` → `AnalisisPrebiotico.tsx`)
+
+Responde dos preguntas: **¿es prebiótica?** y **¿en qué condiciones?**, separando el espacio de la Tierra (una molécula
+puede ser prebiótica en un planeta y no estar confirmada en el espacio, como la glicina). No es una etiqueta «porque sí»:
+la clase sale de criterios explícitos.
+
+| Clase | Criterio | Cuántas (de 436 fichas) |
+|---|---|---|
+| **Prebiótica** | Hay una ruta química conocida hacia una familia de biomoléculas (tabla `RUTAS`, 12 moléculas). | 12 |
+| **Solvente** | El agua: el solvente de la vida. | 1 |
+| **Ingrediente potencial** | Contiene carbono y al menos uno de N, O, P o S, sin ruta directa conocida. | 244 |
+| **Sin papel conocido** | El resto (p. ej. NaCl, SiO). | 179 |
+
+El titular combina la clase con el censo: «Prebiótica · observada en el espacio» (detectada o tentativa en CDMS) o
+«Prebiótica en la Tierra · no confirmada en el espacio».
+
+Qué muestra la ficha:
+- **Ingredientes (C, H, N, O, P, S)**: cuáles contiene y el papel de cada uno.
+- **Factores bióticos**: el **solvente** (agua) y las cuatro familias de biomoléculas (**proteínas, ADN/ARN, lípidos,
+  azúcares**), resaltando aquellas a las que lleva su ruta y cómo.
+- **Factores abióticos**: **temperatura, presión, aire/atmósfera, gravedad y radiación**, en dos columnas: dónde se forma
+  en el espacio y qué necesitaría en un planeta para participar en la química de la vida.
+
+**De dónde sale cada parte:**
+
+| Parte | Fuente | Tipo |
+|---|---|---|
+| Elementos CHNOPS | Fórmula de la molécula | Dato |
+| Papel de cada elemento | Presentación de apertura, diap. 3 | Documento de la competencia |
+| Observada o no en el espacio | Censo CDMS (`censo_cdms_2026-09.csv`) | Dato |
+| Temperatura en el espacio | Entorno de la ficha + secuencia nube fría → calentamiento → disco (diap. 8) | Ficha (borrador de IA) + documento |
+| Factores a considerar (agua/solvente; proteínas, ADN, lípidos, azúcares; temperatura, aire, presión, gravedad) | Retroalimentación de los jueces | Indicación directa |
+| Relacionar con una ruta química y las condiciones que necesitaría; «también es válido concluir que el vínculo todavía es incierto» | Diap. 25 y Documento de participantes | Documento de la competencia |
+| Rutas hacia biomoléculas (`RUTAS`) y textos de condiciones | Conocimiento general de química prebiótica | **Borrador de IA, pendiente de verificar con bibliografía** |
+| Condiciones en la Tierra (agua líquida 0–100 °C a 1 atm; presión > 0.006 atm, el punto triple del agua) | Física general del agua | General |
+
+Límites: la tabla de rutas es corta y está hecha a mano; una molécula marcada como «ingrediente» puede tener rutas que
+no incluimos. El análisis **no** entra en la probabilidad (§6.6).
 
 **De dónde sale cada dato:** número de átomos y estado → censo CDMS (`data/externos/censo_cdms_2026-09.csv`); líneas que
-explica → nuestro motor (`web/public/data/probabilidad.json`); familia, entorno, relevancia y textos → fichas
+explica → nuestro motor (`web/public/data/probabilidad.json`); familia, entorno, rutas prebióticas y textos → fichas
 (`data/externos/fichas_moleculas.json`), **borrador de IA pendiente de verificación**, y así se indica en cada ficha.
 
 ### «Evidencia»
@@ -318,7 +357,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python analysis/t2_aij_catalogo_local.py    # coeficiente de Einstein del catálogo oficial
 .venv/bin/python analysis/t1_censo_cdms.py            # censo CDMS de 348 moléculas
 .venv/bin/python analysis/t2b_catalogo_ampliado.py    # catálogo ampliado etiquetado con el censo
-.venv/bin/python analysis/fichas.py                   # fichas de moléculas
+.venv/bin/python analysis/fichas.py                   # fichas de moléculas y análisis prebiótico
 .venv/bin/python analysis/probabilidad.py             # ruido, líneas y probabilidad por línea
 .venv/bin/python analysis/t4_pruebas.py               # robustez y sensibilidad
 .venv/bin/python notebooks/build_01_graficas_referencia.py && cp notebooks/figs/*.png web/public/figs/
@@ -336,7 +375,7 @@ Publicación: Vercel con **Root Directory = `web`**.
 
 | Herramienta | Tareas | Qué conservamos | Cómo lo verificamos |
 |---|---|---|---|
-| Claude (Anthropic) vía Claude Code | Lectura de documentos, planificación, extracción de catálogos (Splatalogue/CDMS), código del motor y del tablero, borrador de fichas, documentación; también la versión anterior (v1) | Código en `analysis/`, `web/`, `notebooks/`; fichas marcadas como pendientes | Contraste con los documentos de la competencia; pruebas de robustez y sensibilidad; revisión de ganadores uno a uno; archivos idénticos al paquete (SHA256); compilación y pruebas automáticas del tablero (incluida la que comprueba que el navegador reproduce exactamente el cálculo de Python) |
+| Claude (Anthropic) vía Claude Code | Lectura de documentos, planificación, extracción de catálogos (Splatalogue/CDMS), código del motor y del tablero, borrador de fichas y de rutas prebióticas, documentación; también la versión anterior (v1) | Código en `analysis/`, `web/`, `notebooks/`; fichas marcadas como pendientes | Contraste con los documentos de la competencia; pruebas de robustez y sensibilidad; revisión de ganadores uno a uno; archivos idénticos al paquete (SHA256); compilación y pruebas automáticas del tablero (incluida la que comprueba que el navegador reproduce exactamente el cálculo de Python) |
 
 Aportes de cada integrante: **por completar por el equipo**.
 

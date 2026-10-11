@@ -33,7 +33,7 @@ Un solo paso: de frecuencia observada (LSRK) a frecuencia en reposo, `ν_reposo 
 |---|---|
 | **Analizar** | Espectro, tabla de líneas y, para la línea elegida, la molécula más probable, alternativas, comparación factor por factor, el porqué y las huellas. Pesos de cada factor ajustables. |
 | **Cómo lo calculamos** | Los 7 pasos de los datos a la probabilidad, con números y gráficas reales; al final, el resto de las gráficas de las instrucciones. |
-| **Moléculas (348)** | Censo CDMS y especies de laboratorio: resúmenes que filtran, moléculas que explican líneas en nuestro espectro y ficha de cada una. Átomos y estado vienen del censo CDMS; las líneas explicadas, del motor; entorno, relevancia y textos, de fichas en **borrador de IA pendiente de verificación**. |
+| **Moléculas (348)** | Censo CDMS y especies de laboratorio: resúmenes que filtran, moléculas que explican líneas en nuestro espectro y ficha de cada una con su **análisis prebiótico** (ingredientes C/H/N/O/P/S, factores bióticos —solvente, proteínas, ADN/ARN, lípidos, azúcares— y abióticos —temperatura, presión, aire, gravedad, radiación— en el espacio y en la Tierra). Átomos, elementos y estado vienen de la fórmula y del censo CDMS; las líneas explicadas, del motor; entorno, rutas prebióticas y textos, de fichas en **borrador de IA pendiente de verificación**. Criterios en la documentación completa, §9. |
 | **Evidencia** | Tabla con las columnas de `evidencia_plantilla.csv`, exportable a CSV. |
 
 ## Reproducir
@@ -48,7 +48,7 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/python analysis/t2_aij_catalogo_local.py     # coeficiente de Einstein del catálogo oficial
 .venv/bin/python analysis/t1_censo_cdms.py             # censo CDMS de 348 moléculas
 .venv/bin/python analysis/t2b_catalogo_ampliado.py     # catálogo ampliado etiquetado con el censo
-.venv/bin/python analysis/fichas.py                    # fichas de moléculas
+.venv/bin/python analysis/fichas.py                    # fichas de moléculas y análisis prebiótico
 
 # 3. Motor: ruido, líneas, probabilidad por línea → web/public/data/{peaks,probabilidad,spectra}.json
 .venv/bin/python analysis/probabilidad.py

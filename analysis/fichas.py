@@ -23,6 +23,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from formulas import composicion  # noqa: E402
+from prebiotico import analizar as analizar_prebiotico, relevancia  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -30,109 +31,109 @@ FACTOR_ENTORNO = {"hot_corino": 1.0, "ubicua": 1.0, "nube_fria": 0.5, "circunest
 
 # relevancia: "directa" (bloque o precursor directo de biomoléculas), "relacionada", "no_conocida"
 MANUAL = {
-    "CH3OH": dict(nombre="Metanol", entorno="hot_corino", relevancia="relacionada",
+    "CH3OH": dict(nombre="Metanol", entorno="hot_corino",
         descripcion="El alcohol más simple; se forma en los hielos de los granos por hidrogenación de CO y se libera al gas al calentarse (>100 K). Es la base de la química orgánica compleja en hot corinos.",
         abiotico="Hielos de granos fríos (10–20 K) + calentamiento protoestelar que los sublima.",
         biotico="En la Tierra lo producen microorganismos (metilótrofos) y la degradación de pectinas; precursor de moléculas orgánicas mayores."),
-    "CH3CN": dict(nombre="Acetonitrilo (cianuro de metilo)", entorno="hot_corino", relevancia="relacionada",
+    "CH3CN": dict(nombre="Acetonitrilo (cianuro de metilo)", entorno="hot_corino",
         descripcion="Trompo simétrico: sus transiciones J→J−1 forman una 'escalera' de componentes K muy juntas, clásica para medir temperatura en núcleos calientes.",
         abiotico="Gas caliente (100–300 K) cerca de protoestrellas; química en fase gas y en hielos.",
         biotico="Nitrilo; los nitrilos son precursores propuestos de aminoácidos y nucleobases (química del HCN)."),
-    "CH3CHO": dict(nombre="Acetaldehído", entorno="hot_corino", relevancia="relacionada",
+    "CH3CHO": dict(nombre="Acetaldehído", entorno="hot_corino",
         descripcion="Aldehído de dos carbonos, abundante en hot corinos y en cometas.",
         abiotico="Química de granos y de fase gas en regiones templadas/calientes.",
         biotico="Intermediario del metabolismo (fermentación alcohólica); precursor propuesto de azúcares y de alanina (síntesis de Strecker)."),
-    "HC(O)OCH3": dict(nombre="Formiato de metilo", entorno="hot_corino", relevancia="relacionada",
+    "HC(O)OCH3": dict(nombre="Formiato de metilo", entorno="hot_corino",
         descripcion="Éster más simple; muy abundante en hot corinos, con muchísimas líneas en submilimétrico.",
         abiotico="Hot corinos y núcleos calientes; formación en hielos y en fase gas.",
         biotico="Isómero del glicolaldehído y del ácido acético (C2H4O2); sirve de referencia para comparar isómeros prebióticos."),
-    "CH2OHCHO": dict(nombre="Glicolaldehído", entorno="hot_corino", relevancia="directa",
+    "CH2OHCHO": dict(nombre="Glicolaldehído", entorno="hot_corino",
         descripcion="El azúcar más simple: dos carbonos, un aldehído y un alcohol. Detectado hacia IRAS 16293-2422 B (Jørgensen et al. 2012).",
         abiotico="Hielos irradiados o calentados; reacción formosa a partir de formaldehído.",
         biotico="Precursor de la ribosa (azúcar del ARN) vía reacción formosa."),
-    "CH3CH2OH": dict(nombre="Etanol", entorno="hot_corino", relevancia="relacionada",
+    "CH3CH2OH": dict(nombre="Etanol", entorno="hot_corino",
         descripcion="Alcohol de dos carbonos, presente en hot corinos y cometas.",
         abiotico="Hielos de granos; liberado en regiones calientes.",
         biotico="Producto de la fermentación en la Tierra; no es biomarcador en el espacio."),
-    "(CH3)2O": dict(nombre="Dimetil éter", entorno="hot_corino", relevancia="no_conocida",
+    "(CH3)2O": dict(nombre="Dimetil éter", entorno="hot_corino",
         descripcion="Éter más simple; abundante en núcleos calientes, isómero del etanol.",
         abiotico="Hot corinos; formación en hielos y fase gas a partir de metanol.",
         biotico="Sin papel biológico conocido."),
-    "CH3CH2CN": dict(nombre="Propionitrilo (cianuro de etilo)", entorno="hot_corino", relevancia="relacionada",
+    "CH3CH2CN": dict(nombre="Propionitrilo (cianuro de etilo)", entorno="hot_corino",
         descripcion="Nitrilo saturado de tres carbonos, típico de núcleos calientes.",
         abiotico="Hot cores/corinos; química de hielos ricos en nitrógeno.",
         biotico="Nitrilo; familia química precursora de aminoácidos."),
-    "NH2CHO": dict(nombre="Formamida", entorno="hot_corino", relevancia="directa",
+    "NH2CHO": dict(nombre="Formamida", entorno="hot_corino",
         descripcion="Molécula más simple con enlace peptídico (–C(O)–N–). Detectada hacia IRAS 16293-2422 (Kahane et al. 2013; Coutens et al. 2016).",
         abiotico="Hot corinos y choques; formación en hielos o fase gas (NH2 + H2CO).",
         biotico="Con calor y minerales produce nucleobases, aminoácidos y azúcares (química de formamida)."),
-    "SO2": dict(nombre="Dióxido de azufre", entorno="ubicua", relevancia="no_conocida",
+    "SO2": dict(nombre="Dióxido de azufre", entorno="ubicua",
         descripcion="Molécula de azufre común en choques, flujos y regiones calientes.",
         abiotico="Choques, flujos protoestelares, atmósferas volcánicas.",
         biotico="Sin papel biológico directo; en la Tierra, sobre todo volcánico e industrial."),
-    "Glycine": dict(nombre="Glicina", entorno="hot_corino", relevancia="directa",
+    "Glycine": dict(nombre="Glicina", entorno="hot_corino",
         descripcion="El aminoácido más simple. NO detectada en el ISM según CDMS (detecciones cuestionadas); sí hallada en el cometa 67P (Rosetta) y en meteoritos.",
         abiotico="Se espera en hielos irradiados/calentados; sus líneas serían débiles y con muchos niveles.",
         biotico="Bloque de las proteínas; detectarla en el ISM sería clave para el origen de la vida."),
-    "H2CO": dict(nombre="Formaldehído", entorno="ubicua", relevancia="directa",
+    "H2CO": dict(nombre="Formaldehído", entorno="ubicua",
         descripcion="Aldehído más simple, en casi todos los entornos.", abiotico="Ubicuo; fase gas y hielos.",
         biotico="Materia prima de la reacción formosa (azúcares)."),
-    "HCN": dict(nombre="Cianuro de hidrógeno", entorno="ubicua", relevancia="directa",
+    "HCN": dict(nombre="Cianuro de hidrógeno", entorno="ubicua",
         descripcion="Nitrilo más simple, trazador de gas denso.", abiotico="Ubicuo.",
         biotico="Su oligomerización produce adenina y aminoácidos (química de Oró)."),
-    "HC3N": dict(nombre="Cianoacetileno", entorno="ubicua", relevancia="directa",
+    "HC3N": dict(nombre="Cianoacetileno", entorno="ubicua",
         descripcion="Cadena de carbono más simple de la familia HCnN.", abiotico="Nubes frías y hot corinos.",
         biotico="Precursor propuesto de pirimidinas (citosina)."),
-    "HNCO": dict(nombre="Ácido isociánico", entorno="ubicua", relevancia="relacionada",
+    "HNCO": dict(nombre="Ácido isociánico", entorno="ubicua",
         descripcion="Molécula más simple con C, H, N y O.", abiotico="Ubicuo, abundante en choques y hot corinos.",
         biotico="Relacionado químicamente con la formamida y los enlaces peptídicos."),
-    "H2NCH2CN": dict(nombre="Aminoacetonitrilo", entorno="hot_corino", relevancia="directa",
+    "H2NCH2CN": dict(nombre="Aminoacetonitrilo", entorno="hot_corino",
         descripcion="Precursor directo de la glicina por hidrólisis.", abiotico="Núcleos calientes (Sgr B2).",
         biotico="Vía de Strecker hacia la glicina."),
-    "H2NC(O)NH2": dict(nombre="Urea", entorno="hot_corino", relevancia="directa",
+    "H2NC(O)NH2": dict(nombre="Urea", entorno="hot_corino",
         descripcion="Primera molécula orgánica sintetizada en el laboratorio (Wöhler, 1828).",
         abiotico="Núcleos calientes (Sgr B2).", biotico="Precursora de pirimidinas; producto del metabolismo."),
-    "HOCH2CH2NH2": dict(nombre="Etanolamina", entorno="hot_corino", relevancia="directa",
+    "HOCH2CH2NH2": dict(nombre="Etanolamina", entorno="hot_corino",
         descripcion="Cabeza polar de fosfolípidos.", abiotico="Nube molecular G+0.693 (centro galáctico).",
         biotico="Componente de membranas celulares."),
-    "(CH2OH)2": dict(nombre="Etilenglicol", entorno="hot_corino", relevancia="relacionada",
+    "(CH2OH)2": dict(nombre="Etilenglicol", entorno="hot_corino",
         descripcion="Alcohol de azúcar más simple; reducido del glicolaldehído.", abiotico="Hot corinos y cometas.",
         biotico="Relacionado con la química de azúcares."),
-    "CH3COOH": dict(nombre="Ácido acético", entorno="hot_corino", relevancia="relacionada",
+    "CH3COOH": dict(nombre="Ácido acético", entorno="hot_corino",
         descripcion="Ácido carboxílico; isómero del formiato de metilo.", abiotico="Núcleos calientes.",
         biotico="Metabolito universal (acetil-CoA)."),
-    "CH3NCO": dict(nombre="Isocianato de metilo", entorno="hot_corino", relevancia="relacionada",
+    "CH3NCO": dict(nombre="Isocianato de metilo", entorno="hot_corino",
         descripcion="Detectado hacia IRAS 16293-2422 B (Ligterink et al. 2017; Martín-Doménech et al. 2017).",
         abiotico="Hot corinos.", biotico="Contiene un grupo similar al enlace peptídico."),
-    "CH3OC(O)NH2": dict(nombre="Carbamato de metilo", entorno="hot_corino", relevancia="relacionada",
+    "CH3OC(O)NH2": dict(nombre="Carbamato de metilo", entorno="hot_corino",
         descripcion="Isómero de la glicina, detectado recientemente.", abiotico="Hot cores.",
         biotico="Isómero de la glicina: útil para distinguir falsas detecciones de glicina."),
-    "NH2OH": dict(nombre="Hidroxilamina", entorno="hot_corino", relevancia="directa",
+    "NH2OH": dict(nombre="Hidroxilamina", entorno="hot_corino",
         descripcion="Precursora propuesta de aminoácidos y del ARN.", abiotico="Nube G+0.693.",
         biotico="Precursora en rutas de síntesis de ribonucleótidos."),
-    "(CH3)2S": dict(nombre="Dimetil sulfuro", entorno="hot_corino", relevancia="relacionada",
+    "(CH3)2S": dict(nombre="Dimetil sulfuro", entorno="hot_corino",
         descripcion="Detectado en el ISM en 2025.", abiotico="Nube molecular del centro galáctico.",
         biotico="En la Tierra lo produce casi sólo la vida (fitoplancton): biomarcador propuesto en exoplanetas, aunque su detección en el ISM muestra que también se forma sin vida."),
-    "PH3": dict(nombre="Fosfina", entorno="circunestelar", relevancia="relacionada",
+    "PH3": dict(nombre="Fosfina", entorno="circunestelar",
         descripcion="Detectada en envolturas de estrellas evolucionadas (IRC+10216).",
         abiotico="Envolturas circunestelares ricas en carbono.",
         biotico="Biomarcador propuesto (caso de Venus, Greaves et al. 2020, diapositiva 12); el fósforo es esencial para ADN/ARN."),
-    "H2O": dict(nombre="Agua", entorno="ubicua", relevancia="directa",
+    "H2O": dict(nombre="Agua", entorno="ubicua",
         descripcion="Muy abundante en hielos y gas caliente.", abiotico="Ubicua.", biotico="Disolvente de la vida."),
-    "SiO": dict(nombre="Monóxido de silicio", entorno="ubicua", relevancia="no_conocida",
+    "SiO": dict(nombre="Monóxido de silicio", entorno="ubicua",
         descripcion="Trazador de choques: el silicio se libera de los granos.", abiotico="Choques y flujos protoestelares.",
         biotico="Sin papel biológico."),
-    "SiS": dict(nombre="Monosulfuro de silicio", entorno="ubicua", relevancia="no_conocida",
+    "SiS": dict(nombre="Monosulfuro de silicio", entorno="ubicua",
         descripcion="Choques y envolturas circunestelares.", abiotico="Choques, envolturas de estrellas AGB.",
         biotico="Sin papel biológico."),
-    "CH3SH": dict(nombre="Metanotiol", entorno="hot_corino", relevancia="relacionada",
+    "CH3SH": dict(nombre="Metanotiol", entorno="hot_corino",
         descripcion="Análogo de azufre del metanol.", abiotico="Hot corinos.", biotico="Producto del metabolismo bacteriano."),
-    "HCOOH": dict(nombre="Ácido fórmico", entorno="hot_corino", relevancia="relacionada",
+    "HCOOH": dict(nombre="Ácido fórmico", entorno="hot_corino",
         descripcion="Ácido carboxílico más simple.", abiotico="Hot corinos, hielos.", biotico="Metabolito común."),
-    "CH2CHCN": dict(nombre="Cianuro de vinilo (acrilonitrilo)", entorno="hot_corino", relevancia="relacionada",
+    "CH2CHCN": dict(nombre="Cianuro de vinilo (acrilonitrilo)", entorno="hot_corino",
         descripcion="Nitrilo insaturado; también en la atmósfera de Titán.", abiotico="Núcleos calientes, Titán.",
         biotico="Se propuso que forma membranas (azotosomas) en Titán."),
-    "CH3NH2": dict(nombre="Metilamina", entorno="hot_corino", relevancia="directa",
+    "CH3NH2": dict(nombre="Metilamina", entorno="hot_corino",
         descripcion="Amina más simple.", abiotico="Núcleos calientes; también en el cometa 67P.",
         biotico="Precursora de la glicina en hielos irradiados."),
 }
@@ -141,35 +142,34 @@ ATMOSFERA = {"Cl", "Br", "I", "F", "Se"}            # halógenos y otros típico
 METALES = {"Al", "Na", "K", "Mg", "Ca", "Fe", "Ti", "Sc", "Y", "Mn"}
 
 
-def familia(formula: str, nombre_quimico: str = "") -> tuple[str, str, str]:
-    """(familia, entorno, relevancia) por reglas químicas. Sólo para fichas sin redacción manual."""
+def familia(formula: str, nombre_quimico: str = "") -> tuple[str, str]:
+    """(familia, entorno) por reglas químicas. Sólo para fichas sin redacción manual."""
     comp, _ = composicion(formula)
     els = set(re.findall(r"[A-Z][a-z]?", comp))
     n = sum(int(x) for x in re.findall(r"[A-Z][a-z]?(\d+)", comp)) if comp else 0
     carga = comp.endswith(("+", "-"))
     nq = nombre_quimico.lower()
     if els & METALES:
-        return "compuesto con metal", "circunestelar", "no_conocida"
+        return "compuesto con metal", "circunestelar"
     if els & ATMOSFERA and "HCl" not in formula and formula not in {"AlCl", "NaCl", "KCl", "HF", "CF+", "AlF", "H2Cl+", "HCl+", "CH3Cl"}:
-        return "halógeno / química atmosférica", "atmosfera_lab", "no_conocida"
+        return "halógeno / química atmosférica", "atmosfera_lab"
     if any(k in nq for k in ["nitric", "nitrogen dioxide", "ozone", "peroxy", "sulfuric", "hypochlor", "peroxynit"]):
-        return "química atmosférica", "atmosfera_lab", "no_conocida"
+        return "química atmosférica", "atmosfera_lab"
     if carga:
-        return "ion", "nube_fria", "no_conocida"
+        return "ion", "nube_fria"
     if "Si" in els or "P" in els:
-        return "compuesto de silicio/fósforo", "circunestelar" if "Si" in els and n > 3 else "ubicua", \
-            "relacionada" if "P" in els else "no_conocida"
+        return "compuesto de silicio/fósforo", "circunestelar" if "Si" in els and n > 3 else "ubicua"
     h = int(re.search(r"H(\d+)", comp).group(1)) if re.search(r"H(\d+)", comp) else 0
     c = int(re.search(r"C(\d+)", comp).group(1)) if re.search(r"C(\d+)", comp) else 0
     if c >= 6 and h <= c and ("N" in els or els <= {"C", "H"}):
-        return "aromático / cadena larga", "nube_fria", "no_conocida"
+        return "aromático / cadena larga", "nube_fria"
     if c >= 3 and h <= 2:
-        return "cadena de carbono insaturada", "nube_fria", "no_conocida"
+        return "cadena de carbono insaturada", "nube_fria"
     if n <= 4:
-        return "molécula simple", "ubicua", "relacionada" if els & {"N", "O"} and "C" in els else "no_conocida"
+        return "molécula simple", "ubicua"
     if c >= 1 and h >= c and (els & {"O", "N", "S"}):
-        return "orgánica compleja saturada (COM)", "hot_corino", "relacionada" if els & {"N"} else "no_conocida"
-    return "orgánica insaturada", "nube_fria", "no_conocida"
+        return "orgánica compleja saturada (COM)", "hot_corino"
+    return "orgánica insaturada", "nube_fria"
 
 
 TEXTO_FAMILIA = {
@@ -198,24 +198,25 @@ def ficha(formula, n_atomos, estado, nombre_quimico="", en_censo=True, url=""):
     n_atomos = "?" if pd.isna(n_atomos) else str(n_atomos)
     url = "" if pd.isna(url) else url
     m = MANUAL.get(formula)
-    fam, ent, rel = familia(formula, nombre_quimico)
+    fam, ent = familia(formula, nombre_quimico)
     if formula == "Glycine":
         fam = "aminoácido"
     if m:
+        pre_m = analizar_prebiotico(formula, m["entorno"], estado)
         return dict(formula=formula, nombre=m["nombre"], n_atomos=n_atomos, visto_en_espacio=estado,
                     en_censo=en_censo, familia=fam, entorno=m["entorno"],
-                    factor_entorno=FACTOR_ENTORNO[m["entorno"]], relevancia_biotica=m["relevancia"],
+                    factor_entorno=FACTOR_ENTORNO[m["entorno"]], relevancia_biotica=relevancia(pre_m["clase"]), prebiotico=pre_m,
                     descripcion=m["descripcion"], condiciones_abioticas=m["abiotico"],
                     condiciones_bioticas=m["biotico"], tipo_ficha="manual", url_cdms=url,
                     verificacion="pendiente", fuente_texto="borrador IA (Claude)")
     if en_censo and ent == "atmosfera_lab":      # está en el censo: sí se ha visto en el espacio
         fam, ent = "molécula simple", "ubicua"
     desc, abio = TEXTO_FAMILIA[fam]
+    pre = analizar_prebiotico(formula, ent, estado)
     return dict(formula=formula, nombre=nombre_quimico or formula, n_atomos=n_atomos, visto_en_espacio=estado,
                 en_censo=en_censo, familia=fam, entorno=ent, factor_entorno=FACTOR_ENTORNO[ent],
-                relevancia_biotica=rel, descripcion=desc, condiciones_abioticas=abio,
-                condiciones_bioticas="Sin papel biológico conocido." if rel == "no_conocida" else
-                "Contiene C con N/O: familia química relacionada con precursores prebióticos.",
+                relevancia_biotica=relevancia(pre["clase"]), prebiotico=pre, descripcion=desc, condiciones_abioticas=abio,
+                condiciones_bioticas=pre["tierra"],
                 tipo_ficha="por familia", url_cdms=url, verificacion="pendiente", fuente_texto="borrador IA (Claude)")
 
 
