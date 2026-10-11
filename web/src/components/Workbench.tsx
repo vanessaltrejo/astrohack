@@ -15,7 +15,6 @@ import MoleculesPanel, { type Ficha } from "./MoleculesPanel";
 import ReferencePlots from "./ReferencePlots";
 import Backstage from "./Backstage";
 import Huellas from "./Huellas";
-import { Dialog } from "./ui";
 
 const Plot = dynamic(() => import("./Plot"), { ssr: false });
 
@@ -37,6 +36,20 @@ const BIO: Record<string, string> = {
   no_conocida: "Sin relevancia prebiótica conocida",
 };
 const CAND_COLORS = ["#1d4ed8", "#7c3aed", "#0e7490"];
+
+type Vista = "analizar" | "backstage" | "moleculas" | "graficas" | "evidencia";
+
+function Pagina({ titulo, subtitulo, children }: { titulo: string; subtitulo: string; children: React.ReactNode }) {
+  return (
+    <section>
+      <header className="mb-6">
+        <h1 className="text-[1.8rem] font-semibold leading-tight">{titulo}</h1>
+        <p className="mt-1 max-w-[80ch] text-ink-2">{subtitulo}</p>
+      </header>
+      {children}
+    </section>
+  );
+}
 
 export default function Workbench() {
   const [core, setCore] = useState<CoreLoad | null>(null);
@@ -66,7 +79,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
   const [foco, setFoco] = useState<string | null>(null);
   const [zoom, setZoom] = useState(false);
   const [pesos, setPesos] = useState<Pesos>(PESOS_BASE);
-  const [panel, setPanel] = useState<null | "backstage" | "moleculas" | "graficas" | "evidencia">(null);
+  const [vista, setVista] = useState<Vista>("analizar");
   const [rows, setRowsRaw] = useState<EvidenceRow[]>([]);
   const [team, setTeamRaw] = useState("");
   const [toast, setToast] = useState<string | null>(null);
@@ -86,6 +99,11 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
       saveRows(next);
       return next;
     });
+  }, []);
+
+  const irA = useCallback((x: Vista) => {
+    setVista(x);
+    window.scrollTo({ top: 0 });
   }, []);
 
   const v = v3.parametros.v_kms[pos];
@@ -263,15 +281,17 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
     <div className="min-h-screen bg-night pl-[92px] text-ink">
       <Sidebar
         items={[
-          { id: "analizar", label: "Analizar", Icon: ScanSearch, onClick: () => setPanel(null), active: panel === null },
-          { id: "backstage", label: "Cómo lo calculamos", Icon: Workflow, onClick: () => setPanel("backstage"), active: panel === "backstage" },
-          { id: "moleculas", label: "Moléculas (348)", Icon: Atom, onClick: () => setPanel("moleculas"), active: panel === "moleculas" },
-          { id: "graficas", label: "Gráficas Python", Icon: Images, onClick: () => setPanel("graficas"), active: panel === "graficas" },
-          { id: "evidencia", label: "Evidencia", Icon: ClipboardList, onClick: () => setPanel("evidencia"), active: panel === "evidencia", badge: rows.length },
+          { id: "analizar", label: "Analizar", Icon: ScanSearch, onClick: () => irA("analizar"), active: vista === "analizar" },
+          { id: "backstage", label: "Cómo lo calculamos", Icon: Workflow, onClick: () => irA("backstage"), active: vista === "backstage" },
+          { id: "moleculas", label: "Moléculas (348)", Icon: Atom, onClick: () => irA("moleculas"), active: vista === "moleculas" },
+          { id: "graficas", label: "Gráficas Python", Icon: Images, onClick: () => irA("graficas"), active: vista === "graficas" },
+          { id: "evidencia", label: "Evidencia", Icon: ClipboardList, onClick: () => irA("evidencia"), active: vista === "evidencia", badge: rows.length },
         ]}
       />
 
       <main className="mx-auto max-w-[1500px] px-4 pb-16 pt-6 md:px-6">
+        {vista === "analizar" ? (
+          <>
         <header className="mb-5">
           <h1 className="text-[1.6rem] font-semibold leading-tight">¿Qué molécula produce cada línea?</h1>
           <p className="mt-1 max-w-[80ch] text-ink-2">
@@ -407,7 +427,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
                   margin: { l: 56, r: 12, t: 10, b: 46 },
                   paper_bgcolor: "#ffffff",
                   plot_bgcolor: "#ffffff",
-                  font: { family: "IBM Plex Sans, sans-serif", size: 12.5, color: "#0b1220" },
+                  font: { family: "Inter Variable, Inter, sans-serif", size: 12.5, color: "#0b1220" },
                   xaxis: { title: { text: "Frecuencia en reposo (GHz)" }, gridcolor: "#e6ebf2", range: xRange, zeroline: false },
                   yaxis: { title: { text: "Intensidad (Jy/haz)" }, gridcolor: "#e6ebf2", zerolinecolor: "#94a0b4" },
                   showlegend: false,
@@ -457,7 +477,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
                           className={`cursor-pointer border-t border-rule ${on ? "bg-accent-dim" : "hover:bg-plate"}`}
                           style={on ? { boxShadow: "inset 3px 0 0 #1d4ed8" } : undefined}
                         >
-                          <td className="px-3 py-1.5 font-mono text-[0.84rem]">{p.nu_reposo_MHz.toFixed(2)}</td>
+                          <td className="px-3 py-1.5 tabular-nums text-[0.84rem]">{p.nu_reposo_MHz.toFixed(2)}</td>
                           <td className="px-3 py-1.5 text-right tabular-nums">{p.Jy.toFixed(2)}</td>
                           <td className="px-3 py-1.5 text-right tabular-nums">{p.snr.toFixed(0)}</td>
                           <td className="px-3 py-1.5">
@@ -492,7 +512,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
               <div className="rounded-lg border-2 border-ink bg-white">
                 <div className="border-b border-rule px-4 py-3">
                   <p className="text-[0.76rem] font-semibold uppercase tracking-wide text-muted">Línea seleccionada</p>
-                  <p className="mt-0.5 font-mono text-[1.05rem]">{actual.p.nu_reposo_MHz.toFixed(2)} MHz</p>
+                  <p className="mt-0.5 tabular-nums text-[1.05rem]">{actual.p.nu_reposo_MHz.toFixed(2)} MHz</p>
                   <p className="text-[0.84rem] text-ink-2">
                     {actual.p.Jy.toFixed(2)} Jy/haz · S/N {actual.p.snr.toFixed(0)}
                     {actual.p.fwhm_kms ? ` · ancho ${actual.p.fwhm_kms.toFixed(1)} km/s` : ""}
@@ -552,33 +572,39 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
           </section>
         ) : null}
 
+          </>
+        ) : vista === "backstage" ? (
+          <Pagina titulo="Cómo lo calculamos" subtitulo="De los datos a la probabilidad, paso a paso, con los números reales del análisis.">
+            <Backstage v3={v3} spectra={spectra} />
+          </Pagina>
+        ) : vista === "moleculas" ? (
+          <Pagina titulo="Moléculas" subtitulo="Las 348 del censo CDMS y las especies de laboratorio con líneas en nuestra banda.">
+            <MoleculesPanel />
+          </Pagina>
+        ) : vista === "graficas" ? (
+          <Pagina titulo="Gráficas Python" subtitulo="Las gráficas de las instrucciones, reproducidas con el único paso permitido sobre los datos.">
+            <ReferencePlots />
+          </Pagina>
+        ) : (
+          <Pagina titulo="Evidencia" subtitulo="Las líneas que el equipo decide defender, con las columnas de evidencia_plantilla.csv.">
+            <EvidenceLog
+              rows={rows}
+              setRows={setRows}
+              team={team}
+              setTeam={(t) => {
+                setTeamRaw(t);
+                saveTeam(t);
+              }}
+              flashId={null}
+            />
+          </Pagina>
+        )}
+
         <footer className="mt-10 border-t border-rule pt-4 text-[0.78rem] text-muted">
           This project makes use of the following ALMA data: {meta.credit}. ALMA is a partnership of ESO, NSF and NINS, with NRC, NSTC, ASIAA and KASI,
           in cooperation with the Republic of Chile. Productos ARI-L; contexto PILS (Jørgensen et al. 2016). Catálogos CDMS y JPL (vía Splatalogue).
         </footer>
       </main>
-
-      <Dialog open={panel === "backstage"} onClose={() => setPanel(null)} kind="sheet" title="Cómo lo calculamos" subtitle="de los datos a la probabilidad, paso a paso">
-        <Backstage v3={v3} spectra={spectra} />
-      </Dialog>
-      <Dialog open={panel === "moleculas"} onClose={() => setPanel(null)} kind="sheet" title="Moléculas" subtitle="censo CDMS (348) y especies de laboratorio en la banda">
-        <MoleculesPanel />
-      </Dialog>
-      <Dialog open={panel === "graficas"} onClose={() => setPanel(null)} kind="sheet" title="Gráficas Python" subtitle="las de las instrucciones, reproducidas">
-        <ReferencePlots />
-      </Dialog>
-      <Dialog open={panel === "evidencia"} onClose={() => setPanel(null)} kind="sheet" title="Evidencia" subtitle="columnas de evidencia_plantilla.csv">
-        <EvidenceLog
-          rows={rows}
-          setRows={setRows}
-          team={team}
-          setTeam={(t) => {
-            setTeamRaw(t);
-            saveTeam(t);
-          }}
-          flashId={null}
-        />
-      </Dialog>
 
       {toast ? (
         <div role="status" className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-ink px-4 py-2.5 text-[0.88rem] text-white shadow-lg">

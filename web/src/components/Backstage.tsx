@@ -60,7 +60,7 @@ export default function Backstage({ v3, spectra }: { v3: V3; spectra: Spectra })
     <div className="mx-auto max-w-[62rem] space-y-6">
       <p className="text-[0.95rem] text-ink-2">
         Todo lo que ve la pantalla <b className="text-ink">Analizar</b> sale de estos pasos. Cada número es reproducible con el código del repositorio
-        (<span className="font-mono text-[0.85em]">analysis/v3/</span>).
+        (<span className="tabular-nums text-[0.85em]">analysis/v3/</span>).
       </p>
 
       <Paso n={1} titulo="Los datos, sin tocar">
@@ -76,7 +76,7 @@ export default function Backstage({ v3, spectra }: { v3: V3; spectra: Spectra })
           El gas se mueve, y eso corre las líneas (efecto Doppler). Con la velocidad <b className="text-ink">dada por los organizadores</b> (B: 2.7 km/s,
           A: 3.2 km/s) llevamos el espectro a reposo, una sola vez:
         </p>
-        <p className="mb-3 rounded-md bg-plate px-4 py-2 text-center font-mono text-[0.95rem]">ν_reposo = ν_observada / (1 − v/c)   ·   2.7 km/s ↔ 3.14 MHz a 349 GHz</p>
+        <p className="mb-3 rounded-md bg-plate px-4 py-2 text-center tabular-nums text-[0.95rem]">ν_reposo = ν_observada / (1 − v/c)   ·   2.7 km/s ↔ 3.14 MHz a 349 GHz</p>
         <Figura src="/figs/fig1_espectro_B_offset.png" pie="Arriba: observado. Abajo: en reposo. Es la gráfica del cuaderno oficial." />
       </Paso>
 
@@ -160,7 +160,7 @@ export default function Backstage({ v3, spectra }: { v3: V3; spectra: Spectra })
       </Paso>
 
       <Paso n={6} titulo="Los seis factores de cada candidata">
-        <p className="mb-2 rounded-md bg-plate px-4 py-2 text-center font-mono text-[0.92rem]">
+        <p className="mb-2 rounded-md bg-plate px-4 py-2 text-center tabular-nums text-[0.92rem]">
           P(molécula | línea) ∝ frecuencia × Einstein × se repite × complejidad × visto en el espacio × entorno
         </p>
         <ul className="space-y-1.5 text-[0.88rem]">

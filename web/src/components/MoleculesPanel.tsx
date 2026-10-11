@@ -102,7 +102,7 @@ export default function MoleculesPanel() {
             </button>
           ))}
         </div>
-        <ul className="mt-3 max-h-[60vh] overflow-y-auto border-t border-rule">
+        <ul className="mt-3 max-h-[75vh] overflow-y-auto border-t border-rule">
           {lista.map((f) => (
             <li key={f.formula + f.nombre}>
               <button
@@ -132,7 +132,7 @@ export default function MoleculesPanel() {
           <article className="space-y-3 text-[0.88rem]">
             <header>
               <p className="text-[1.4rem] font-semibold text-ink">{prettyFormula(sel.formula)}</p>
-              <p className="serif text-[1.1rem] italic text-ink-2">{sel.nombre}</p>
+              <p className="text-[1.1rem] text-ink-2">{sel.nombre}</p>
             </header>
             <dl className="grid grid-cols-[9rem_1fr] gap-x-3 gap-y-1.5 text-[0.82rem]">
               <dt className="text-muted">Átomos</dt>

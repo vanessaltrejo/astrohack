@@ -65,7 +65,7 @@ export default function Huellas({
           return (
             <figure key={p.f.nu_reposo_MHz} className="rounded-md border-2 bg-white p-2" style={{ borderColor: ok ? "#15803d" : "#b91c1c" }}>
               <figcaption className="mb-1 flex items-center justify-between text-[0.78rem]">
-                <span className="font-mono">{p.f.nu_reposo_MHz.toFixed(2)} MHz</span>
+                <span className="tabular-nums">{p.f.nu_reposo_MHz.toFixed(2)} MHz</span>
                 <span className="rounded px-1.5 font-semibold" style={{ color: ok ? "#15803d" : "#b91c1c", background: ok ? "#dcfce7" : "#fee2e2" }}>
                   {ok ? "✓ aparece" : "✗ falta"}
                 </span>

@@ -31,9 +31,9 @@
   --color-side-ink: #ffffff;
   --color-side-muted: #c3cdf0;
 
-  --font-serif: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  /* Inter para texto y datos; Space Grotesk para títulos y cifras destacadas */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, sans-serif;
 
   --ease-enter: cubic-bezier(0, 0, 0, 1);
   --ease-exit: cubic-bezier(0.3, 0, 1, 1);
@@ -60,6 +60,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -75,22 +83,22 @@ body {
 @layer components {
   /* ---------- texto ---------- */
   .serif {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-variation-settings: "opsz" 36;
   }
   .id {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.86em;
   }
   .wordmark {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-weight: 500;
     font-variation-settings: "opsz" 48;
     letter-spacing: -0.015em;
     line-height: 1;
   }
   .title {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-weight: 500;
     font-variation-settings: "opsz" 36;
     letter-spacing: -0.012em;
@@ -99,7 +107,7 @@ body {
   }
   .title em,
   .subtitle {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-style: normal;
     font-weight: 400;
     color: var(--color-ink-2);
@@ -119,7 +127,7 @@ body {
     line-height: 1.45;
   }
   .fig {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
     font-weight: 400;
     font-variation-settings: "opsz" 72;
     letter-spacing: -0.02em;
@@ -621,7 +629,7 @@ body {
     stroke: var(--color-focus);
   }
   kbd {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.72rem;
     padding: 0.05rem 0.35rem;
     border: 1px solid var(--color-rule-strong);
