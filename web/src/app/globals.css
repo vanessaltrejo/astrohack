@@ -97,9 +97,6 @@ h4 {
     border: 1px solid var(--color-rule);
     border-radius: 4px;
   }
-  .pending-stripes {
-    background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgb(11 18 32 / 0.035) 10px 20px);
-  }
 
   /* ---------- controles ---------- */
   .seg {
@@ -197,49 +194,4 @@ h4 {
     border-color: transparent;
   }
 
-  .field {
-    background: var(--color-night);
-    border: 1px solid var(--color-rule-strong);
-    border-radius: 3px;
-    padding: 0.25rem 0.5rem;
-    color: var(--color-ink);
-    font-size: 0.8rem;
-    transition: border-color 120ms ease;
-  }
-  .field:focus {
-    outline: none;
-    border-color: var(--color-accent);
-  }
-  .field::placeholder {
-    color: var(--color-muted);
-  }
-
-  /* ---------- tabla de Evidencia ---------- */
-  .dtable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.82rem;
-  }
-  .dtable th {
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.72rem;
-    letter-spacing: 0.02em;
-    color: var(--color-muted);
-    padding: 0.45rem 0.6rem;
-    border-bottom: 1px solid var(--color-rule-strong);
-    white-space: nowrap;
-    position: sticky;
-    top: 0;
-    background: var(--color-plate);
-    z-index: 1;
-  }
-  .dtable td {
-    padding: 0.38rem 0.6rem;
-    border-bottom: 1px solid var(--color-rule);
-    vertical-align: top;
-  }
-  .dtable tbody tr:hover {
-    background: var(--color-plate-2);
-  }
 }

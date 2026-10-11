@@ -102,7 +102,7 @@ Retiramos el código de v1 del repositorio para que no se confunda con el actual
 |---|---|
 | Reproducir las gráficas de las instrucciones con un único paso sobre los datos (observado → reposo) | `notebooks/01_graficas_referencia.ipynb` y las gráficas de «Cómo lo calculamos» en el tablero. |
 | Una sola fuente de picos para todo el tablero | `peaks.json` sale del motor, con ruido, picos y ajustes propios (§5). |
-| Sidebar delgado a la izquierda; cada sección (Analizar, Cómo lo calculamos, Moléculas, Evidencia) es una pantalla completa; las gráficas del cuaderno viven dentro de «Cómo lo calculamos» | Tablero actual (§9). |
+| Sidebar delgado a la izquierda; cada sección (Analizar, Cómo lo calculamos, Moléculas) es una pantalla completa; las gráficas del cuaderno viven dentro de «Cómo lo calculamos» | Tablero actual (§9). |
 | Tema claro de alto contraste, tipografías Inter (texto) y Space Grotesk (títulos), ancho completo | Lectura más clara en pantallas grandes y proyector. |
 | Controles de peso por factor, comparación de candidatas y huellas | Interactividad para ver qué tan robusta es cada respuesta (§9). |
 | Rango de Einstein de los jueces dentro del factor Einstein | §6.2. |
@@ -138,7 +138,7 @@ Retiramos el código de v1 del repositorio para que no se confunda con el actual
 | Archivo | Qué es | Cómo lo obtuvimos |
 |---|---|---|
 | `splatalogue_CDMS_JPL_348.80-349.80GHz.csv` | 8 977 transiciones (424 entradas) de CDMS y JPL en la banda, con log Aij, E_sup, g_sup | `astroquery` → Splatalogue |
-| `catalogo_local_con_aij.csv` | El catálogo oficial + Aij de la **misma** transición (|tag|, g_sup, E_sup ±0.05 K, Δν < 1 MHz) | `analysis/t2_aij_catalogo_local.py` |
+| `catalogo_local_con_aij.csv` | El catálogo oficial + Aij de la **misma** transición (\|tag\|, g_sup, E_sup ±0.05 K, Δν < 1 MHz) | `analysis/t2_aij_catalogo_local.py` |
 | `censo_cdms_2026-09.csv` | Censo CDMS estructurado: fórmula, nº de átomos (por columna), estado, año | `analysis/t1_censo_cdms.py` |
 | `catalogo_ampliado.csv` | 7 105 transiciones: 348 oficiales + 6 757 de CDMS/JPL; 6 997 utilizables (con Aij y g_u publicados e incertidumbre ≤ 1 MHz) | `analysis/t2b_catalogo_ampliado.py` |
 | `fichas_moleculas.json` | 436 fichas (descripción, entorno, análisis prebiótico). Elementos y estado: datos; entorno, rutas y textos: fichas | `analysis/fichas.py` + `analysis/prebiotico.py` |
@@ -266,7 +266,7 @@ Resultados completos: `analysis/outputs/pruebas_T4.txt`.
 
 Diseño: fondo blanco, texto casi negro (alto contraste), Inter para texto y Space Grotesk para títulos, ancho completo y
 sidebar azul marino a la izquierda con el logo de Sparks. Cada sección es una **pantalla completa**:
-**Analizar · Cómo lo calculamos · Moléculas (348) · Evidencia.**
+**Analizar · Cómo lo calculamos · Moléculas (348).**
 
 ### Pantalla «Analizar»
 Responde una sola pregunta: *¿qué molécula produce esta línea?*
@@ -280,7 +280,7 @@ Responde una sola pregunta: *¿qué molécula produce esta línea?*
 4. **Espectro** en reposo con las líneas coloreadas por confianza; «Acercar y ver candidatas» muestra las 5 candidatas.
 5. **Tabla de líneas**, que ocupa la altura del panel derecho.
 6. **Panel de la línea**: molécula más probable, alternativas, **comparar candidatas** (matriz factor × candidata),
-   «¿Por qué?» en palabras (punto verde/ámbar/rojo = a favor / a medias / en contra), ficha breve y **Añadir a Evidencia**.
+   «¿Por qué?» en palabras (punto verde/ámbar/rojo = a favor / a medias / en contra), y el veredicto prebiótico de la ficha.
 7. **Huellas**: las líneas fuertes de la candidata elegida en velocidad, ✓ si aparecen y ✗ si faltan.
 
 La etiqueta de confianza es **orientativa** (se deriva del %); no es un veredicto.
@@ -340,9 +340,6 @@ no incluimos. El análisis **no** entra en la probabilidad (§6.6).
 **De dónde sale cada dato:** número de átomos y estado → censo CDMS (`data/externos/censo_cdms_2026-09.csv`); líneas que
 explica → nuestro motor (`web/public/data/probabilidad.json`); familia, entorno, rutas prebióticas y textos → fichas
 (`data/externos/fichas_moleculas.json`).
-
-### «Evidencia»
-Tabla con las columnas de `evidencia_plantilla.csv`, exportable a CSV. Se guarda en el navegador de quien la usa.
 
 ---
 

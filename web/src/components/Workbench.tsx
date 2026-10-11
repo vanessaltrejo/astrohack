@@ -2,16 +2,12 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Atom, ClipboardList, Plus, RotateCcw, ScanSearch, Workflow, ZoomIn, ZoomOut } from "lucide-react";
-import { findPeak, loadCore, loadJson, loadPeaks, type CatalogLine, type CoreLoad, type Peaks, type PosKey, type WinKey } from "@/lib/data";
-import { loadRows, loadTeam, saveRows, saveTeam, type EvidenceRow } from "@/lib/evidence";
-import { prefillRow } from "@/lib/prefill";
+import { Atom, RotateCcw, ScanSearch, Workflow, ZoomIn, ZoomOut } from "lucide-react";
+import { loadCore, loadJson, type CoreLoad, type PosKey, type WinKey } from "@/lib/data";
 import { prettyFormula } from "@/lib/formula";
 import { toRestFrameGHz } from "@/lib/spectro";
-import { TEAM_NAME_DEFAULT } from "@/lib/config";
 import { esBase, FACTORES, FUERA, nivel, NIVEL, PESOS_BASE, pct, recalcular, type Cand, type FactorKey, type Nivel, type Pesos, type V3 } from "@/lib/modelo";
 import Sidebar from "./Sidebar";
-import EvidenceLog from "./EvidenceLog";
 import MoleculesPanel, { type Explica, type Ficha } from "./MoleculesPanel";
 import Backstage from "./Backstage";
 import Huellas from "./Huellas";
@@ -35,7 +31,7 @@ const ENTORNO: Record<string, string> = {
 };
 const CAND_COLORS = ["#1d4ed8", "#7c3aed", "#0e7490"];
 
-type Vista = "analizar" | "backstage" | "moleculas" | "evidencia";
+type Vista = "analizar" | "backstage" | "moleculas";
 
 function Pagina({ titulo, subtitulo, children }: { titulo: string; subtitulo: string; children: React.ReactNode }) {
   return (
@@ -51,26 +47,23 @@ function Pagina({ titulo, subtitulo, children }: { titulo: string; subtitulo: st
 
 export default function Workbench() {
   const [core, setCore] = useState<CoreLoad | null>(null);
-  const [peaks, setPeaks] = useState<Peaks | null>(null);
   const [v3, setV3] = useState<V3 | null>(null);
   const [fichas, setFichas] = useState<Ficha[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadCore().then(setCore, (e: Error) => setError(e.message));
-    loadPeaks().then(setPeaks);
     loadJson<V3>("probabilidad.json").then(setV3, (e: Error) => setError(e.message));
     loadJson<Ficha[]>("fichas_moleculas.json").then(setFichas, (e: Error) => setError(e.message));
   }, []);
 
   if (error) return <p className="p-10 text-critical">{error}</p>;
   if (!core || !v3) return <p className="p-10 text-muted">Cargando datos…</p>;
-  return <Loaded core={core} peaks={peaks} v3={v3} fichas={fichas} />;
+  return <Loaded core={core} v3={v3} fichas={fichas} />;
 }
 
-function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | null; v3: V3; fichas: Ficha[] }) {
-  const { meta, spectra, catalog } = core;
-  const catalogById = useMemo(() => new Map(catalog.map((l) => [l.id, l])), [catalog]);
+function Loaded({ core, v3, fichas }: { core: CoreLoad; v3: V3; fichas: Ficha[] }) {
+  const { meta, spectra } = core;
   const [pos, setPos] = useState<PosKey>("B_offset");
   const [win, setWin] = useState<WinKey>("W1");
   const [sel, setSel] = useState<string | null>(null);
@@ -78,27 +71,6 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
   const [zoom, setZoom] = useState(false);
   const [pesos, setPesos] = useState<Pesos>(PESOS_BASE);
   const [vista, setVista] = useState<Vista>("analizar");
-  const [rows, setRowsRaw] = useState<EvidenceRow[]>([]);
-  const [team, setTeamRaw] = useState("");
-  const [toast, setToast] = useState<string | null>(null);
-
-  useEffect(() => {
-    setRowsRaw(loadRows());
-    setTeamRaw(loadTeam() || TEAM_NAME_DEFAULT);
-  }, []);
-  useEffect(() => {
-    if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3000);
-    return () => clearTimeout(t);
-  }, [toast]);
-  const setRows = useCallback((fn: (r: EvidenceRow[]) => EvidenceRow[]) => {
-    setRowsRaw((prev) => {
-      const next = fn(prev);
-      saveRows(next);
-      return next;
-    });
-  }, []);
-
   const irA = useCallback((x: Vista) => {
     setVista(x);
     window.scrollTo({ top: 0 });
@@ -237,41 +209,6 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
   const xRange: [number, number] | undefined =
     zoom && actual ? [actual.p.nu_reposo_MHz / 1000 - 0.006, actual.p.nu_reposo_MHz / 1000 + 0.006] : undefined;
 
-  // ---------- evidencia ----------
-  const registrar = useCallback(
-    (c: Cand) => {
-      const oficial = c.catalog_id >= 0 ? catalogById.get(c.catalog_id) : undefined;
-      const line: CatalogLine = oficial ?? {
-        id: c.catalog_id,
-        species: c.especie,
-        catalog: c.lista ?? "",
-        entry: String(Math.abs(c.tag ?? 0)).padStart(6, "0"),
-        rest_MHz: c.nu_cat_MHz ?? c.nu_reposo_MHz,
-        unc_MHz: c.unc_MHz ?? 0,
-        logI_300K: 0,
-        Eu_K: c.Eu_K ?? 0,
-        El_cm1: 0,
-        gu: 0,
-        qn_up: c.QN ?? "",
-        qn_lo: "",
-        window: c.ventana,
-      };
-      const found = findPeak(peaks, c.pico);
-      const row = prefillRow({
-        team,
-        line,
-        win: c.ventana,
-        pos,
-        peak: found?.peak ?? null,
-        noise: spectra[c.ventana].noise[pos],
-        decision: `pendiente (${pct(c.P)} en esta línea${esBase(pesos) ? "" : ", pesos modificados"})`,
-      });
-      setRows((rs) => [...rs, row]);
-      setToast(`${prettyFormula(c.especie)} añadida a Evidencia`);
-    },
-    [catalogById, peaks, team, pos, spectra, setRows, pesos],
-  );
-
   const explica = useMemo(() => {
     const m: Explica = {};
     for (const p of Object.keys(v3.posiciones) as PosKey[])
@@ -290,7 +227,6 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
           { id: "analizar", label: "Analizar", Icon: ScanSearch, onClick: () => irA("analizar"), active: vista === "analizar" },
           { id: "backstage", label: "Cómo lo calculamos", Icon: Workflow, onClick: () => irA("backstage"), active: vista === "backstage" },
           { id: "moleculas", label: "Moléculas (348)", Icon: Atom, onClick: () => irA("moleculas"), active: vista === "moleculas" },
-          { id: "evidencia", label: "Evidencia", Icon: ClipboardList, onClick: () => irA("evidencia"), active: vista === "evidencia", badge: rows.length },
         ]}
       />
 
@@ -305,7 +241,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
             </p>
           </div>
           <ol className="flex flex-wrap gap-x-5 gap-y-1 text-[0.8rem] text-ink-2">
-            {["Elige posición y ventana", "Toca una línea", "Compara candidatas", "Añádela a Evidencia"].map((t, i) => (
+            {["Elige posición y ventana", "Toca una línea", "Compara candidatas", "Decide tú"].map((t, i) => (
               <li key={t} className="flex items-center gap-1.5">
                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[0.64rem] font-bold text-white">{i + 1}</span>
                 {t}
@@ -557,11 +493,6 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
                         </p>
                       </div>
                     ) : null}
-                    <div className="border-t border-rule px-4 py-3">
-                      <button type="button" className="btn btn-primary w-full justify-center py-2 text-[0.9rem]" onClick={() => registrar(enfocada)}>
-                        <Plus className="icon" /> Añadir {prettyFormula(enfocada.especie)} a Evidencia
-                      </button>
-                    </div>
                   </>
                 ) : null}
               </div>
@@ -591,22 +522,9 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
           <Pagina titulo="Cómo lo calculamos" subtitulo="De los datos a la probabilidad, paso a paso, con los números reales del análisis.">
             <Backstage v3={v3} spectra={spectra} />
           </Pagina>
-        ) : vista === "moleculas" ? (
+        ) : (
           <Pagina titulo="Moléculas" subtitulo="Las 348 del censo CDMS y las especies de laboratorio con líneas en nuestra banda.">
             <MoleculesPanel explica={explica} />
-          </Pagina>
-        ) : (
-          <Pagina titulo="Evidencia" subtitulo="Las líneas que el equipo decide defender, con las columnas de evidencia_plantilla.csv.">
-            <EvidenceLog
-              rows={rows}
-              setRows={setRows}
-              team={team}
-              setTeam={(t) => {
-                setTeamRaw(t);
-                saveTeam(t);
-              }}
-              flashId={null}
-            />
           </Pagina>
         )}
 
@@ -616,11 +534,6 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
         </footer>
       </main>
 
-      {toast ? (
-        <div role="status" className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-md bg-ink px-4 py-2.5 text-[0.88rem] text-white shadow-lg">
-          ✓ {toast}
-        </div>
-      ) : null}
     </div>
   );
 }
