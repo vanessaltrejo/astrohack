@@ -23,6 +23,7 @@ export type Cand = {
   L_frecuencia?: number | null;
   L_Einstein?: number | null;
   L_poblacion?: number | null;
+  L_rango_Aij?: number | null;
   L_repeticion?: number | null;
   lineas_presentes?: number | null;
   lineas_fuertes?: number | null;
@@ -81,7 +82,7 @@ export type V3 = {
 
 export const FACTORES = [
   { key: "frecuencia", campo: "L_frecuencia", label: "Frecuencia", ref: Math.exp(-2), ayuda: "qué tan cerca cae la línea de la transición del catálogo" },
-  { key: "einstein", campo: "L_Einstein", label: "Coef. de Einstein", ref: 0.5, ayuda: "si la intensidad esperada (Aij, energía del nivel) es compatible" },
+  { key: "einstein", campo: "L_Einstein", label: "Coef. de Einstein", ref: 0.5, ayuda: "si Aij está en el rango probable (10⁻⁶–10⁻² s⁻¹) y la intensidad esperada es compatible" },
   { key: "repite", campo: "L_repeticion", label: "Se repite", ref: 0.5, ayuda: "cuántas de sus líneas fuertes aparecen en W1 y W2" },
   { key: "complejidad", campo: "prior_complejidad", label: "Complejidad", ref: 0.1, ayuda: "cuántas de las 348 moléculas conocidas tienen ese número de átomos" },
   { key: "espacio", campo: "prior_espacio", label: "Visto en el espacio", ref: 1, ayuda: "si está en el censo CDMS de moléculas detectadas" },

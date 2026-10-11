@@ -39,6 +39,7 @@ PARAM = dict(
     agrupar_canales=2.0,        # filas a < 2 canales = un solo rasgo no resuelto (Guía p. 7)
     sigma_log_intensidad=0.5,   # dex: tolerancia entre altura observada y predicha
     E_ref_K=500.0, T_pob_K=300.0,  # población: niveles con Eu > 500 K se castigan como exp(−(Eu−500)/300)
+    log10_Aij_min=-6.0,         # criterio de los jueces: Aij entre 1e-2 y 1e-6 es probable; por debajo de 1e-6, cada década ÷10
     rep_no_comprobable=0.5,     # L_repeticion si la especie tiene 1 sola línea fuerte en banda
     prior_espacio={"detectada": 1.0, "tentativa": 0.5, "no detectada": 0.1, "cuestionada": 0.1},
     # "fuera del catálogo" = candidata hipotética a 2σ, L_E 0.5, L_rep 0.5, complejidad 0.1, vista, entorno 1
@@ -278,7 +279,10 @@ def analizar(pos, esp, cat, ruido=None, universo=None):
                 pred = np.nan; modo_E = "fuerza relativa en la especie"
             # población del nivel superior (Boltzmann): sin castigo hasta E_ref, después exp(−(Eu−E_ref)/T)
             L_pob = float(min(1.0, np.exp(-(g.loc[b, "E_superior_K"] - PARAM["E_ref_K"]) / PARAM["T_pob_K"])))
-            L_E = L_E * L_pob
+            # rango de Einstein (criterio de los jueces): A ≥ 1e-6 s⁻¹ probable; 1e-7 → 0.1, 1e-8 → 0.01
+            log_a = float(g.loc[b, "log10_Aij"])
+            L_rangoA = float(min(1.0, 10 ** (log_a - PARAM["log10_Aij_min"])))
+            L_E = L_E * L_pob * L_rangoA
             F = info["fuertes"]
             n_f, n_p = len(F), int(F.pico.notna().sum())
             L_rep = PARAM["rep_no_comprobable"] if n_f < 2 else (n_p + 1) / (n_f + 2)
@@ -290,7 +294,7 @@ def analizar(pos, esp, cat, ruido=None, universo=None):
                 origen=r0.origen, lista=r0.lista, tag=int(r0.tag), catalog_id=int(r0.catalog_id), unc_MHz=float(r0.unc),
                 isotopologo=bool(r0.isotopologo), nu_cat_MHz=nu_b, delta_MHz=nu_b - p.nu_reposo_MHz,
                 sigma_nu_MHz=sn[b], log10_Aij=r0.log10_Aij, Eu_K=r0.E_superior_K, QN=r0.QN,
-                n_filas_rasgo=len(grp), L_frecuencia=lf[b], L_Einstein=L_E, modo_Einstein=modo_E, L_poblacion=L_pob,
+                n_filas_rasgo=len(grp), L_frecuencia=lf[b], L_Einstein=L_E, modo_Einstein=modo_E, L_poblacion=L_pob, L_rango_Aij=L_rangoA,
                 pico_predicho_Jy=pred, L_repeticion=L_rep, lineas_fuertes=n_f, lineas_presentes=n_p,
                 n_atomos=r0.n_atomos, prior_complejidad=r0.prior_complejidad,
                 visto_en_espacio=r0.visto_en_espacio, prior_espacio=r0.prior_espacio,
@@ -317,7 +321,7 @@ def resumen(Cd):
 
 CAND_WEB = ["pico", "ventana", "nu_obs_MHz", "nu_reposo_MHz", "Jy", "snr", "especie", "molecula", "nombre_quimico", "origen",
             "lista", "tag", "catalog_id", "unc_MHz", "isotopologo", "nu_cat_MHz", "delta_MHz", "log10_Aij", "Eu_K", "QN",
-            "L_frecuencia", "L_Einstein", "L_poblacion", "L_repeticion", "lineas_fuertes", "lineas_presentes", "n_atomos",
+            "L_frecuencia", "L_Einstein", "L_poblacion", "L_rango_Aij", "L_repeticion", "lineas_fuertes", "lineas_presentes", "n_atomos",
             "prior_complejidad", "visto_en_espacio", "prior_espacio", "factor_entorno", "puntaje", "P", "rango"]
 
 

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { prettyFormula } from "@/lib/formula";
+import { loadJson } from "@/lib/data";
 
 export type Ficha = {
   formula: string;
@@ -44,10 +45,7 @@ export default function MoleculesPanel() {
   const [sel, setSel] = useState<Ficha | null>(null);
 
   useEffect(() => {
-    fetch("/data/fichas_moleculas.json")
-      .then((r) => r.json())
-      .then((d: Ficha[]) => setFichas(d))
-      .catch(() => setFichas([]));
+    loadJson<Ficha[]>("fichas_moleculas.json").then(setFichas, () => setFichas([]));
   }, []);
 
   const lista = useMemo(() => {

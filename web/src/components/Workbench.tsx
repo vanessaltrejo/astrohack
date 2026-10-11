@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Atom, ClipboardList, Images, Plus, RotateCcw, ScanSearch, Workflow, ZoomIn, ZoomOut } from "lucide-react";
-import { findPeak, loadAnalysis, loadCore, type CatalogLine, type CoreLoad, type Peaks, type PosKey, type WinKey } from "@/lib/data";
+import { findPeak, loadCore, loadJson, loadPeaks, type CatalogLine, type CoreLoad, type Peaks, type PosKey, type WinKey } from "@/lib/data";
 import { loadRows, loadTeam, saveRows, saveTeam, type EvidenceRow } from "@/lib/evidence";
 import { prefillRow } from "@/lib/prefill";
 import { prettyFormula } from "@/lib/formula";
@@ -47,9 +47,9 @@ export default function Workbench() {
 
   useEffect(() => {
     loadCore().then(setCore, (e: Error) => setError(e.message));
-    loadAnalysis().then((a) => setPeaks(a.peaks));
-    fetch("/data/probabilidad.json").then((r) => r.json()).then(setV3, () => setError("No se pudo leer probabilidad.json"));
-    fetch("/data/fichas_moleculas.json").then((r) => r.json()).then(setFichas, () => setFichas([]));
+    loadPeaks().then(setPeaks);
+    loadJson<V3>("probabilidad.json").then(setV3, (e: Error) => setError(e.message));
+    loadJson<Ficha[]>("fichas_moleculas.json").then(setFichas, (e: Error) => setError(e.message));
   }, []);
 
   if (error) return <p className="p-10 text-critical">{error}</p>;
@@ -729,7 +729,7 @@ function Porque({ c, ficha }: { c: Cand; ficha: Ficha | undefined }) {
     { k: "Frecuencia", v: `${lf != null && lf >= 0.6 ? "Coincide" : lf != null && lf >= 0.25 ? "Cerca" : "Lejos"}: a ${Math.abs(c.delta_MHz ?? 0).toFixed(2)} MHz del catálogo`, x: lf },
     {
       k: "Coef. de Einstein",
-      v: `A = ${sci(c.log10_Aij)} s⁻¹, nivel a ${Math.round(c.Eu_K ?? 0)} K: ${le != null && le >= 0.6 ? "intensidad esperada compatible" : le != null && le >= 0.25 ? "algo distinta a la esperada" : "no debería verse tan intensa"}`,
+      v: `A = ${sci(c.log10_Aij)} s⁻¹ ${(c.log10_Aij ?? 0) >= -6 ? "(en el rango probable 10⁻⁶–10⁻²)" : "(debajo de 10⁻⁶: muy improbable)"}, nivel a ${Math.round(c.Eu_K ?? 0)} K: ${le != null && le >= 0.6 ? "intensidad esperada compatible" : le != null && le >= 0.25 ? "algo distinta a la esperada" : "no debería verse tan intensa"}`,
       x: le,
     },
     {

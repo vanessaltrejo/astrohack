@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import type { Spectra, PosKey, WinKey } from "@/lib/data";
+import { assetUrl, loadJson, type PosKey, type Spectra, type WinKey } from "@/lib/data";
 import { FACTORES, type V3 } from "@/lib/modelo";
 
 type Pruebas = {
@@ -41,7 +41,7 @@ function Figura({ src, pie }: { src: string; pie: string }) {
   return (
     <figure className="rounded-md border border-rule bg-white p-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={pie} className="w-full" loading="lazy" />
+      <img src={assetUrl(src)} alt={pie} className="w-full" loading="lazy" />
       <figcaption className="mt-1 text-[0.78rem] text-muted">{pie}</figcaption>
     </figure>
   );
@@ -51,9 +51,7 @@ function Figura({ src, pie }: { src: string; pie: string }) {
 export default function Backstage({ v3, spectra }: { v3: V3; spectra: Spectra }) {
   const [pr, setPr] = useState<Pruebas | null>(null);
   useEffect(() => {
-    fetch("/data/pruebas.json")
-      .then((r) => r.json())
-      .then(setPr, () => setPr(null));
+    loadJson<Pruebas>("pruebas.json").then(setPr, () => setPr(null));
   }, []);
   const b = v3.backstage;
   const maxCenso = Math.max(...b.censo_por_atomos.map((x) => x.n));

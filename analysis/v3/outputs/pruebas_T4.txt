@@ -31,11 +31,11 @@ B_offset-W1-029 0.933 0.018      4         0.923       0.972         0.476      
           CCH v2 = 1 0.006     -0.331         0.849       0.001         0.600 576.516
 
 (d) Sensibilidad (fracción de picos con el mismo ganador que la versión base):
-  complejidad ^2 (más fuerte)    88%
+  complejidad ^2 (más fuerte)    89%
   complejidad ^0.5 (más débil)   86%
-  sin complejidad                82%
-  no detectada = 0.2             85%
-  no detectada = 0.05            86%
-  sin entorno                    95%
+  sin complejidad                81%
+  no detectada = 0.2             86%
+  no detectada = 0.05            85%
+  sin entorno                    96%
   T población 150 K              96%
   T población 500 K              94%

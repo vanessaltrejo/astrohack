@@ -75,6 +75,7 @@ Nuestra primera versión (`analysis/pipeline.py` y el primer tablero) seguía un
 | Indicación de los jueces | Qué hicimos | Por qué |
 |---|---|---|
 | Hay **4 factores** para decidir si una molécula coincide: coeficiente de Einstein; complejidad (nº de átomos); si se ha visto en el espacio; si se repite. | Son los factores del modelo (§6). | Es lo que el jurado espera ver. |
+| El coeficiente de Einstein es probable **entre 10⁻² y 10⁻⁶ s⁻¹**; de 10⁻⁷ hacia abajo es muy improbable. | Término `L_rangoA` dentro del factor Einstein (§6.2). | Criterio experto de los jueces. |
 | La complejidad se implementa como **estándar de átomos por molécula**; es la forma adecuada de meter probabilidad sin complicarse. | `π_átomos` = fracción de las 348 moléculas del censo con ese nº de átomos. | Usa el censo de la diapositiva 5. |
 | **No limpiar ni cuestionar los datos**; el coeficiente de Einstein y la velocidad ya vienen; sólo hay que escoger el adecuado. | Velocidad **dada**; Einstein tomado **tal cual** de CDMS/JPL; única transformación observado → reposo. | Indicación directa. |
 | Usar las **348 moléculas**; si el modelo está bien, el resultado debe ser igual con 15 o 30. | Catálogo ampliado y prueba de robustez 13 → 30 → todas (§7). | Indicación directa. |
@@ -188,6 +189,10 @@ Intensidad relativa esperada: `S = g_u · A_ij · exp(−E_u / 150 K)` (sólo pa
   `L_A = exp(−½ (log₁₀(obs/pred) / 0.5)²)` (0.5 dex de tolerancia).
 - Si no hay otras líneas para escalar, `L_A` es la fuerza relativa de la línea dentro de su especie.
 - **Por qué**: una transición con poca intensidad esperada no puede explicar un pico brillante.
+- **Rango de A_ij (criterio de los jueces)**: un A_ij entre 10⁻² y 10⁻⁶ s⁻¹ es probable; por debajo de 10⁻⁶ es muy
+  improbable. Lo aplicamos como `L_rangoA = min(1, 10^(log₁₀A_ij + 6))`: sin castigo desde 10⁻⁶, y ÷10 por cada década
+  por debajo (10⁻⁷ → 0.1; 10⁻⁸ → 0.01). De 6 997 transiciones utilizables, 1 223 tienen A_ij < 10⁻⁶. Con la regla,
+  ninguna línea queda asignada a una transición de ese rango (antes había una en B offset, cis-CH₂OHCHO con A ≈ 2 × 10⁻⁸).
 
 ### 6.3 Población del nivel (dentro del factor Einstein)
 `L_pob = min(1, exp(−(E_u − 500 K)/300 K))`.
@@ -233,7 +238,7 @@ Resultados completos: `analysis/v3/outputs/pruebas_T4.txt`.
 | **Robustez al tamaño de la base** ("igual con 15 o 30") | 13 → 30 especies: **mismo ganador en 51/51 picos (100 %)**. 13 → 380: **48/51 (94 %)**; los 3 que cambian pasan a especies raras (Z-HNCHCN, HS₂, CCH v₂=1). |
 | **Glicina** | Candidata en 13 picos; P máxima **2.3 %**; **no gana ningún pico**. |
 | **Línea más brillante** (349 627.9 MHz LSRK, 349 631.0 MHz reposo, 1.76 Jy/beam, S/N ≈ 73; no está en el catálogo local) | **Ambigua**: D₂CO 6(2,5)–5(2,4) 38 % (isotopólogo no confirmado, una sola línea), n-C₃H₇CN v₃₀=2 31 % (E_u 862 K), fuera del catálogo 30 %. La reportamos como **sin identificación firme**. |
-| **Sensibilidad a supuestos** (mismo ganador) | complejidad al cuadrado 88 %; raíz 86 %; sin complejidad 82 %; "no detectada" 0.2 → 85 %, 0.05 → 86 %; sin entorno 95 %; T de población 150 K 96 %, 500 K 94 %. |
+| **Sensibilidad a supuestos** (mismo ganador) | complejidad al cuadrado 89 %; raíz 86 %; sin complejidad 81 %; "no detectada" 0.2 → 86 %, 0.05 → 85 %; sin entorno 96 %; T de población 150 K 96 %, 500 K 94 %. |
 | **Especies oficiales ganadoras** | CH₂DOH 15, CH₃CN 9, CH₃CHO 7, CH₃OCHO 7, C₂H₅CN 7, C₂H₅OH 1, CH₃OH 1, CH₃OCH₃ 1. Coinciden con las especies que PILS reporta para esta fuente. |
 | **Picos asignados** | B_offset 88 de 104 (16 fuera del catálogo); B_pico 84 de 94; A 45 de 67. |
 
