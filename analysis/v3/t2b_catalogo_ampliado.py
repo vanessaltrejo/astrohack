@@ -155,7 +155,7 @@ E = pd.DataFrame(dict(
     formula_censo=ext.formula_censo, isotopologo=ext.iso, origen="splatalogue", lista=ext.linelist,
     tag=ext.moleculeTag, frecuencia_reposo_MHz=ext.orderedfreq, incertidumbre_MHz=np.nan, log10_Aij=ext.aij,
     E_superior_K=ext.upper_state_energy_K, g_superior=pd.to_numeric(ext.upperStateDegen, errors="coerce"),
-    QN=ext.resolved_QNs))
+    QN=ext.resolved_QNs.map(lambda q: html.unescape(re.sub(r"<[^>]+>", "", str(q))).strip())))
 cat = pd.concat([L, E], ignore_index=True)
 
 # 4) etiquetas del censo: estado y nº de átomos

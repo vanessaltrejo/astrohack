@@ -2,7 +2,6 @@
 
 import { useMemo, useRef, useState } from "react";
 import { BookOpen, Eye, EyeOff, Grid2x2, Layers, Crosshair, Eraser } from "lucide-react";
-import VelocitySlider from "./VelocitySlider";
 import SpectrumTooltip from "./SpectrumTooltip";
 import type { CatalogLine, Meta, Peak, PosKey, Verdict, WinKey, WindowSpectra } from "@/lib/data";
 import { POSITION_KEYS, WINDOW_KEYS } from "@/lib/data";
@@ -162,7 +161,10 @@ export default function SpectrumSection(p: SpectrumSectionProps) {
 
       {/* velocidad */}
       <div className="mt-4 border-y border-rule py-3">
-        <VelocitySlider v={p.v} setV={p.setV} vStart={vStart} vAdopted={p.vPipeline} pulse={p.vPulse} stepKms={wm.step_kms} />
+        {/* velocidad fija: la dada por los organizadores (no se estima ni se ajusta) */}
+        <p className="text-[0.84rem] text-ink-2">
+          v = <b className="text-ink">{vStart} km/s</b> <span className="text-muted">(dada · sólo observado → reposo)</span>
+        </p>
       </div>
 
       {/* especies por veredicto */}

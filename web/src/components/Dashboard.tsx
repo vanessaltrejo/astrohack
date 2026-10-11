@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { BookOpen, ClipboardList, RefreshCw, Keyboard } from "lucide-react";
+import { Atom, AudioWaveform, BookOpen, ChartBarBig, ClipboardList, Fingerprint, Images, Keyboard, RefreshCw, Table2 } from "lucide-react";
 import {
   findPeak,
   loadAnalysis,
@@ -27,13 +27,18 @@ import PeaksTable from "./PeaksTable";
 import Fingerprints from "./Fingerprints";
 import FieldMap from "./FieldMap";
 import EvidenceLog from "./EvidenceLog";
-import { Dialog, MethodBody, SectionHead, ShortcutsBody, VERDICT } from "./ui";
+import { Dialog, MethodBody, SectionHead, ShortcutsBody } from "./ui";
+import RightRail from "./RightRail";
+import MoleculesPanel from "./MoleculesPanel";
+import ReferencePlots from "./ReferencePlots";
+import LineProbability from "./LineProbability";
 import { Tex, SYM } from "./Tex";
 
 const SECTIONS = [
   { id: "espectro", label: "Espectro", key: "1" },
-  { id: "huellas", label: "Huellas", key: "2" },
-  { id: "candidatas", label: "Candidatas", key: "3" },
+  { id: "probabilidad", label: "Probabilidad", key: "2" },
+  { id: "huellas", label: "Huellas", key: "3" },
+  { id: "candidatas", label: "Candidatas", key: "4" },
 ] as const;
 const SECTION_IDS = SECTIONS.map((s) => s.id);
 
@@ -141,6 +146,8 @@ function Loaded({
   const [drawer, setDrawer] = useState(false);
   const [method, setMethod] = useState(false);
   const [keys, setKeys] = useState(false);
+  const [molPanel, setMolPanel] = useState(false);
+  const [figPanel, setFigPanel] = useState(false);
   const [shrunk, setShrunk] = useState(false);
   const [flashRange, setFlashRange] = useState<[number, number] | null>(null);
   const [vPulse, setVPulse] = useState(0);
@@ -295,13 +302,13 @@ function Loaded({
   const showInSpectrum = useCallback((sp: string, vv: number) => {
     const vq = Math.min(6, Math.max(0, Math.round(vv / 0.05) * 0.05));
     setSpeciesOn(new Set([sp]));
-    setV(vq);
     setVPulse((k) => k + 1);
     setGuides(true);
     setRest(false);
     setXRange(null);
     setYRange(null);
-    setToast(`Sólo ${speciesInfo(sp).formula} en el espectro, con v_LSR en su velocidad (${vq.toFixed(2)} km/s)`);
+    void vq;
+    setToast(`Sólo ${speciesInfo(sp).formula} en el espectro`);
     scrollToPlot();
   }, []);
 
@@ -357,22 +364,34 @@ function Loaded({
   const sigma = spectra[win].noise[active]?.sigma_Jy ?? 0;
   const baseline = pipeline?.noise?.[win]?.[active]?.baseline_Jy ?? 0;
   const activePeaks = peaks?.[win]?.[active] ?? null;
-  const vAdopted = pipeline?.v_adopted?.[active] ?? null;
-  const vPipeline = vAdopted?.v_kms ?? null;
+  // velocidad DADA por los organizadores (Guía p. 8, diapositiva 22); no se estima
+  const vPipeline = meta.positions[active].v_start_kms;
   const verdictOf = useCallback((sp: string): Verdict | null => scores?.[active]?.[sp]?.verdict ?? null, [scores, active]);
   const laneSpecies = useMemo(() => speciesKeys.filter((sp) => speciesOn.has(sp)), [speciesKeys, speciesOn]);
 
-  const verdicts = useMemo(() => {
-    const ps = scores?.[active];
-    const by: Record<Verdict, string[]> = { fuerte: [], tentativa: [], insuficiente: [], descartada: [] };
-    if (ps) for (const [sp, s] of Object.entries(ps).sort((a, b) => b[1].score - a[1].score)) (by[s.verdict] ?? by.insuficiente).push(sp);
-    return by;
-  }, [scores, active]);
 
   const wm = meta.windows.W1;
 
   return (
-    <>
+    <div className="pr-[76px]">
+      <RightRail
+        items={[
+          ...SECTIONS.map((sec) => ({
+            id: sec.id,
+            label: sec.label,
+            Icon: { espectro: AudioWaveform, probabilidad: ChartBarBig, huellas: Fingerprint, candidatas: Table2 }[sec.id],
+            onClick: () => scrollTo(sec.id),
+            active: current === sec.id,
+            title: `${sec.label} (${sec.key})`,
+          })),
+          { id: "moleculas", label: "Moléculas (348)", Icon: Atom, onClick: () => setMolPanel(true), divider: true, title: "Base de datos de moléculas" },
+          { id: "graficas", label: "Gráficas Python", Icon: Images, onClick: () => setFigPanel(true), title: "Gráficas de referencia reproducidas" },
+          { id: "evidencia", label: "Evidencia", Icon: ClipboardList, onClick: () => setDrawer(true), badge: rows.length, divider: true, title: "Registro de evidencia (e)" },
+          { id: "metodo", label: "Método", Icon: BookOpen, onClick: () => setMethod(true), title: "Método (m)" },
+          { id: "recargar", label: "Recargar", Icon: RefreshCw, onClick: reload, spin: reloading, title: "Volver a leer el análisis" },
+          { id: "atajos", label: "Atajos", Icon: Keyboard, onClick: () => setKeys(true), title: "Atajos de teclado (?)" },
+        ]}
+      />
       {/* ---------- cabecera ---------- */}
       <header ref={headRef} className={`masthead sticky top-0 z-30 border-b border-rule bg-night/95 ${shrunk ? "shrunk" : ""}`}>
         <div className="masthead-row mx-auto flex max-w-[1680px] items-center gap-5 px-6 py-3">
@@ -382,36 +401,6 @@ function Loaded({
           <p className="hidden text-[0.84rem] text-ink-2 md:block">
             {SOURCE_LABEL} <span className="text-muted">— {PROJECT_LABEL}</span>
           </p>
-          <nav className="ml-auto flex items-center gap-1" aria-label="Secciones">
-            {SECTIONS.map((s) => (
-              <a
-                key={s.id}
-                href={`#${s.id}`}
-                aria-current={current === s.id ? "location" : undefined}
-                className={`border-b-2 px-2.5 py-1.5 text-[0.84rem] font-medium transition-colors duration-150 ${
-                  current === s.id ? "border-accent text-ink" : "border-transparent text-ink-2 hover:text-ink"
-                }`}
-              >
-                {s.label}
-              </a>
-            ))}
-            <span className="mx-2 h-4 w-px bg-rule" aria-hidden />
-            <button type="button" className="btn btn-quiet" onClick={() => setMethod(true)} title="Método (m)">
-              <BookOpen className="icon" />
-              Método
-            </button>
-            <button type="button" className="btn" onClick={() => setDrawer(true)} title="Registro de evidencia (e)">
-              <ClipboardList className="icon" />
-              Evidencia
-              {rows.length ? <span className="rounded-[2px] bg-accent px-1 text-[0.7rem] font-semibold text-night">{rows.length}</span> : null}
-            </button>
-            <button type="button" className="btn btn-quiet px-2" onClick={reload} disabled={reloading} title="Volver a leer peaks.json y species_scores.json" aria-label="Recargar análisis">
-              <RefreshCw className={`icon ${reloading ? "animate-spin" : ""}`} />
-            </button>
-            <button type="button" className="btn btn-quiet px-2" onClick={() => setKeys(true)} title="Atajos de teclado (?)" aria-label="Atajos de teclado">
-              <Keyboard className="icon" />
-            </button>
-          </nav>
         </div>
       </header>
 
@@ -483,54 +472,15 @@ function Loaded({
             />
 
             <aside className="self-start lg:sticky lg:top-[4.2rem]">
-              {/* veredicto, en prosa */}
+              {/* velocidad dada + acceso al motor v3 */}
               <div className="mb-6 border-b border-rule pb-5">
-                {scores ? (
-                  <>
-                    <p className="fig text-[3.4rem]">
-                      {verdicts.fuerte.length}
-                      <span className="serif ml-2 text-[1.2rem] italic text-ink-2">
-                        {verdicts.fuerte.length === 1 ? "especie con detección firme" : "especies con detección firme"}
-                      </span>
-                    </p>
-                    <p className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-[0.9rem]">
-                      {verdicts.fuerte.map((sp) => (
-                        <button
-                          key={sp}
-                          type="button"
-                          className="inline-flex items-center gap-1.5 text-ink hover:text-accent"
-                          onMouseEnter={() => setHoverSpecies(sp)}
-                          onMouseLeave={() => setHoverSpecies(null)}
-                          onClick={() => {
-                            setFpSpecies(sp);
-                            scrollTo("huellas");
-                          }}
-                        >
-                          <span className="h-2 w-2" style={{ background: speciesInfo(sp).color }} />
-                          {speciesInfo(sp).formula}
-                        </button>
-                      ))}
-                      {verdicts.fuerte.length === 0 ? <span className="text-muted">ninguna en {POSITION_LABELS[active]}</span> : null}
-                    </p>
-                    <p className="caption mt-3">
-                      {(["tentativa", "descartada", "insuficiente"] as Verdict[])
-                        .filter((k) => verdicts[k].length)
-                        .map((k, i) => {
-                          const V = VERDICT[k];
-                          return (
-                            <span key={k}>
-                              {i ? "; " : ""}
-                              <V.Icon className="icon mr-1 inline align-[-0.15em]" style={{ color: V.color }} aria-hidden />
-                              {V.sentence}: {verdicts[k].map((sp) => speciesInfo(sp).formula).join(", ")}
-                            </span>
-                          );
-                        })}
-                      .
-                    </p>
-                  </>
-                ) : (
-                  <p className="caption">Puntuaciones del pipeline en curso.</p>
-                )}
+                <p className="fig text-[2.6rem]">
+                  {vPipeline} <span className="serif ml-1 text-[1.1rem] italic text-ink-2">km/s</span>
+                </p>
+                <p className="caption mt-1">velocidad dada por los organizadores para {POSITION_LABELS[active]}; el espectro sólo se lleva de observado a reposo</p>
+                <button type="button" className="btn mt-3" onClick={() => scrollTo("probabilidad")}>
+                  <ChartBarBig className="icon" /> Ver probabilidad por línea
+                </button>
                 <p className="caption mt-3">
                   Haz {f(wm.beam_arcsec[0], 2)}″ × {f(wm.beam_arcsec[1], 2)}″, canal {f(wm.step_MHz * 1000, 0)} kHz ({f(wm.step_kms, 2)} km/s),
                   intensidades en <Tex>{SYM.jyb}</Tex> de un píxel. Crédito ALMA {meta.credit}.
@@ -548,6 +498,12 @@ function Loaded({
               />
             </aside>
           </div>
+        </section>
+
+        {/* ---------- probabilidad por línea (motor v3) ---------- */}
+        <section id="probabilidad" aria-labelledby="probabilidad-title" className="pt-16">
+          <SectionHead id="probabilidad" title="Probabilidad por línea" subtitle="qué molécula explica cada pico, y por qué" />
+          <LineProbability active={active} win={win} setWin={setWin} onZoom={(w, fGHz) => zoomTo(w, active, fGHz)} />
         </section>
 
         {/* ---------- huellas ---------- */}
@@ -607,6 +563,14 @@ function Loaded({
         <MethodBody />
       </Dialog>
 
+      <Dialog open={molPanel} onClose={() => setMolPanel(false)} kind="sheet" title="Moléculas" subtitle="censo CDMS 09/2026 (348) + especies de laboratorio en la banda">
+        <MoleculesPanel />
+      </Dialog>
+
+      <Dialog open={figPanel} onClose={() => setFigPanel(false)} kind="sheet" title="Gráficas de referencia" subtitle="las de las instrucciones, reproducidas en Python">
+        <ReferencePlots />
+      </Dialog>
+
       <Dialog open={keys} onClose={() => setKeys(false)} kind="modal" narrow title="Atajos">
         <ShortcutsBody />
       </Dialog>
@@ -620,6 +584,6 @@ function Loaded({
           </button>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }

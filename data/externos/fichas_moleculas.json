@@ -67,7 +67,7 @@
   "condiciones_abioticas": "Nubes frías y hot corinos.",
   "condiciones_bioticas": "Precursor propuesto de pirimidinas (citosina).",
   "tipo_ficha": "manual",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -229,7 +229,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -445,7 +445,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Contiene C con N/O: familia química relacionada con precursores prebióticos.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -679,7 +679,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Contiene C con N/O: familia química relacionada con precursores prebióticos.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -877,7 +877,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Contiene C con N/O: familia química relacionada con precursores prebióticos.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -1093,7 +1093,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -1129,7 +1129,7 @@
   "condiciones_abioticas": "Nubes oscuras frías y envolturas ricas en carbono.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -1197,7 +1197,7 @@
   "entorno": "hot_corino",
   "factor_entorno": 1.0,
   "relevancia_biotica": "directa",
-  "descripcion": "El 'azúcar' más simple (diosa). Detectado hacia IRAS 16293-2422 B (Jørgensen et al. 2012).",
+  "descripcion": "El azúcar más simple: dos carbonos, un aldehído y un alcohol. Detectado hacia IRAS 16293-2422 B (Jørgensen et al. 2012).",
   "condiciones_abioticas": "Hielos irradiados o calentados; reacción formosa a partir de formaldehído.",
   "condiciones_bioticas": "Precursor de la ribosa (azúcar del ARN) vía reacción formosa.",
   "tipo_ficha": "manual",
@@ -1327,7 +1327,7 @@
   "condiciones_abioticas": "Nubes frías o difusas ionizadas por rayos cósmicos o UV.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -1525,7 +1525,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -1741,7 +1741,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -1759,7 +1759,7 @@
   "condiciones_abioticas": "Choques, flujos protoestelares, atmósferas volcánicas.",
   "condiciones_bioticas": "Sin papel biológico directo; en la Tierra, sobre todo volcánico e industrial.",
   "tipo_ficha": "manual",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -2191,7 +2191,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -2371,7 +2371,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -2569,7 +2569,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -2587,7 +2587,7 @@
   "condiciones_abioticas": "Nubes frías o difusas ionizadas por rayos cósmicos o UV.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -2623,7 +2623,7 @@
   "condiciones_abioticas": "Nubes frías y regiones templadas.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -2929,7 +2929,7 @@
   "condiciones_abioticas": "Envolturas circunestelares calientes de estrellas AGB, donde los metales están en fase gas.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -3109,7 +3109,7 @@
   "condiciones_abioticas": "Envolturas circunestelares calientes de estrellas AGB, donde los metales están en fase gas.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -3289,7 +3289,7 @@
   "condiciones_abioticas": "Envolturas circunestelares calientes de estrellas AGB, donde los metales están en fase gas.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -3307,7 +3307,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Contiene C con N/O: familia química relacionada con precursores prebióticos.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -3469,7 +3469,7 @@
   "condiciones_abioticas": "Envolturas circunestelares calientes de estrellas AGB, donde los metales están en fase gas.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -3505,7 +3505,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -4261,7 +4261,7 @@
   "condiciones_abioticas": "Presente en muchos entornos, incluidos núcleos calientes.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },
@@ -4387,7 +4387,7 @@
   "condiciones_abioticas": "Nubes frías o difusas ionizadas por rayos cósmicos o UV.",
   "condiciones_bioticas": "Sin papel biológico conocido.",
   "tipo_ficha": "por familia",
-  "url_cdms": NaN,
+  "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)"
  },

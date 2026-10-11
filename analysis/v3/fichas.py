@@ -47,7 +47,7 @@ MANUAL = {
         abiotico="Hot corinos y núcleos calientes; formación en hielos y en fase gas.",
         biotico="Isómero del glicolaldehído y del ácido acético (C2H4O2); sirve de referencia para comparar isómeros prebióticos."),
     "CH2OHCHO": dict(nombre="Glicolaldehído", entorno="hot_corino", relevancia="directa",
-        descripcion="El 'azúcar' más simple (diosa). Detectado hacia IRAS 16293-2422 B (Jørgensen et al. 2012).",
+        descripcion="El azúcar más simple: dos carbonos, un aldehído y un alcohol. Detectado hacia IRAS 16293-2422 B (Jørgensen et al. 2012).",
         abiotico="Hielos irradiados o calentados; reacción formosa a partir de formaldehído.",
         biotico="Precursor de la ribosa (azúcar del ARN) vía reacción formosa."),
     "CH3CH2OH": dict(nombre="Etanol", entorno="hot_corino", relevancia="relacionada",
@@ -195,6 +195,8 @@ TEXTO_FAMILIA = {
 
 
 def ficha(formula, n_atomos, estado, nombre_quimico="", en_censo=True, url=""):
+    n_atomos = "?" if pd.isna(n_atomos) else str(n_atomos)
+    url = "" if pd.isna(url) else url
     m = MANUAL.get(formula)
     fam, ent, rel = familia(formula, nombre_quimico)
     if formula == "Glycine":
@@ -235,7 +237,8 @@ if __name__ == "__main__":
         f["especie_laboratorio"] = r.especie
         fichas.append(f)
     out = ROOT / "data/externos/fichas_moleculas.json"
-    out.write_text(json.dumps(fichas, ensure_ascii=False, indent=1))
+    out.write_text(json.dumps(fichas, ensure_ascii=False, indent=1, allow_nan=False))
+    (ROOT / "web/public/data/fichas_moleculas.json").write_text(json.dumps(fichas, ensure_ascii=False, allow_nan=False))
     df = pd.DataFrame(fichas)
     print("fichas:", len(df), "| del censo:", df.en_censo.sum(), "| manuales:", (df.tipo_ficha == "manual").sum())
     print(df.groupby(["en_censo", "entorno"]).size().to_string())
