@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Maximize2, Minimize2 } from "lucide-react";
 import { Tex, SYM } from "./Tex";
-import type { Continuum, Meta, Peaks, PipelineMeta, PosKey } from "@/lib/data";
+import type { Continuum, Meta, Peaks, PosKey } from "@/lib/data";
 import { POSITION_KEYS, WINDOW_KEYS } from "@/lib/data";
 import { CONTINUUM_BEAM_PA_FALLBACK_DEG, POSITION_LABELS } from "@/lib/config";
 import { POSITION_COLORS } from "@/lib/species";
@@ -19,7 +19,6 @@ export interface FieldMapProps {
   setActive: (p: PosKey) => void;
   sigmaOf: (w: "W1" | "W2", p: PosKey) => number;
   peaks: Peaks | null;
-  pipeline: PipelineMeta | null;
 }
 
 const BETA_FRAC = 0.01; // β del asinh como fracción del máximo
@@ -27,7 +26,7 @@ const INK = "#f2f6fa";
 const NIGHT = "#0b1120";
 
 /** Mapa del continuo con las tres posiciones; panel lateral compacto junto al espectro. */
-export default function FieldMap({ continuum, meta, active, setActive, sigmaOf, peaks, pipeline }: FieldMapProps) {
+export default function FieldMap({ continuum, meta, active, setActive, sigmaOf, peaks }: FieldMapProps) {
   const [zoom, setZoom] = useState(true);
   const [hover, setHover] = useState<{ x: number; y: number; val: number | null } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -255,7 +254,6 @@ export default function FieldMap({ continuum, meta, active, setActive, sigmaOf, 
         {POSITION_KEYS.map((pos) => {
           const m = meta.positions[pos];
           const isA = pos === active;
-          const va = pipeline?.v_adopted?.[pos];
           const nPk = peaks ? WINDOW_KEYS.reduce((s, w) => s + (peaks[w]?.[pos]?.length ?? 0), 0) : null;
           return (
             <li key={pos}>
@@ -278,7 +276,7 @@ export default function FieldMap({ continuum, meta, active, setActive, sigmaOf, 
                   </span>
                   <span className="mt-0.5 grid grid-cols-3 gap-x-2 text-[0.72rem] text-ink-2">
                     <span>
-                      <Tex className="text-muted">{SYM.vlsr}</Tex> {va ? `${f(va.v_kms, 2)} ± ${f(va.err_kms ?? null, 2)}` : f(m.v_start_kms, 2)}
+                      <Tex className="text-muted">{SYM.vlsr}</Tex> {f(m.v_start_kms, 1)}
                     </span>
                     <span>
                       <Tex className="text-muted">{SYM.sigma}</Tex> {f(sigmaOf("W1", pos) * 1000, 0)} / {f(sigmaOf("W2", pos) * 1000, 0)}
@@ -294,7 +292,7 @@ export default function FieldMap({ continuum, meta, active, setActive, sigmaOf, 
         })}
       </ul>
       <p className="caption mt-2">
-        <Tex>{SYM.vlsr}</Tex> adoptada en km/s y <Tex>{SYM.sigma}</Tex> de W1 / W2 en mJy/beam. Haz del continuo{" "}
+        <Tex>{SYM.vlsr}</Tex> dada por los organizadores (km/s) y <Tex>{SYM.sigma}</Tex> de W1 / W2 en mJy/beam. Haz del continuo{" "}
         {continuum.beam_arcsec ? `${f(continuum.beam_arcsec[0], 2)}″ × ${f(continuum.beam_arcsec[1], 2)}″` : "—"}, píxel {f(pix, 2)}″.
       </p>
     </div>

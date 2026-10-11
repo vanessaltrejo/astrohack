@@ -3,7 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { BookOpen, Eye, EyeOff, Grid2x2, Layers, Crosshair, Eraser } from "lucide-react";
 import SpectrumTooltip from "./SpectrumTooltip";
-import type { CatalogLine, Meta, Peak, PosKey, Verdict, WinKey, WindowSpectra } from "@/lib/data";
+import type { CatalogLine, Meta, Peak, PosKey, WinKey, WindowSpectra } from "@/lib/data";
 import { POSITION_KEYS, WINDOW_KEYS } from "@/lib/data";
 import { POSITION_LABELS } from "@/lib/config";
 import { POSITION_COLORS, speciesInfo } from "@/lib/species";
@@ -12,7 +12,6 @@ import { f } from "@/lib/format";
 import { useRestartAnimation } from "@/lib/motion";
 import SpectrumView, { type HoverInfo } from "./SpectrumView";
 import { Tex, SYM } from "./Tex";
-import { VERDICT } from "./ui";
 
 export interface SpectrumSectionProps {
   meta: Meta;
@@ -35,7 +34,9 @@ export interface SpectrumSectionProps {
   speciesOn: Set<string>;
   toggleSpecies: (s: string) => void;
   setAllSpecies: (on: boolean) => void;
-  verdictOf: (sp: string) => Verdict | null;
+  /** grupo de la especie según el motor v3 (explica líneas / candidata sin ganar / sin candidatas) */
+  groupOf: (sp: string) => string;
+  winsOf: (sp: string) => number;
   hoverSpecies: string | null;
   setHoverSpecies: (s: string | null) => void;
   minLogI: number;
@@ -59,7 +60,7 @@ export interface SpectrumSectionProps {
   vPulse: number;
 }
 
-const GROUP_ORDER: (Verdict | "sin puntuar")[] = ["fuerte", "tentativa", "descartada", "insuficiente", "sin puntuar"];
+const GROUP_ORDER = ["explica líneas", "candidata sin ganar", "sin candidatas"];
 
 export default function SpectrumSection(p: SpectrumSectionProps) {
   const shown = [p.active, ...p.overlay.filter((x) => x !== p.active)];
@@ -82,15 +83,15 @@ export default function SpectrumSection(p: SpectrumSectionProps) {
   }, [p.selRange, p.spectra, p.active, p.baseline, wm.step_kms]);
 
   // especies agrupadas por veredicto (una fila por grupo, no un muro de chips)
-  const { speciesKeys, verdictOf } = p;
+  const { speciesKeys, groupOf } = p;
   const groups = useMemo(() => {
-    const g = new Map<Verdict | "sin puntuar", string[]>();
+    const g = new Map<string, string[]>();
     for (const sp of speciesKeys) {
-      const k = verdictOf(sp) ?? "sin puntuar";
+      const k = groupOf(sp);
       g.set(k, [...(g.get(k) ?? []), sp]);
     }
     return GROUP_ORDER.filter((k) => g.has(k)).map((k) => [k, g.get(k)!] as const);
-  }, [speciesKeys, verdictOf]);
+  }, [speciesKeys, groupOf]);
 
   const vStart = p.meta.positions[p.active].v_start_kms;
 
@@ -170,11 +171,9 @@ export default function SpectrumSection(p: SpectrumSectionProps) {
       {/* especies por veredicto */}
       <div className="mt-3 flex flex-wrap items-start gap-x-5 gap-y-2">
         {groups.map(([k, sps]) => {
-          const vd = k === "sin puntuar" ? null : VERDICT[k];
           return (
             <div key={k} className="flex flex-wrap items-center gap-1.5">
-              <span className="label mr-0.5 inline-flex items-center gap-1" title={vd ? vd.sentence : "sin puntuación del pipeline"}>
-                {vd ? <vd.Icon className="icon" style={{ color: vd.color }} aria-hidden /> : null}
+              <span className="label mr-0.5 inline-flex items-center gap-1" title="según la probabilidad por línea (motor v3)">
                 {k}
               </span>
               {sps.map((sp) => {
@@ -188,7 +187,7 @@ export default function SpectrumSection(p: SpectrumSectionProps) {
                     onClick={() => p.toggleSpecies(sp)}
                     onMouseEnter={() => p.setHoverSpecies(sp)}
                     onMouseLeave={() => p.setHoverSpecies(null)}
-                    title={`${info.name}: ${p.lineCounts.get(sp) ?? 0} líneas en ${p.win} sobre el umbral`}
+                    title={`${info.name}: ${p.lineCounts.get(sp) ?? 0} líneas en ${p.win} sobre el umbral · gana ${p.winsOf(sp)} picos`}
                   >
                     <span className="dot" style={{ background: info.color }} />
                     {info.formula}

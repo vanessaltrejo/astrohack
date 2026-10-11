@@ -195,7 +195,7 @@ def analizar(pos, esp, cat, ruido, universo=None):
             filas.append(dict(
                 pico=p.id, ventana=p.ventana, nu_obs_MHz=p.nu_obs_MHz, nu_reposo_MHz=p.nu_reposo_MHz,
                 Jy=p.Jy, snr=p.snr, especie=sp_, molecula=r0.molecula, nombre_quimico=r0.nombre_quimico,
-                origen=r0.origen, lista=r0.lista, nu_cat_MHz=nu_b, delta_MHz=nu_b - p.nu_reposo_MHz,
+                origen=r0.origen, lista=r0.lista, isotopologo=bool(r0.isotopologo), nu_cat_MHz=nu_b, delta_MHz=nu_b - p.nu_reposo_MHz,
                 sigma_nu_MHz=sn[b], log10_Aij=r0.log10_Aij, Eu_K=r0.E_superior_K, QN=r0.QN,
                 n_filas_rasgo=len(grp), L_frecuencia=lf[b], L_Einstein=L_E, modo_Einstein=modo_E, L_poblacion=L_pob,
                 pico_predicho_Jy=pred, L_repeticion=L_rep, lineas_fuertes=n_f, lineas_presentes=n_p,
@@ -233,10 +233,23 @@ if __name__ == "__main__":
         Cd.to_csv(OUT / f"probabilidad_{pos}.csv", index=False)
         R = resumen(Cd)
         R.to_csv(OUT / f"resumen_{pos}.csv", index=False)
+        # líneas fuertes de cada especie y si aparecen (factor "se repite"): oficiales + ganadoras
+        oficiales = set(cat[cat.origen == "catalogo_local_oficial"].especie)
+        ganadoras = set(Cd[(Cd.rango == 1)].especie) - {"(fuera del catálogo)"}
+        especies = {}
+        for sp_ in sorted(oficiales | ganadoras):
+            if sp_ not in info:
+                continue
+            F = info[sp_]["fuertes"]
+            especies[sp_] = dict(
+                n_fuertes=int(len(F)), n_presentes=int(F.pico.notna().sum()),
+                fuertes=[dict(nu_reposo_MHz=round(float(r.nu), 4), S=float(r.S),
+                              pico=(r.pico if isinstance(r.pico, str) else None)) for r in F.itertuples()])
         web["posiciones"][pos] = dict(
             picos=json.loads(P.to_json(orient="records")),
             candidatas=json.loads(Cd[Cd.rango <= 5].to_json(orient="records")),
-            resumen=json.loads(R.head(30).to_json(orient="records")))
+            resumen=json.loads(R.head(30).to_json(orient="records")),
+            especies=especies)
         n_em = (P.tipo == "emision").sum()
         print(f"\n=== {pos}: {n_em} picos de emisión, {(P.tipo == 'absorcion').sum()} absorciones, "
               f"σ W1/W2 = {P.groupby('ventana').sigma_Jy.first().round(4).to_dict()}")

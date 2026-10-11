@@ -17,12 +17,17 @@ Rubric: ID 25 · astrobiology 20 · **creativity/tools 25** · presentation 20 �
 - `analysis/verificar_candidatas.py` — Boltzmann-pattern + PILS-literature check (refs in `analysis/referencias_pils.csv`).
 
 ## Science rules (from organizers — do not violate)
-- Radio Doppler, applied ONCE: ν_rest = ν_LSRK / (1 − v/c), c = 299792.458 km/s. Adopted v: B_offset 2.62±0.03, B_pico 2.61±0.03, A 3.71±0.61 km/s.
+- Radio Doppler, applied ONCE: ν_rest = ν_LSRK / (1 − v/c), c = 299792.458 km/s. **v is GIVEN by the organizers (B 2.7, A 3.2 km/s); it is never estimated or fitted** (judges' instruction, 11-oct). The data are not cleaned or questioned.
 - Never stitch W1 (348.834–349.302 GHz) and W2 (349.303–349.771 GHz). Units Jy/beam ≠ abundance. log10_I_300K ≠ Aij.
 - Unresolved catalog rows = one feature. Noise from line‑free segments only. Flag absorption/blends, never delete.
 - Credit line is mandatory: ADS/JAO.ALMA#2013.1.00278.S; cite ARI‑L, Jørgensen et al. 2016 (PILS), CDMS/JPL entries.
 
-## Current results (pipeline v1)
+## Current engine (v3) — supersedes pipeline v1 below
+`analysis/v3/` — per-line probability: frequency × Einstein A × repetition × atom-count prior (CDMS census, 348) ×
+seen-in-space prior × environment, plus a "outside the catalogue" option. Run `.venv/bin/python analysis/v3/probabilidad.py`.
+No p-value/FAP, no velocity fitting in the UI. Dashboard sidebar is on the LEFT. Priority: Vanessa's word > organizers' documents > code.
+
+## Old results (pipeline v1, kept for reference only; uses velocity fitting and FAP — not shown in the UI)
 Strong at B: CH3CN (10/10), CH2DOH (15/16), CH3CHO (7/7); C2H5CN (7/12) borderline; CH3OCHO tentative; **Glycine rejected**
 (matches at 1.69 km/s, ~6σ off source velocity; strong line at 349249.6 MHz absent). Brightest line in band
 (349627.8 MHz obs ≈ 349630.9 rest, SNR 73) is NOT in the local catalog → check full CDMS/JPL/Splatalogue. See `analysis/outputs/sin_identificar.csv`.

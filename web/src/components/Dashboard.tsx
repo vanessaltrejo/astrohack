@@ -12,7 +12,6 @@ import {
   type Peak,
   type PeakCandidate,
   type PosKey,
-  type Verdict,
   type WinKey,
 } from "@/lib/data";
 import { AI_DECLARATION, APP_NAME, LOGI_DEFAULT, PEAK_ZOOM_HALF_GHZ, POSITION_LABELS, PROJECT_LABEL, SOURCE_LABEL, TEAM_NAME_DEFAULT } from "@/lib/config";
@@ -28,10 +27,11 @@ import Fingerprints from "./Fingerprints";
 import FieldMap from "./FieldMap";
 import EvidenceLog from "./EvidenceLog";
 import { Dialog, MethodBody, SectionHead, ShortcutsBody } from "./ui";
-import RightRail from "./RightRail";
+import LeftRail from "./LeftRail";
 import MoleculesPanel from "./MoleculesPanel";
 import ReferencePlots from "./ReferencePlots";
 import LineProbability from "./LineProbability";
+import { groupOfRow, loadV3, speciesRows, type V3Data } from "@/lib/probabilidad";
 import { Tex, SYM } from "./Tex";
 
 const SECTIONS = [
@@ -116,10 +116,12 @@ function Loaded({
 }) {
   const { meta, spectra, catalog, continuum } = core;
   const peaks = analysis?.peaks ?? null;
-  const scores = analysis?.scores ?? null;
   const pipeline = analysis?.pipeline ?? null;
   const peaksState = analysis ? analysis.peaksState : "missing";
-  const scoresState = analysis ? analysis.scoresState : "missing";
+  const [v3, setV3] = useState<V3Data | null>(null);
+  useEffect(() => {
+    loadV3().then(setV3);
+  }, []);
 
   const speciesKeys = useMemo(() => orderedSpecies(catalog.map((l) => l.species)), [catalog]);
   const catalogById = useMemo(() => new Map(catalog.map((l) => [l.id, l])), [catalog]);
@@ -187,14 +189,12 @@ function Loaded({
     return () => clearTimeout(t);
   }, [toast]);
 
-  const fpDefault = useMemo(() => {
-    const ps = scores?.[active];
-    if (ps) {
-      const best = Object.entries(ps).sort((a, b) => b[1].score - a[1].score || b[1].n_matched - a[1].n_matched)[0];
-      if (best) return best[0];
-    }
-    return speciesKeys.includes("CH3OCHO") ? "CH3OCHO" : speciesKeys[0];
-  }, [scores, active, speciesKeys]);
+  // especie por defecto en Huellas: la que explica más líneas según el motor v3
+  const v3Rows = useMemo(() => speciesRows(v3?.posiciones?.[active], speciesKeys), [v3, active, speciesKeys]);
+  const fpDefault = useMemo(
+    () => (v3Rows[0]?.gana ? v3Rows[0].especie : speciesKeys.includes("CH3OCHO") ? "CH3OCHO" : speciesKeys[0]),
+    [v3Rows, speciesKeys],
+  );
   const fpSp = fpSpecies ?? fpDefault;
 
   // ---------- acciones ----------
@@ -283,7 +283,7 @@ function Loaded({
   const logLine = useCallback(
     (line: CatalogLine, w: WinKey | null, peakId: string | null) => {
       const found = peakId ? findPeak(peaks, peakId) : null;
-      const verdict = scores?.[active]?.[line.species]?.verdict;
+      const gana = v3Rows.find((r) => r.especie === line.species)?.gana ?? 0;
       addEvidence(
         prefillRow({
           team,
@@ -292,11 +292,11 @@ function Loaded({
           pos: active,
           peak: found?.peak ?? null,
           noise: w ? spectra[w].noise[active] : null,
-          decision: verdict ? `pendiente (pipeline: ${verdict})` : "pendiente",
+          decision: `pendiente (probabilidad por línea: explica ${gana} picos)`,
         }),
       );
     },
-    [peaks, scores, active, addEvidence, team, spectra],
+    [peaks, active, v3Rows, addEvidence, team, spectra],
   );
 
   const showInSpectrum = useCallback((sp: string, vv: number) => {
@@ -366,15 +366,16 @@ function Loaded({
   const activePeaks = peaks?.[win]?.[active] ?? null;
   // velocidad DADA por los organizadores (Guía p. 8, diapositiva 22); no se estima
   const vPipeline = meta.positions[active].v_start_kms;
-  const verdictOf = useCallback((sp: string): Verdict | null => scores?.[active]?.[sp]?.verdict ?? null, [scores, active]);
+  const groupOf = useCallback((sp: string) => groupOfRow(v3Rows.find((r) => r.especie === sp)), [v3Rows]);
+  const winsOf = useCallback((sp: string) => v3Rows.find((r) => r.especie === sp)?.gana ?? 0, [v3Rows]);
   const laneSpecies = useMemo(() => speciesKeys.filter((sp) => speciesOn.has(sp)), [speciesKeys, speciesOn]);
 
 
   const wm = meta.windows.W1;
 
   return (
-    <div className="pr-[76px]">
-      <RightRail
+    <div className="pl-[76px]">
+      <LeftRail
         items={[
           ...SECTIONS.map((sec) => ({
             id: sec.id,
@@ -445,7 +446,8 @@ function Loaded({
                 })
               }
               setAllSpecies={(on) => setSpeciesOn(on ? new Set(speciesKeys) : new Set())}
-              verdictOf={verdictOf}
+              groupOf={groupOf}
+              winsOf={winsOf}
               hoverSpecies={hoverSpecies}
               setHoverSpecies={setHoverSpecies}
               minLogI={minLogI}
@@ -494,7 +496,6 @@ function Loaded({
                 setActive={setActive}
                 sigmaOf={(w, p) => spectra[w].noise[p]?.sigma_Jy ?? NaN}
                 peaks={peaks}
-                pipeline={pipeline}
               />
             </aside>
           </div>
@@ -515,13 +516,11 @@ function Loaded({
             catalog={catalog}
             catalogById={catalogById}
             speciesKeys={speciesKeys}
-            scores={scores}
-            scoresState={scoresState}
+            v3={v3?.posiciones?.[active] ?? null}
             active={active}
             fpSpecies={fpSp}
             setFpSpecies={setFpSpecies}
             vControl={v}
-            vAdopted={vPipeline}
             onHoverSpecies={setHoverSpecies}
             onZoomLine={(w, fGHz) => zoomTo(w, active, fGHz)}
             onLogLine={logLine}

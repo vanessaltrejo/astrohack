@@ -14,12 +14,12 @@ export type RailItem = {
   spin?: boolean;
 };
 
-/** Sidebar delgado a la derecha: sustituye a la navegación y los botones de la cabecera. */
-export default function RightRail({ items }: { items: RailItem[] }) {
+/** Sidebar delgado a la izquierda: sustituye a la navegación y los botones de la cabecera. */
+export default function LeftRail({ items }: { items: RailItem[] }) {
   return (
     <nav
       aria-label="Secciones y herramientas"
-      className="fixed right-0 top-0 z-40 flex h-screen w-[76px] flex-col items-stretch gap-0.5 border-l border-rule bg-night/95 py-3"
+      className="fixed left-0 top-0 z-40 flex h-screen w-[76px] flex-col items-stretch gap-0.5 border-r border-rule bg-night/95 py-3"
     >
       {items.map((it) => (
         <div key={it.id}>
@@ -34,13 +34,13 @@ export default function RightRail({ items }: { items: RailItem[] }) {
             }`}
           >
             <span
-              className={`absolute right-0 top-1/2 h-6 w-[2px] -translate-y-1/2 ${it.active ? "bg-accent" : "bg-transparent"}`}
+              className={`absolute left-0 top-1/2 h-6 w-[2px] -translate-y-1/2 ${it.active ? "bg-accent" : "bg-transparent"}`}
               aria-hidden
             />
             <it.Icon className={`h-[18px] w-[18px] ${it.spin ? "animate-spin" : ""}`} aria-hidden />
             <span className="text-center">{it.label}</span>
             {it.badge ? (
-              <span className="absolute right-3 top-1 rounded-[2px] bg-accent px-1 text-[0.6rem] font-semibold text-night">{it.badge}</span>
+              <span className="absolute right-2 top-1 rounded-[2px] bg-accent px-1 text-[0.6rem] font-semibold text-night">{it.badge}</span>
             ) : null}
           </button>
         </div>

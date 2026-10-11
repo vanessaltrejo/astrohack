@@ -3,14 +3,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { scaleLinear } from "d3-scale";
 import { Maximize2, ZoomIn, Plus, Filter } from "lucide-react";
-import type { CatalogLine, LineStatus, Meta, PosKey, ScoreLine, SpeciesScore, SpeciesScores, Spectra, WinKey } from "@/lib/data";
-import { lineStatus, WINDOW_KEYS } from "@/lib/data";
+import type { CatalogLine, LineStatus, Meta, PosKey, ScoreLine, Spectra, WinKey } from "@/lib/data";
+import { speciesRows, type V3Pos } from "@/lib/probabilidad";
 import { FP_MAX_PANELS, FP_VMAX, FP_VMIN, POSITION_LABELS, STRONG_DEX } from "@/lib/config";
 import { speciesInfo } from "@/lib/species";
 import { observedFreqGHz, paddedRange, sliceVelocity, strongLines, windowForFreq, type Slice } from "@/lib/spectro";
 import { f } from "@/lib/format";
 import { useReveal } from "@/lib/motion";
-import { Dialog, Pending, STATUS, StatusTag, VerdictBadge } from "./ui";
+import { Dialog, Pending, STATUS, StatusTag } from "./ui";
 import { Tex, SYM } from "./Tex";
 
 interface PanelLine {
@@ -27,14 +27,12 @@ export interface FingerprintsProps {
   catalog: CatalogLine[];
   catalogById: Map<number, CatalogLine>;
   speciesKeys: string[];
-  scores: SpeciesScores | null;
-  scoresState: "ok" | "missing" | "error";
+  /** salida del motor v3 para la posición activa (probabilidad por línea) */
+  v3: V3Pos | null;
   active: PosKey;
   fpSpecies: string;
   setFpSpecies: (s: string) => void;
   vControl: number;
-  /** velocidad adoptada de la posición, para expresar la de la especie como Δv */
-  vAdopted: number | null;
   onHoverSpecies: (s: string | null) => void;
   onZoomLine: (win: WinKey, freqGHz: number) => void;
   onLogLine: (line: CatalogLine, win: WinKey | null, peakId: string | null) => void;
@@ -47,45 +45,42 @@ const SANS = '"IBM Plex Sans", sans-serif';
 export default function Fingerprints(p: FingerprintsProps) {
   const [sharedY, setSharedY] = useState(true);
   const [inspect, setInspect] = useState<number | null>(null);
-  const posScores = p.scores?.[p.active] ?? null;
-  const score: SpeciesScore | null = posScores?.[p.fpSpecies] ?? null;
   const info = speciesInfo(p.fpSpecies);
   const gridRef = useReveal<HTMLDivElement>();
 
-  const vAdopt = score?.v_best_kms ?? score?.v_mean_kms ?? null;
-  const vLine = vAdopt ?? p.vControl;
-  const vSource = vAdopt !== null ? "pipeline" : "control";
+  // velocidad dada por los organizadores; el espectro sólo se lleva de observado a reposo
+  const vLine = p.vControl;
 
   const axes = useMemo(
     () => ({ W1: p.spectra.W1.freq_GHz, W2: p.spectra.W2.freq_GHz }) as Record<WinKey, number[]>,
     [p.spectra],
   );
 
+  const features = p.v3?.especies?.[p.fpSpecies]?.fuertes ?? null;
   const panels = useMemo<PanelLine[]>(() => {
-    let base: { cat: CatalogLine; sl: ScoreLine | null }[];
-    if (score) {
-      base = score.lines
-        .map((sl) => ({ cat: p.catalogById.get(sl.catalog_id), sl }))
-        .filter((x): x is { cat: CatalogLine; sl: ScoreLine } => !!x.cat);
-    } else {
-      const ls = p.catalog.filter(
-        (l) => l.species === p.fpSpecies && windowForFreq(axes, observedFreqGHz(l.rest_MHz, vLine)) !== null,
-      );
-      base = strongLines(ls, STRONG_DEX)
-        .sort((a, b) => b.logI_300K - a.logI_300K)
-        .slice(0, FP_MAX_PANELS)
-        .map((cat) => ({ cat, sl: null }));
-    }
-    base.sort((a, b) => a.cat.rest_MHz - b.cat.rest_MHz);
-    return base.slice(0, FP_MAX_PANELS).map(({ cat, sl }) => {
-      const w =
-        (sl?.window && WINDOW_KEYS.includes(sl.window) ? sl.window : null) ??
-        windowForFreq(axes, observedFreqGHz(cat.rest_MHz, vLine)) ??
-        cat.window;
+    const ls = p.catalog.filter(
+      (l) => l.species === p.fpSpecies && windowForFreq(axes, observedFreqGHz(l.rest_MHz, vLine)) !== null,
+    );
+    const base = strongLines(ls, STRONG_DEX)
+      .sort((a, b) => b.logI_300K - a.logI_300K)
+      .slice(0, FP_MAX_PANELS)
+      .sort((a, b) => a.rest_MHz - b.rest_MHz);
+    return base.map((cat) => {
+      const w = windowForFreq(axes, observedFreqGHz(cat.rest_MHz, vLine)) ?? cat.window;
       const slice = w ? sliceVelocity(p.spectra[w].freq_GHz, p.spectra[w][p.active], cat.rest_MHz, FP_VMIN, FP_VMAX) : null;
-      return { cat, win: w, status: sl ? lineStatus(sl) : null, sl, slice };
+      // "se repite": la línea aparece (o falta) según el motor v3, que ya agrupó las filas no resueltas
+      let status: LineStatus | null = null;
+      if (features) {
+        let best: { d: number; pico: string | null } | null = null;
+        for (const ft of features) {
+          const d = Math.abs(ft.nu_reposo_MHz - cat.rest_MHz);
+          if (d <= 0.6 && (!best || d < best.d)) best = { d, pico: ft.pico };
+        }
+        if (best) status = best.pico ? "matched" : "missing";
+      }
+      return { cat, win: w, status, sl: null, slice };
     });
-  }, [score, p.catalog, p.catalogById, p.fpSpecies, p.spectra, p.active, axes, vLine]);
+  }, [p.catalog, p.fpSpecies, p.spectra, p.active, axes, vLine, features]);
 
   // al cambiar de especie o posición, vuelve a revelar la rejilla con escalonado
   useEffect(() => {
@@ -101,10 +96,7 @@ export default function Fingerprints(p: FingerprintsProps) {
     [panels],
   );
 
-  const ranked = useMemo(() => {
-    if (!posScores) return [];
-    return Object.entries(posScores).sort((a, b) => b[1].score - a[1].score || b[1].n_matched - a[1].n_matched);
-  }, [posScores]);
+  const ranked = useMemo(() => (p.v3 ? speciesRows(p.v3, p.speciesKeys) : []), [p.v3, p.speciesKeys]);
 
   const statusCounts = useMemo(() => {
     const m = new Map<LineStatus, number>();
@@ -113,7 +105,6 @@ export default function Fingerprints(p: FingerprintsProps) {
   }, [panels]);
 
   const inspected = inspect !== null ? (panels.find((x) => x.cat.id === inspect) ?? null) : null;
-  const dv = vSource === "pipeline" && p.vAdopted !== null ? vLine - p.vAdopted : null;
 
   return (
     <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(24rem,27rem)_minmax(0,1fr)]">
@@ -122,24 +113,23 @@ export default function Fingerprints(p: FingerprintsProps) {
         <h3 className="serif mb-2 text-[1.1rem]">
           Marcador <em className="text-ink-2">en {POSITION_LABELS[p.active]}</em>
         </h3>
-        {posScores ? (
+        {p.v3 ? (
           <div className="plate overflow-hidden">
             <table className="dtable">
               <thead>
                 <tr>
                   <th>Especie</th>
-                  <th>Coinciden</th>
-                  <th className="r">
-                    <Tex>{String.raw`\bar v \pm s`}</Tex>
-                  </th>
-                  <th>Veredicto</th>
+                  <th>Se repite</th>
+                  <th className="r">Líneas que explica</th>
+                  <th className="r">P media</th>
                 </tr>
               </thead>
               <tbody>
-                {ranked.map(([sp, s]) => {
+                {ranked.map((r) => {
+                  const sp = r.especie;
                   const si = speciesInfo(sp);
                   const sel = sp === p.fpSpecies;
-                  const frac = s.n_predicted > 0 ? s.n_matched / s.n_predicted : 0;
+                  const frac = r.fuertes > 0 ? r.presentes / r.fuertes : 0;
                   return (
                     <tr
                       key={sp}
@@ -167,27 +157,19 @@ export default function Fingerprints(p: FingerprintsProps) {
                             <span className="absolute inset-y-0 left-0 transition-[width] duration-300" style={{ width: `${frac * 100}%`, background: si.color }} />
                           </span>
                           <span>
-                            {s.n_matched}/{s.n_predicted}
+                            {r.presentes}/{r.fuertes}
                           </span>
                         </span>
-                        {s.n_missing_strong > 0 ? (
+                        {r.fuertes - r.presentes > 0 ? (
                           <span className="mt-0.5 block text-[0.7rem] text-ink-2">
-                            <span style={{ color: "var(--color-critical)" }}>✕</span> {s.n_missing_strong} ausente{s.n_missing_strong > 1 ? "s" : ""}
+                            <span style={{ color: "var(--color-critical)" }}>✕</span> {r.fuertes - r.presentes} ausente
+                            {r.fuertes - r.presentes > 1 ? "s" : ""}
                           </span>
                         ) : null}
                       </td>
+                      <td className="r whitespace-nowrap">{r.gana > 0 ? r.gana : <span className="text-muted">0</span>}</td>
                       <td className="r whitespace-nowrap">
-                        {s.v_mean_kms !== null ? (
-                          <>
-                            {f(s.v_mean_kms, 2)}
-                            <span className="text-muted"> ± {s.v_std_kms !== null ? f(s.v_std_kms, 2) : "—"}</span>
-                          </>
-                        ) : (
-                          <span className="text-muted">—</span>
-                        )}
-                      </td>
-                      <td>
-                        <VerdictBadge verdict={s.verdict} quiet />
+                        {r.pMedia !== null ? `${(r.pMedia * 100).toFixed(0)}%` : <span className="text-muted">—</span>}
                       </td>
                     </tr>
                   );
@@ -196,7 +178,7 @@ export default function Fingerprints(p: FingerprintsProps) {
             </table>
           </div>
         ) : (
-          <Pending what={p.scoresState === "error" ? "species_scores.json (con errores de lectura)" : "species_scores.json"}>
+          <Pending what="probabilidad.json (analysis/v3/probabilidad.py)">
             <div className="mt-4 flex flex-wrap gap-1.5">
               {p.speciesKeys.map((sp) => {
                 const si = speciesInfo(sp);
@@ -210,9 +192,9 @@ export default function Fingerprints(p: FingerprintsProps) {
             </div>
           </Pending>
         )}
-        <p className={`caption mt-2 ${posScores ? "" : "hidden"}`}>
-          Orden por puntuación del pipeline. “Coinciden” cuenta las líneas fuertes predichas en W1 y W2 con un pico a la
-          velocidad común; una línea fuerte ausente es evidencia en contra.
+        <p className={`caption mt-2 ${p.v3 ? "" : "hidden"}`}>
+          Orden por las líneas que cada especie explica (la candidata de mayor probabilidad). “Se repite” cuenta las
+          líneas fuertes de la especie en W1 y W2 que aparecen a la velocidad dada; una línea fuerte ausente pesa en contra.
         </p>
       </div>
 
@@ -226,16 +208,8 @@ export default function Fingerprints(p: FingerprintsProps) {
               <em className="text-ink-2">{info.name}</em>
             </h3>
             <p className="caption mt-0.5">
-              {panels.length} líneas {score ? "predichas" : `fuertes del catálogo (≤ ${STRONG_DEX} dex)`}
-              {dv !== null ? (
-                <>
-                  , con la especie a <Tex>{String.raw`\Delta v = ` + (dv >= 0 ? "+" : "-") + Math.abs(dv).toFixed(2)}</Tex> km/s de la velocidad adoptada
-                </>
-              ) : (
-                <>
-                  , línea vertical en <Tex>{String.raw`v = ` + f(vLine, 2)}</Tex> km/s
-                </>
-              )}
+              {panels.length} líneas fuertes del catálogo (≤ {STRONG_DEX} dex), línea vertical en{" "}
+              <Tex>{String.raw`v = ` + f(vLine, 1)}</Tex> km/s (dada)
             </p>
           </div>
           <div className="ml-auto flex items-center gap-2">

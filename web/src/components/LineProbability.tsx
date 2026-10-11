@@ -33,6 +33,7 @@ type Cand = {
   QN?: string | null;
   origen?: string | null;
   lista?: string | null;
+  isotopologo?: boolean | null;
 };
 type Resumen = { molecula: string; picos_ganados: number; P_media: number | null; P_acumulada: number };
 type Datos = {
@@ -203,6 +204,11 @@ export default function LineProbability({
                                 <span className="id text-ink">{c.especie}</span>
                                 {c.QN ? <span className="ml-2 text-muted">{c.QN}</span> : null}
                                 {c.origen === "catalogo_local_oficial" ? <span className="ml-2 text-accent">catálogo oficial</span> : null}
+                                {c.isotopologo ? (
+                                  <span className="ml-2 text-data" title="Contiene un isótopo raro (13C, D, 18O…). Su forma principal es mucho más abundante: si aparece sola esta, desconfía.">
+                                    isotopólogo
+                                  </span>
+                                ) : null}
                               </td>
                               <td className="text-right font-semibold">{(c.P * 100).toFixed(1)}%</td>
                               {c.especie === FUERA ? (

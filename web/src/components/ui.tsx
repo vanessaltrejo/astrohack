@@ -156,39 +156,68 @@ export function Dialog({
 
 export function MethodBody() {
   return (
-    <div className="max-w-[66ch] space-y-4 text-[0.92rem] leading-relaxed text-ink-2">
+    <div className="max-w-[68ch] space-y-4 text-[0.92rem] leading-relaxed text-ink-2">
       <section>
-        <h3 className="serif text-[1.15rem] text-ink">Convención radio, marco LSRK</h3>
-        <div className="plate my-2 px-5 py-3 text-ink">
-          <Tex display>{String.raw`v = c\left(1 - \frac{\nu_{\mathrm{LSRK}}}{\nu_{\mathrm{rest}}}\right),\qquad \nu_{\mathrm{obs}} = \nu_{\mathrm{rest}}\left(1 - \frac{v}{c}\right),\qquad c = 299\,792.458\ \mathrm{km\,s^{-1}}`}</Tex>
-        </div>
+        <h3 className="serif text-[1.15rem] text-ink">Los datos no se tocan</h3>
         <p>
-          La corrección Doppler se aplica una sola vez, a las líneas del catálogo (o al espectro si activas “reposo”).
-          W1 y W2 se tratan por separado y nunca se unen. Las intensidades están en{" "}
-          <Tex>{SYM.jyb}</Tex> y no son abundancias.
+          Espectros en <Tex>{SYM.jyb}</Tex> tal como vienen del paquete, sin suavizar, sin restar fondo y sin recalibrar. W1 y
+          W2 se tratan por separado y nunca se unen. Las intensidades no son abundancias.
         </p>
       </section>
       <section>
-        <h3 className="serif text-[1.15rem] text-ink">Ruido y picos</h3>
+        <h3 className="serif text-[1.15rem] text-ink">Un solo paso: de observado a reposo</h3>
+        <div className="plate my-2 px-5 py-3 text-ink">
+          <Tex display>{String.raw`\nu_{\mathrm{reposo}} = \frac{\nu_{\mathrm{LSRK}}}{1 - v/c},\qquad c = 299\,792.458\ \mathrm{km\,s^{-1}}`}</Tex>
+        </div>
         <p>
-          <Tex>{SYM.sigma}</Tex> se mide en tramos sin líneas; los errores formales se multiplican por{" "}
-          <Tex>{String.raw`\sqrt{\kappa}`}</Tex> porque los canales vecinos están correlacionados. Un pico cuenta a partir de{" "}
-          <Tex>{String.raw`4\sigma`}</Tex>; las absorciones se conservan pero no son evidencia.
+          La velocidad es la <b className="text-ink">dada por los organizadores</b> (B ≈ 2.7 km/s, A ≈ 3.2 km/s); no se estima
+          ni se ajusta. El Doppler se aplica una sola vez. Ruido: desviación estándar de tramos sin líneas, con la mediana
+          restada, como en el cuaderno oficial.
         </p>
       </section>
       <section>
-        <h3 className="serif text-[1.15rem] text-ink">Huellas</h3>
-        <p>
-          Una detección se sostiene cuando todas las líneas fuertes de la especie aparecen a la misma velocidad, con
-          intensidades relativas plausibles y sin que falte ninguna. La intensidad esperada se escala dentro de cada
-          especie con
-        </p>
+        <h3 className="serif text-[1.15rem] text-ink">Probabilidad por línea</h3>
+        <p>Para cada pico de emisión (≥ 4σ) y cada transición cercana de CDMS/JPL:</p>
         <div className="plate my-2 px-5 py-3 text-ink">
-          <Tex display>{String.raw`\log I_T = \log I_{300} - \frac{E_{\mathrm{u}}}{\ln 10}\left(\frac{1}{T} - \frac{1}{300}\right),\quad T \in \{100, 300\}\ \mathrm{K}`}</Tex>
+          <Tex display>{String.raw`P(s\mid\text{línea}) \propto L_{\nu}\cdot L_{A}\cdot L_{\text{rep}}\cdot \pi_{\text{átomos}}\cdot \pi_{\text{espacio}}\cdot f_{\text{entorno}}`}</Tex>
         </div>
+        <ul className="list-disc space-y-1.5 pl-5">
+          <li>
+            <b className="text-ink">Frecuencia</b> <Tex>{String.raw`L_\nu`}</Tex>: cercanía del pico a la transición (en reposo),
+            con la incertidumbre del catálogo, el canal y el movimiento interno del gas.
+          </li>
+          <li>
+            <b className="text-ink">Coeficiente de Einstein</b> <Tex>{String.raw`L_A`}</Tex>: el <Tex>{String.raw`A_{ij}`}</Tex>{" "}
+            publicado por CDMS/JPL (con <Tex>{String.raw`g_u`}</Tex> y <Tex>{String.raw`E_u`}</Tex>). Una transición con poca
+            intensidad esperada no explica un pico brillante.
+          </li>
+          <li>
+            <b className="text-ink">Se repite</b> <Tex>{String.raw`L_{\text{rep}}`}</Tex>: qué fracción de las líneas fuertes de
+            la molécula en W1 y W2 aparece, y cuántas faltan.
+          </li>
+          <li>
+            <b className="text-ink">Complejidad</b> <Tex>{String.raw`\pi_{\text{átomos}}`}</Tex>: fracción de las 348 moléculas
+            del censo CDMS con ese número de átomos.
+          </li>
+          <li>
+            <b className="text-ink">Visto en el espacio</b> <Tex>{String.raw`\pi_{\text{espacio}}`}</Tex>: detectada, tentativa
+            o no detectada según el censo.
+          </li>
+          <li>
+            <b className="text-ink">Entorno</b> <Tex>{String.raw`f_{\text{entorno}}`}</Tex>: si sus condiciones favorables se
+            parecen a un núcleo caliente protoestelar.
+          </li>
+        </ul>
         <p>
-          y la probabilidad de falsa alarma es la de obtener <Tex>{String.raw`\geq n`}</Tex> coincidencias por azar dada la
-          densidad de picos de la ventana: <Tex>{String.raw`p_i = 1 - e^{-2\lambda\,\mathrm{tol}_i}`}</Tex>.
+          Siempre compite la opción <i>fuera del catálogo</i>. Los valores se normalizan a 100 % por pico. Son puntajes
+          relativos, no probabilidades calibradas: la decisión final es de quien analiza.
+        </p>
+      </section>
+      <section>
+        <h3 className="serif text-[1.15rem] text-ink">Qué no hace</h3>
+        <p>
+          No convierte intensidad en abundancia, no estima la velocidad y no asume que una coincidencia sea una
+          identificación. Las fichas de moléculas son borrador pendiente de verificación.
         </p>
       </section>
     </div>
@@ -197,7 +226,7 @@ export function MethodBody() {
 
 export function ShortcutsBody() {
   const rows: [string, string][] = [
-    ["1 · 2 · 3", "ir a Espectro, Huellas, Candidatas"],
+    ["1 · 2 · 3 · 4", "ir a Espectro, Probabilidad, Huellas, Candidatas"],
     ["e", "abrir el registro de evidencia"],
     ["m", "ver el método"],
     ["w", "cambiar de ventana (W1 / W2)"],
