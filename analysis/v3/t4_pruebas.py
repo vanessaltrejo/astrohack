@@ -104,3 +104,4 @@ for k, val in {"T_pob_K": 150.0, "T_pob_K ": 500.0}.items():
 M.PARAM.update(orig)
 res["sensibilidad"] = sens
 (Path(__file__).resolve().parent / "outputs/pruebas_T4.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
+(Path(__file__).resolve().parents[2] / "web/public/data/pruebas.json").write_text(json.dumps(res, ensure_ascii=False, allow_nan=False))

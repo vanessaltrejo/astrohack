@@ -171,8 +171,8 @@ export function MethodBody() {
         </div>
         <p>
           La velocidad es la <b className="text-ink">dada por los organizadores</b> (B ≈ 2.7 km/s, A ≈ 3.2 km/s); no se estima
-          ni se ajusta. El Doppler se aplica una sola vez. Ruido: desviación estándar de tramos sin líneas, con la línea base
-          de cada tramo restada (en A, que casi no tiene tramos libres, se usa la envolvente inferior del ruido).
+          ni se ajusta. El Doppler se aplica una sola vez. Ruido: desviación estándar de tramos sin líneas, con la mediana
+          de cada tramo restada, como en el cuaderno oficial (en A, que casi no tiene tramos libres, se usa la envolvente inferior).
         </p>
       </section>
       <section>

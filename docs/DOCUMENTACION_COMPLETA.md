@@ -115,8 +115,10 @@ El código de v1 permanece en `analysis/` como referencia histórica, con un avi
 | Isotopólogos raros heredaban "visto en el espacio" de su molécula madre | Casi la mitad de los picos iban a isotopólogos | Isotopólogos fuera del catálogo oficial = no confirmados (§6.5). |
 | Glicolaldehído oficial con frecuencias distintas hasta 0.69 MHz de Splatalogue | Validación del catálogo | Versión CDMS 2026 (oficial) frente a una anterior: conservamos la oficial. |
 | `NaN` en un JSON → panel vacío | Prueba en el navegador | JSON estricto. |
+| 46 transiciones sin degeneración g_u (CH₂Cl₂, fenol) producían `NaN` en la intensidad esperada y un JSON inválido | Prueba automática que compara el cálculo del navegador con el de Python | "Utilizable" exige Aij **y** g_u; el JSON se escribe en modo estricto para que un `NaN` detenga el proceso. |
 | Estilos rotos al compilar con el servidor de desarrollo encendido | Revisión visual | Compilamos con el servidor apagado. |
 | Primer método de ruido para A no convergía (σ ≈ 180 mJy) | Comparación con v1 | A usa estimador de envolvente inferior (§5). |
+| El ruido del cuaderno (26.2 mJy) y el del motor (25.5 mJy) no coincidían: el motor restaba una recta por tramo y el cuaderno la mediana; además los límites de los tramos se guardaban redondeados a 10 kHz | Revisión del panel «Cómo lo calculamos» | Un solo método, el oficial (`ruido_empirico`), y límites con precisión completa: cuaderno, motor y tablero dan el mismo σ. |
 
 ---
 
@@ -132,7 +134,7 @@ El código de v1 permanece en `analysis/` como referencia histórica, con un avi
 | `splatalogue_CDMS_JPL_348.80-349.80GHz.csv` | 8 977 transiciones (424 entradas) de CDMS y JPL en la banda, con log Aij, E_sup, g_sup | `astroquery` → Splatalogue |
 | `catalogo_local_con_aij.csv` | El catálogo oficial + Aij de la **misma** transición (|tag|, g_sup, E_sup ±0.05 K, Δν < 1 MHz) | `analysis/v3/t2_aij_catalogo_local.py` |
 | `censo_cdms_2026-09.csv` | Censo CDMS estructurado: fórmula, nº de átomos (por columna), estado, año | `analysis/v3/t1_censo_cdms.py` |
-| `catalogo_ampliado.csv` | 7 105 transiciones: 348 oficiales + 6 757 de CDMS/JPL; 7 043 utilizables (con Aij e incertidumbre ≤ 1 MHz), 380 especies | `analysis/v3/t2b_catalogo_ampliado.py` |
+| `catalogo_ampliado.csv` | 7 105 transiciones: 348 oficiales + 6 757 de CDMS/JPL; 6 997 utilizables (con Aij y g_u publicados e incertidumbre ≤ 1 MHz) | `analysis/v3/t2b_catalogo_ampliado.py` |
 | `fichas_moleculas.json` | 436 fichas (descripción, entorno, relevancia biótica). **Borrador de IA, pendiente de verificar** | `analysis/v3/fichas.py` |
 
 Detalles y límites:
@@ -152,14 +154,15 @@ Código: `analysis/v3/probabilidad.py`.
    v = 2.7 km/s (B_offset, B_pico) y 3.2 km/s (A). Una sola vez; el catálogo no se toca.
    Comprobación: 2.7 km/s ↔ 3.14 MHz a 349 GHz (número de la presentación).
 2. **Ruido**:
-   - **B**: desviación estándar de los **6 tramos sin líneas más largos** (≥ 15 canales), con la línea base lineal de
-     cada tramo restada. Los tramos salen de enmascarar |y − base| > 3σ₀ (σ₀ = percentil 25 del rms local en ventanas
-     de 25 canales) con dilatación de ±6 canales. Intervalos publicados en `analysis/v3/outputs/ruido_v3.csv`.
+   - **B**: `ruido_empirico()` del cuaderno oficial (desviación estándar con la mediana de cada tramo restada) sobre los
+     **6 tramos sin líneas más largos** (≥ 15 canales). Los tramos salen de enmascarar |y − base| > 3σ₀ (σ₀ = percentil 25
+     del rms local en ventanas de 25 canales) con dilatación de ±6 canales. Intervalos publicados, con precisión completa,
+     en `analysis/v3/outputs/ruido_v3.csv`. El cuaderno de gráficas usa exactamente los mismos tramos y obtiene el mismo σ.
    - **A**: casi no tiene tramos libres (líneas de ~6 km/s) → usamos σ₀ de envolvente inferior, y lo declaramos.
-   - Resultado: σ(B_offset) = 24.7 / 25.5 mJy/beam (W1 / W2); B_pico 37.2 / 37.5; A 19.4 / 21.5.
-     En B coincide con la versión anterior dentro de ±4 %.
+   - Resultado: σ(B_offset) = 26.1 / 26.2 mJy/beam (W1 / W2); B_pico 38.2 / 39.1; A 19.4 / 21.5.
+     En B queda dentro de ~8 % del valor de la versión anterior (que usaba otros tramos).
 3. **Picos**: emisión con altura ≥ 4σ, prominencia ≥ 3σ, separación ≥ 3 canales. Las absorciones se detectan y marcan,
-   pero no se usan como evidencia. Totales: B_offset 104 emisiones + 23 absorciones; B_pico 95 + 35; A 67 + 5.
+   pero no se usan como evidencia. Totales: B_offset 104 emisiones + 23 absorciones; B_pico 94 + 35; A 67 + 5.
 4. **Ajuste gaussiano descriptivo** por pico (gaussiana + constante, en velocidad, como `ajustar()`): FWHM, amplitud,
    área, línea base y error formal del centro. **No identifica la molécula.** Los errores formales no incluyen la
    correlación entre canales ni la calibración (~10 %). Bandera `blend` si el residuo del núcleo supera max(4σ, 10 % de la amplitud).
@@ -232,7 +235,7 @@ Resultados completos: `analysis/v3/outputs/pruebas_T4.txt`.
 | **Línea más brillante** (349 627.9 MHz LSRK, 349 631.0 MHz reposo, 1.76 Jy/beam, S/N ≈ 73; no está en el catálogo local) | **Ambigua**: D₂CO 6(2,5)–5(2,4) 38 % (isotopólogo no confirmado, una sola línea), n-C₃H₇CN v₃₀=2 31 % (E_u 862 K), fuera del catálogo 30 %. La reportamos como **sin identificación firme**. |
 | **Sensibilidad a supuestos** (mismo ganador) | complejidad al cuadrado 88 %; raíz 86 %; sin complejidad 82 %; "no detectada" 0.2 → 85 %, 0.05 → 86 %; sin entorno 95 %; T de población 150 K 96 %, 500 K 94 %. |
 | **Especies oficiales ganadoras** | CH₂DOH 15, CH₃CN 9, CH₃CHO 7, CH₃OCHO 7, C₂H₅CN 7, C₂H₅OH 1, CH₃OH 1, CH₃OCH₃ 1. Coinciden con las especies que PILS reporta para esta fuente. |
-| **Picos asignados** | B_offset 88 de 104 (16 fuera del catálogo); B_pico 85 de 95; A 45 de 67. |
+| **Picos asignados** | B_offset 88 de 104 (16 fuera del catálogo); B_pico 84 de 94; A 45 de 67. |
 
 ---
 
@@ -253,32 +256,44 @@ Resultados completos: `analysis/v3/outputs/pruebas_T4.txt`.
 
 ## 9. El tablero (`web/`)
 
-Diseño: fondo blanco, texto casi negro (alto contraste), tipografía sans serif y sidebar azul marino a la izquierda con:
-**Analizar · Moléculas (348) · Gráficas Python · Evidencia · Cómo funciona.**
+Diseño: fondo blanco, texto casi negro (alto contraste), tipografía sans serif y sidebar azul marino a la izquierda con el
+logo de Sparks y: **Analizar · Cómo lo calculamos · Moléculas (348) · Gráficas Python · Evidencia.**
 
-Pantalla **Analizar** (la principal), pensada para responder una sola pregunta: *¿qué molécula produce esta línea?*
-1. **Pasos de uso** en el encabezado (elegir posición y ventana → tocar una línea → revisar → añadir a Evidencia).
-2. **Controles**: posición (B offset recomendada, B pico, A) y ventana (W1, W2). La velocidad se muestra como dato fijo.
-3. **Resumen**: número de líneas y cuántas tienen confianza alta (≥ 70 %), media (40–70 %), baja (< 40 %) o están sin
-   identificar (gana "fuera del catálogo"); moléculas más frecuentes.
-4. **Espectro** en frecuencia de reposo con las líneas detectadas como triángulos coloreados por confianza; al tocar uno
-   se selecciona y se marca con una línea punteada la frecuencia de la molécula más probable.
-5. **Tabla de líneas** ordenada por S/N: frecuencia, intensidad, molécula más probable, % y confianza.
-6. **Panel de la línea seleccionada**: molécula más probable y %, alternativas, **"¿Por qué?"** con los 6 factores en
-   palabras (verde a favor, ámbar a medias, rojo en contra, gris contexto), las líneas fuertes de esa molécula que aparecen
-   (✓) o faltan (✗), una nota de la ficha de la molécula y el botón **Añadir a Evidencia**.
+### Pantalla «Analizar»
+Responde una sola pregunta: *¿qué molécula produce esta línea?*
+1. **Pasos de uso** y **controles de datos**: posición (B offset recomendada, B pico, A), ventana (W1, W2) y la velocidad
+   como dato fijo.
+2. **Peso de cada factor** (interactivo): cada uno de los 6 factores se puede poner en *apagado*, *normal* o *doble*.
+   Todos los % se recalculan al instante con la misma fórmula del motor (con pesos normales reproduce exactamente el
+   cálculo de Python; lo comprueba una prueba automática). El tablero indica cuántas líneas cambian de molécula y las
+   marca en la tabla. Sirve para ver **qué tan robusta** es cada respuesta frente a nuestros supuestos.
+3. **Resumen**: líneas con confianza alta (≥ 70 %), media (40–70 %), baja (< 40 %) o sin identificar; moléculas más
+   frecuentes (las variantes isotópicas se marcan).
+4. **Espectro** en reposo con las líneas detectadas coloreadas por confianza. «Acercar y ver candidatas» muestra la línea
+   de cerca con las frecuencias de catálogo de sus 5 candidatas.
+5. **Tabla de líneas** (S/N, molécula más probable con su nombre, %, confianza).
+6. **Panel de la línea seleccionada**: molécula más probable; «si no es esa, ¿cuál podría ser?» (6 alternativas);
+   **comparar candidatas** (matriz factor × candidata; al tocar una se muestran su porqué, su ficha y sus huellas);
+   «¿Por qué?» en palabras; botón **Añadir a Evidencia**.
+7. **Huellas** (debajo, para no saturar la parte superior): las líneas fuertes de la candidata elegida vistas en velocidad,
+   con ✓ si aparece pico en la velocidad dada y ✗ si falta. Es la prueba visual del factor «se repite».
 
 La etiqueta de confianza es **orientativa** (se deriva del %); no es un veredicto.
 
-| Panel | Qué muestra | Datos |
+### «Cómo lo calculamos» (detrás de cámaras)
+Recorrido visual en 7 pasos con datos reales: (1) los datos sin tocar; (2) observado → reposo; (3) ruido, con sus tramos y
+σ por posición; (4) líneas detectadas; (5) catálogos (oficial → Splatalogue → ampliado → utilizables) y el censo por
+número de átomos que define la complejidad; (6) los seis factores; (7) pruebas: robustez al tamaño de la base,
+sensibilidad a supuestos, control de glicina y la línea más brillante.
+
+| Otros paneles | Qué muestra | Datos |
 |---|---|---|
 | Moléculas (348) | Censo + especies de laboratorio en la banda: ficha, entorno, relevancia biótica | `fichas_moleculas.json` |
 | Gráficas Python | Las 6 gráficas de referencia reproducidas | `web/public/figs/` |
 | Evidencia | Tabla con las columnas de `evidencia_plantilla.csv`, exportable a CSV | navegador |
-| Cómo funciona | Resumen del método | — |
 
-Retiramos de versiones anteriores del tablero lo que no ayudaba a la pregunta principal: el mapa del campo, la vista de
-"Huellas" (su información quedó en el "¿Por qué?"), los atajos de teclado y los veredictos por p-value.
+Retiramos de versiones anteriores del tablero lo que no ayudaba a la pregunta principal: el mapa del campo, los atajos de
+teclado y los veredictos por p-value.
 
 ---
 

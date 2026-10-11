@@ -92,25 +92,23 @@ def tramos_libres(y, dilat, min_ch, nsig=3.0, win=151, nmax=6):
 
 
 def estimar_ruido(f, y, pos):
-    """σ y línea base. B: desviación estándar de tramos sin líneas (línea base lineal por tramo, como pide la
-    Guía p. 8: se indica intervalo y método). A: casi no tiene tramos libres (líneas de ~6 km/s) → σ0 de envolvente."""
+    """σ y línea base.
+    B: `ruido_empirico` del cuaderno oficial (desviación estándar con la mediana de cada tramo restada) sobre los
+       tramos sin líneas que elige `tramos_libres`. Mismo método que el cuaderno de gráficas de referencia.
+    A: casi no tiene tramos libres (líneas de ~6 km/s) → σ0 de envolvente inferior, declarado."""
     s0, r = sigma_envolvente(y)
     if pos == "A":
-        w = 25; x = np.arange(w)
+        w = 25
         libres = [a for a, rr in zip(range(0, len(y) - w + 1, 5), r) if rr <= 1.2 * s0]
         base = float(np.median([np.median(y[a:a + w]) for a in libres])) if libres else float(np.median(y))
         return dict(sigma=s0, baseline=base, segmentos=[],
                     metodo="envolvente inferior (percentil 25 del rms local en ventanas de 25 canales): A casi no tiene tramos libres")
     runs = tramos_libres(y, dilat=6, min_ch=15)
-    res, dof = [], 0
-    for a, b in runs:
-        z = y[a:b + 1]; x = np.arange(len(z))
-        res.append(z - np.polyval(np.polyfit(x, z, 1), x)); dof += len(z) - 2
-    sig = float(np.sqrt(np.sum(np.concatenate(res) ** 2) / dof))
+    segmentos = [(float(f[a]), float(f[b])) for a, b in runs]
+    sig = ruido_empirico(f, y, segmentos)
     base = float(np.mean([np.median(y[a:b + 1]) for a, b in runs]))
-    return dict(sigma=sig, baseline=base, segmentos=[(float(f[a]), float(f[b])) for a, b in runs],
-                metodo=f"desviación estándar de {len(runs)} tramos sin líneas (línea base lineal por tramo; "
-                       f"máscara 3σ0 dilatada ±6 canales)")
+    return dict(sigma=sig, baseline=base, segmentos=segmentos,
+                metodo=f"ruido_empirico oficial (mediana restada) en {len(runs)} tramos sin líneas; máscara 3σ0 dilatada ±6 canales")
 
 
 def ajustar_pico(f_GHz, y, canal, sigma, ancho_ch):
@@ -141,7 +139,8 @@ def ajustar_pico(f_GHz, y, canal, sigma, ancho_ch):
 
 def preparar_catalogo(cat, cen, fichas):
     cat = cat.copy()
-    cat = cat[cat.log10_Aij.notna()].copy()
+    # utilizable = con coeficiente de Einstein y degeneración g_u publicados (el factor Einstein necesita ambos)
+    cat = cat[cat.log10_Aij.notna() & cat.g_superior.notna()].copy()
     cat["unc"] = cat.incertidumbre_MHz.fillna(PARAM["unc_defecto_MHz"])
     cat = cat[cat.unc <= PARAM["unc_max_MHz"]].copy()
     cat["S"] = cat.g_superior * 10 ** cat.log10_Aij * np.exp(-cat.E_superior_K / PARAM["T_K"])
@@ -316,6 +315,30 @@ def resumen(Cd):
         ["picos_ganados", "P_acumulada"], ascending=False)
 
 
+CAND_WEB = ["pico", "ventana", "nu_obs_MHz", "nu_reposo_MHz", "Jy", "snr", "especie", "molecula", "nombre_quimico", "origen",
+            "lista", "tag", "catalog_id", "unc_MHz", "isotopologo", "nu_cat_MHz", "delta_MHz", "log10_Aij", "Eu_K", "QN",
+            "L_frecuencia", "L_Einstein", "L_poblacion", "L_repeticion", "lineas_fuertes", "lineas_presentes", "n_atomos",
+            "prior_complejidad", "visto_en_espacio", "prior_espacio", "factor_entorno", "puntaje", "P", "rango"]
+
+
+def resumen_backstage(cat0, cat):
+    """Números del 'detrás de cámaras' para la web (todo trazable a archivos del repositorio)."""
+    loc = pd.read_csv(ROOT / "data/externos/catalogo_local_con_aij.csv")
+    cen = pd.read_csv(ROOT / "data/externos/censo_cdms_2026-09.csv")
+    sp = pd.read_csv(ROOT / "data/externos/splatalogue_CDMS_JPL_348.80-349.80GHz.csv")
+    cuenta = cen[cen.cuenta_en_348].n_atomos.astype(str).value_counts()
+    orden = [str(i) for i in range(2, 13)] + [">12"]
+    return dict(
+        catalogo_oficial=int(len(loc)), especies_oficiales=int(loc.especie.nunique()),
+        con_aij_oficial=int(loc.log10_Aij_s_1.notna().sum()),
+        splatalogue_filas=int(len(sp)), ampliado_filas=int(len(cat0)), utilizables=int(len(cat)),
+        especies_total=int(cat.especie.nunique()), censo=int(cen.cuenta_en_348.sum()),
+        censo_por_atomos=[dict(atomos=k, n=int(cuenta.get(k, 0))) for k in orden],
+        censo_estado={k: int(v) for k, v in cen.estado.value_counts().items()},
+        utilizables_por_estado={k: int(v) for k, v in cat.visto_en_espacio.value_counts().items()},
+    )
+
+
 def _nan(x):
     return None if x is None or (isinstance(x, float) and not np.isfinite(x)) else x
 
@@ -369,11 +392,11 @@ def exportar_web(guardado, cat):
     spectra = json.loads(sp_path.read_text())
     for (pos, w), rz in NOISE.items():
         spectra[w]["noise"][pos] = dict(sigma_Jy=round(rz["sigma"], 6), baseline_Jy=round(rz["baseline"], 6),
-                                        segments_GHz=[[round(a, 6), round(b, 6)] for a, b in rz["segmentos"]],
+                                        segments_GHz=[[a, b] for a, b in rz["segmentos"]],   # precisión completa: un canal = 0.000244 GHz
                                         method=rz["metodo"])
         filas_ruido.append(dict(posicion=pos, ventana=w, sigma_mJy=round(rz["sigma"] * 1000, 2),
                                 baseline_mJy=round(rz["baseline"] * 1000, 2), n_tramos=len(rz["segmentos"]),
-                                tramos_GHz="; ".join(f"{a:.5f}-{b:.5f}" for a, b in rz["segmentos"]), metodo=rz["metodo"]))
+                                tramos_GHz="; ".join(f"{a:.9f}-{b:.9f}" for a, b in rz["segmentos"]), metodo=rz["metodo"]))
     sp_path.write_text(json.dumps(spectra, ensure_ascii=False, separators=(",", ":")))
     pd.DataFrame(filas_ruido).to_csv(OUT / "ruido_v3.csv", index=False)
 
@@ -393,7 +416,7 @@ if __name__ == "__main__":
         R.to_csv(OUT / f"resumen_{pos}.csv", index=False)
         # líneas fuertes de cada especie y si aparecen (factor "se repite"): oficiales + ganadoras
         oficiales = set(cat[cat.origen == "catalogo_local_oficial"].especie)
-        ganadoras = set(Cd[(Cd.rango == 1)].especie) - {"(fuera del catálogo)"}
+        ganadoras = set(Cd.especie) - {"(fuera del catálogo)"}
         especies = {}
         for sp_ in sorted(oficiales | ganadoras):
             if sp_ not in info:
@@ -405,12 +428,15 @@ if __name__ == "__main__":
                               pico=(r.pico if isinstance(r.pico, str) else None)) for r in F.itertuples()])
         web["posiciones"][pos] = dict(
             picos=json.loads(P.to_json(orient="records")),
-            candidatas=json.loads(Cd[Cd.rango <= 5].to_json(orient="records")),
+            # todas las candidatas de cada línea (máx. ~30): la web recalcula los % con pesos y reproduce exactamente este cálculo
+            candidatas=json.loads(Cd[[c for c in CAND_WEB if c in Cd.columns]].to_json(orient="records")),
             resumen=json.loads(R.head(30).to_json(orient="records")),
             especies=especies)
         n_em = (P.tipo == "emision").sum()
         print(f"\n=== {pos}: {n_em} picos de emisión, {(P.tipo == 'absorcion').sum()} absorciones, "
               f"σ W1/W2 = {P.groupby('ventana').sigma_Jy.first().round(4).to_dict()}")
         print(R.head(12).to_string(index=False))
-    (ROOT / "web/public/data/probabilidad.json").write_text(json.dumps(web, ensure_ascii=False))
+    web["backstage"] = resumen_backstage(cat0, cat)
+    # JSON estricto: un NaN haría el archivo ilegible en el navegador, así que debe fallar aquí
+    (ROOT / "web/public/data/probabilidad.json").write_text(json.dumps(web, ensure_ascii=False, allow_nan=False))
     exportar_web(guardado, cat)
