@@ -167,3 +167,64 @@ para el tablero; se hará contraste LTE en CASSIS; la línea más brillante de l
 |---|---|---|---|---|---|
 | 10-oct | Claude Code | Pipeline de identificación v1, verificación automatizada (Boltzmann, PILS), docs de interpretación | `analysis/`, `docs/` | `validate_outputs.py`, reproducción en otra máquina, contraste con Calcutt+18 / Jørgensen+18 / Drozdovskaya+19 | JP |
 | 10-oct | Claude Code | Tablero web Sparks (diseño, KaTeX, animaciones) con investigación de referencias | `web/` | `npm test`, `npm run build`, revisión visual del equipo | JP |
+
+## 10. Plan v2 (11‑oct, 06:00) · criterios de los jueces
+
+**Pitch (validado por un juez):** herramienta de **apoyo a la decisión**, no un modelo que "lo haga solo".
+Para cada línea muestra qué moléculas la podrían explicar, **con qué probabilidad y por qué**; la decisión final es de la persona.
+
+### 10.1 Los 4 parámetros que piden los jueces vs. lo que ya hay en `analysis/`
+
+| Parámetro | ¿Está en el pipeline actual? | Qué falta |
+|---|---|---|
+| **Repetición** (que la molécula muestre varias líneas coherentes) | ✅ Es el corazón del pipeline: coherencia en velocidad, completitud, líneas ausentes, FAP | Nada; sólo explicarlo simple |
+| **Coeficiente de Einstein (Aij)** | 🟡 No. Usa `log10_I_300K` como sustituto de intensidad relativa y evita Aij a propósito | Obtener Aij por fila (CDMS/JPL/Splatalogue) y usarlo en la intensidad esperada `∝ g_u·Aij·e^(−Eu/Tex)` |
+| **Complejidad** (nº de átomos → probabilidad previa) | ❌ No existe | Prior a partir del censo CDMS (diapositiva 5 de apertura: 348 moléculas por nº de átomos) |
+| **¿Detectada en el espacio?** | 🟡 Sólo como verificación posterior (`referencias_pils.csv`), no entra al cálculo | Prior: detectada en ISM / en IRAS 16293 / no detectada (glicina no está en el censo) |
+| **Probabilidad por línea** | 🟡 Hay FAP por especie y veredictos por reglas (~30 umbrales); la web elige la candidata "más cercana en velocidad" | Ranking por línea con probabilidad que combine los 4 factores |
+
+Conclusión: **se conserva** la capa de medición (ruido, picos, ajustes, Doppler, velocidad, agrupación de rasgos, repetición).
+**Se agrega** una capa de probabilidad por línea con los 4 factores. Además, figuras al estilo del cuaderno oficial.
+
+### 10.2 Modelo propuesto (simple y defendible)
+Para un pico observado y cada molécula candidata *s* (más la opción "no está en el catálogo"):
+
+`P(s | línea) ∝ L_frecuencia × L_Einstein × L_repetición × Prior_complejidad × Prior_espacio`
+
+- **L_frecuencia** = `exp(−½·(Δν/tol)²)`: qué tan cerca cae la línea del catálogo tras el Doppler.
+- **L_Einstein**: ¿la altura observada es compatible con `g_u·Aij·e^(−Eu/Tex)` escalado con las otras líneas de la especie? Una transición con Aij diminuto no explica un pico brillante.
+- **L_repetición**: fracción de líneas fuertes de *s* que sí aparecen a la misma velocidad (sale del pipeline).
+- **Prior_complejidad**: fracción del censo con ese nº de átomos (3 át. 48/348 · 6 át. 39/348 · 7 át. 26/348 · 8 át. 25/348 · 9 át. 19/348 · 10 át. 18/348).
+- **Prior_espacio**: detectada en ISM = 1 · tentativa = 0.5 · no detectada = 0.1 (valores declarados y con prueba de sensibilidad).
+- "**No está en el catálogo**": siempre es una opción (13 especies no cubren todo; la línea más brillante, SNR 73, no tiene candidata).
+
+| Especie | Átomos | ¿En censo ISM (CDMS)? |
+|---|---|---|
+| SO2 | 3 | sí |
+| CH3OH, ¹³CH3OH, CH2DOH, CH3CN, NH2CHO | 6 | sí (isotopólogos: la molécula madre) |
+| CH3CHO | 7 | sí |
+| CH3OCHO, CH2(OH)CHO | 8 | sí |
+| C2H5OH, CH3OCH3, C2H5CN | 9 | sí |
+| Glicina (NH2CH2COOH) | 10 | **no** |
+
+### 10.3 Plan por bloques (hoy, entrega 11:00)
+
+> **09:15 se congela el código.** Después sólo informe, diapositivas, ensayo y ZIP.
+
+| ID | Hora | Paso | Resultado | Quién | Estado |
+|---|---|---|---|---|---|
+| P1 | 06:15–06:45 | Tabla de propiedades por especie: átomos, censo ISM, detección en IRAS 16293 (con cita) | `data/especies_props.csv` (nuestro, no del paquete) | | ⬜ |
+| P2 | 06:30–07:30 | **Aij**: calcular desde `log10_I_300K` con Q(300 K) de cada entrada (fórmula JPL) y **validar 2 líneas/especie contra Splatalogue/CDMS** | `analysis/aij.py`, `outputs/catalogo_con_aij.csv` | | ⬜ |
+| P3 | 07:30–08:30 | Probabilidad por línea con los 4 factores + opción "fuera del catálogo" | `analysis/probabilidad.py`, `outputs/probabilidad_lineas.csv` | | ⬜ |
+| P4 | 08:15–08:45 | Validación: glicina baja; línea SNR 73 → "fuera del catálogo"; cambiar priors ×2 no voltea las fuertes | tabla de sensibilidad | | ⬜ |
+| P5 | 08:00–09:15 | Cuaderno con **las gráficas de referencia** del cuaderno oficial: espectro W1/W2, `candidatos()`, `ruido_empirico()`, `ajustar()` (gauss + residuos en velocidad) para 5–6 líneas demo + barras de probabilidad | `notebooks/01_referencia_y_probabilidad.ipynb` | | ⬜ |
+| P6 | 08:30–09:15 | Web: mostrar barras de probabilidad por línea en la tabla de picos (si no da tiempo: captura del cuaderno) | `web/` | JP | ⬜ |
+| P7 | 09:15–10:15 | Informe 2–3 págs + tabla de candidatas + declaración IA | `docs/informe.pdf` | | ⬜ |
+| P8 | 09:15–10:15 | ≤10 diapositivas (pitch: apoyo a la decisión) + demo | `docs/presentacion.pdf` | | ⬜ |
+| P9 | 10:15–10:45 | README reproducible, aportes por integrante, ZIP con nombre del equipo, ensayo con cronómetro | `NOMBRE.zip` | | ⬜ |
+
+### 10.4 Riesgos
+- **Defensa**: el pipeline tiene ~1300 líneas y ~30 umbrales generados con IA. Todos deben poder explicar los **5 factores** y el flujo; no hace falta defender cada umbral.
+- **Aij**: el paquete advierte no convertir sin verificar Q(T) y degeneraciones → por eso P2 incluye validación contra Splatalogue.
+- **Priors**: son supuestos; se declaran y se muestra que las conclusiones fuertes no dependen de ellos.
+
