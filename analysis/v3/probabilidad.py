@@ -153,6 +153,11 @@ def preparar_catalogo(cat, cen, fichas):
     cat["bin_atomos"] = cat.n_atomos.map(bin_)
     cat["prior_complejidad"] = cat.bin_atomos.map(lambda b: cuenta.get(b, 0) / 348)
     cat["prior_espacio"] = cat.visto_en_espacio.map(PARAM["prior_espacio"])
+    # Isotopólogos (13C, D, 18O...) que NO están en el catálogo oficial: que la molécula madre se haya visto no
+    # significa que esa variante rara se haya visto -> se tratan como no confirmados.
+    iso_ext = (cat.isotopologo == True) & (cat.origen != "catalogo_local_oficial")  # noqa: E712
+    cat.loc[iso_ext, "prior_espacio"] = PARAM["prior_espacio"]["no detectada"]
+    cat.loc[iso_ext, "visto_en_espacio"] = "isotopólogo no confirmado"
     # entorno: ficha por fórmula del censo; las demás por nombre químico
     por_formula = {f["formula"]: f["factor_entorno"] for f in fichas}
     por_nombre = {f["nombre"]: f["factor_entorno"] for f in fichas if not f["en_censo"]}
