@@ -282,7 +282,7 @@ Interés prebiótico/biótico: **pendiente de decisión de Vanessa** (ver 11.4 #
 | T2 | 06:30–07:30 | **Catálogo ampliado con Aij**: transiciones de moléculas del censo en 348.8–349.8 GHz desde CDMS/JPL (vía Splatalogue), con Aij, Eu, g_u e incertidumbre. El catálogo local queda intacto | `data/catalogo_ampliado.csv` | ⬜ |
 | T3 | 07:30–08:30 | **Motor v3**: datos crudos, v fija, ruido oficial, picos, factores 11.2, opción "fuera del catálogo" | `analysis/probabilidad.py`, `outputs/probabilidad_lineas.csv` | ⬜ |
 | T4 | 08:30–09:00 | **Pruebas**: (a) mismo ranking con el catálogo local (13–15), con ~30 y con el ampliado; (b) glicina baja; (c) línea SNR 73 → "fuera del catálogo" o candidata nueva; (d) detecciones PILS conocidas arriba | tabla de robustez | ⬜ |
-| T5 | 08:00–09:00 | **Gráficas de referencia** reproducidas del cuaderno oficial: espectro W1/W2 B_offset, ruido, `candidatos`, `ajustar` (gauss + residuos), verificación del cubo | `notebooks/01_graficas_referencia.ipynb` + PNG en `web/public/figs/` | ⬜ |
+| T5 | 08:00–09:00 | **Gráficas de referencia** reproducidas del cuaderno oficial: espectro W1/W2 B_offset, ruido, `candidatos`, `ajustar` (gauss + residuos), verificación del cubo | `notebooks/01_graficas_referencia.ipynb` + PNG en `web/public/figs/` | ✅ (falta mostrarlas en el sidebar, T6) |
 | T6 | 09:00–10:00 | **Dashboard**: (1) quitar los botones y la navegación de arriba; (2) **sidebar delgado a la derecha** con las secciones existentes + "Moléculas (348)" con buscador y ficha + "Gráficas de referencia (Python)"; (3) barras de probabilidad por línea; (4) quitar el control de velocidad (v fija) | `web/` | ⬜ |
 | T7 | 10:00–10:15 | Congelar código, `npm run build`, revisión final | | ⬜ |
 | T8 | 10:15–11:00 | Mínimo entregable (informe, ZIP); secundario | | ⬜ |
@@ -292,3 +292,7 @@ Interés prebiótico/biótico: **pendiente de decisión de Vanessa** (ver 11.4 #
 2. **Interés biótico en la probabilidad.** Recomendación: que las condiciones **abióticas** (entorno) sí entren como factor, y que la relevancia **biótica/prebiótica** se muestre al lado sin multiplicar. Si multiplica, la herramienta favorecería lo que "queremos encontrar" (p. ej. glicina). Decide Vanessa.
 3. **Dos "348" distintos.** El censo tiene 348 **moléculas**; el catálogo local, 348 **transiciones** de 13 especies (su LEEME dice 15 entradas). Usamos el censo como universo.
 
+### 11.5 Bitácora v3
+| Hora | Paso | Resultado |
+|---|---|---|
+| 06:25 | T5 | 6 gráficas oficiales reproducidas. Única transformación: observado → reposo (v = 2.7 B, 3.2 A). Comprobado: hashes idénticos al paquete, 2.7 km/s = 3.14 MHz a 349 GHz, extracción del cubo exacta. Ajuste CH3CN 19₀–18₀: centro 2.37 km/s, FWHM 1.41 km/s, con caída al rojo en los residuos (descriptivo) |
