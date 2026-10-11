@@ -171,8 +171,8 @@ export function MethodBody() {
         </div>
         <p>
           La velocidad es la <b className="text-ink">dada por los organizadores</b> (B ≈ 2.7 km/s, A ≈ 3.2 km/s); no se estima
-          ni se ajusta. El Doppler se aplica una sola vez. Ruido: desviación estándar de tramos sin líneas, con la mediana
-          restada, como en el cuaderno oficial.
+          ni se ajusta. El Doppler se aplica una sola vez. Ruido: desviación estándar de tramos sin líneas, con la línea base
+          de cada tramo restada (en A, que casi no tiene tramos libres, se usa la envolvente inferior del ruido).
         </p>
       </section>
       <section>
@@ -201,7 +201,7 @@ export function MethodBody() {
           </li>
           <li>
             <b className="text-ink">Visto en el espacio</b> <Tex>{String.raw`\pi_{\text{espacio}}`}</Tex>: detectada, tentativa
-            o no detectada según el censo.
+            o no detectada según el censo Las variantes isotópicas que no están en el catálogo oficial cuentan como no confirmadas.
           </li>
           <li>
             <b className="text-ink">Entorno</b> <Tex>{String.raw`f_{\text{entorno}}`}</Tex>: si sus condiciones favorables se

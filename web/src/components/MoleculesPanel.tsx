@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Search } from "lucide-react";
+import { prettyFormula } from "@/lib/formula";
 
 export type Ficha = {
   formula: string;
@@ -113,7 +114,7 @@ export default function MoleculesPanel() {
                   sel === f ? "bg-plate-2" : ""
                 }`}
               >
-                <span className="id w-36 shrink-0 truncate text-ink">{f.formula}</span>
+                <span className="w-36 shrink-0 truncate font-medium text-ink">{prettyFormula(f.formula)}</span>
                 <span className="flex-1 truncate text-ink-2">{f.nombre !== f.formula ? f.nombre : ""}</span>
                 <span className="shrink-0 text-[0.7rem] text-muted">{f.n_atomos} át.</span>
                 <span
@@ -132,7 +133,7 @@ export default function MoleculesPanel() {
         {sel ? (
           <article className="space-y-3 text-[0.88rem]">
             <header>
-              <p className="id text-[1.3rem] text-ink">{sel.formula}</p>
+              <p className="text-[1.4rem] font-semibold text-ink">{prettyFormula(sel.formula)}</p>
               <p className="serif text-[1.1rem] italic text-ink-2">{sel.nombre}</p>
             </header>
             <dl className="grid grid-cols-[9rem_1fr] gap-x-3 gap-y-1.5 text-[0.82rem]">

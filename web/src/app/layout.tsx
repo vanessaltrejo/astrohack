@@ -1,7 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { APP_NAME, APP_TAGLINE, SOURCE_LABEL } from "@/lib/config";
-import "@fontsource-variable/newsreader/opsz.css";
-import "@fontsource-variable/newsreader/opsz-italic.css";
 import "@fontsource/ibm-plex-sans/300.css";
 import "@fontsource/ibm-plex-sans/400.css";
 import "@fontsource/ibm-plex-sans/400-italic.css";
@@ -17,7 +15,7 @@ export const metadata: Metadata = {
   description: APP_TAGLINE,
 };
 
-export const viewport: Viewport = { themeColor: "#0B1120", colorScheme: "dark" };
+export const viewport: Viewport = { themeColor: "#0F1F4B", colorScheme: "light" };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

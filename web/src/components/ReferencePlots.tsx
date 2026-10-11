@@ -43,8 +43,8 @@ export default function ReferencePlots() {
           <figure key={f.src} className="border border-rule bg-white p-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={f.src} alt={f.titulo} className="w-full" loading="lazy" />
-            <figcaption className="mt-2 px-1 text-[0.8rem] text-night">
-              <b>{f.titulo}.</b> <span className="text-[#475569]">{f.origen}</span>
+            <figcaption className="mt-2 px-1 text-[0.8rem] text-ink">
+              <b>{f.titulo}.</b> <span className="text-ink-2">{f.origen}</span>
             </figcaption>
           </figure>
         ))}

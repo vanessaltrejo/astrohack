@@ -309,3 +309,6 @@ Interés prebiótico/biótico: **pendiente de decisión de Vanessa** (ver 11.4 #
 | 07:58 | T4c | Pruebas con la lista nueva: 13→30 especies 100 % mismo ganador (51/51); 13→todas 92 % (47/51); glicina P máx 2.3 %, nunca gana; línea más brillante → D2CO 86 % (1 línea, tentativa) |
 | 08:00 | DOC | `docs/DOCUMENTACION_COMPLETA.md`: historia de decisiones, fuentes, modelo, datos añadidos, pruebas, errores corregidos, pendientes, declaración de IA |
 | 08:00 | Decisión | Vanessa: se conserva el término de población (Boltzmann). Pendiente: isotopólogos (opción A o B) |
+| — | Decisión | Isotopólogos fuera del catálogo oficial = no confirmados (opción B). Efecto: mismos ganadores oficiales; la línea más brillante pasa a ambigua (D2CO 38 %, n-C3H7CN 31 %, fuera del catálogo 30 %) |
+| — | DOC | Documentación reescrita en voz de equipo, sin nombres ni fechas; v1 descrita como versión anterior del equipo |
+| — | T6d | Rediseño de la app: tema claro de alto contraste, sans serif, sidebar azul marino a la izquierda (Analizar · Moléculas · Gráficas · Evidencia · Cómo funciona). Pantalla única 'Analizar': espectro + tabla de líneas + panel 'molécula más probable y por qué' con los 6 factores en palabras. Se retiran mapa, Huellas, atajos y recarga |

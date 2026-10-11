@@ -253,18 +253,32 @@ Resultados completos: `analysis/v3/outputs/pruebas_T4.txt`.
 
 ## 9. El tablero (`web/`)
 
-Sidebar lateral con: Espectro · Probabilidad · Huellas · Moléculas (348) · Gráficas Python · Evidencia · Cómo funciona.
+Diseño: fondo blanco, texto casi negro (alto contraste), tipografía sans serif y sidebar azul marino a la izquierda con:
+**Analizar · Moléculas (348) · Gráficas Python · Evidencia · Cómo funciona.**
 
-| Sección | Qué muestra | Datos |
+Pantalla **Analizar** (la principal), pensada para responder una sola pregunta: *¿qué molécula produce esta línea?*
+1. **Pasos de uso** en el encabezado (elegir posición y ventana → tocar una línea → revisar → añadir a Evidencia).
+2. **Controles**: posición (B offset recomendada, B pico, A) y ventana (W1, W2). La velocidad se muestra como dato fijo.
+3. **Resumen**: número de líneas y cuántas tienen confianza alta (≥ 70 %), media (40–70 %), baja (< 40 %) o están sin
+   identificar (gana "fuera del catálogo"); moléculas más frecuentes.
+4. **Espectro** en frecuencia de reposo con las líneas detectadas como triángulos coloreados por confianza; al tocar uno
+   se selecciona y se marca con una línea punteada la frecuencia de la molécula más probable.
+5. **Tabla de líneas** ordenada por S/N: frecuencia, intensidad, molécula más probable, % y confianza.
+6. **Panel de la línea seleccionada**: molécula más probable y %, alternativas, **"¿Por qué?"** con los 6 factores en
+   palabras (verde a favor, ámbar a medias, rojo en contra, gris contexto), las líneas fuertes de esa molécula que aparecen
+   (✓) o faltan (✗), una nota de la ficha de la molécula y el botón **Añadir a Evidencia**.
+
+La etiqueta de confianza es **orientativa** (se deriva del %); no es un veredicto.
+
+| Panel | Qué muestra | Datos |
 |---|---|---|
-| Espectro | W1/W2, 3 posiciones, catálogo local en reposo, picos detectados, picos "sin identificar" | `spectra.json`, `peaks.json` |
-| Probabilidad | Por pico: la molécula más probable y sus alternativas; al expandir, cada factor y "Añadir a Evidencia" | `probabilidad.json` |
-| Huellas | Por especie: sus líneas fuertes en velocidad, cuáles aparecen y faltan ("se repite") | `probabilidad.json` + catálogo |
 | Moléculas (348) | Censo + especies de laboratorio en la banda: ficha, entorno, relevancia biótica | `fichas_moleculas.json` |
 | Gráficas Python | Las 6 gráficas de referencia reproducidas | `web/public/figs/` |
-| Evidencia | Tabla con las columnas de `evidencia_plantilla.csv`, exportable | local |
+| Evidencia | Tabla con las columnas de `evidencia_plantilla.csv`, exportable a CSV | navegador |
+| Cómo funciona | Resumen del método | — |
 
-La velocidad se muestra como dato fijo.
+Retiramos de versiones anteriores del tablero lo que no ayudaba a la pregunta principal: el mapa del campo, la vista de
+"Huellas" (su información quedó en el "¿Por qué?"), los atajos de teclado y los veredictos por p-value.
 
 ---
 

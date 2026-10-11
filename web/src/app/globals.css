@@ -8,25 +8,30 @@
  * con cifras tabulares) e IBM Plex Mono únicamente para identificadores (picos, entradas).
  */
 @theme {
-  --color-night: #0b1120;
-  --color-plate: #111a2b;
-  --color-plate-2: #182238;
-  --color-rule: #ffffff14;
-  --color-rule-strong: #ffffff29;
-  --color-ink: #f2f6fa;
-  --color-ink-2: #b8c0cf;
-  --color-muted: #7c879b;
-  --color-accent: #ffb800;
-  --color-accent-dim: #ffb80026;
-  --color-data: #5ac8fa;
-  --color-data-dim: #5ac8fa26;
-  --color-focus: #ffb800;
-  --color-good: #2fcf7f;
-  --color-warning: #ffb800;
-  --color-serious: #ff8a5b;
-  --color-critical: #ff4d6d;
+  /* Tema claro de alto contraste (texto ≥ 7:1 sobre blanco). Sidebar azul marino. */
+  --color-night: #ffffff;
+  --color-plate: #f4f6f9;
+  --color-plate-2: #e6ebf2;
+  --color-rule: #d3dae4;
+  --color-rule-strong: #94a0b4;
+  --color-ink: #0b1220;
+  --color-ink-2: #24314a;
+  --color-muted: #4f5b70;
+  --color-accent: #1d4ed8;
+  --color-accent-dim: #1d4ed81a;
+  --color-data: #0e7490;
+  --color-data-dim: #0e74901a;
+  --color-focus: #1d4ed8;
+  --color-good: #15803d;
+  --color-warning: #b45309;
+  --color-serious: #c2410c;
+  --color-critical: #b91c1c;
+  --color-side: #0f1f4b;
+  --color-side-2: #1b2f6b;
+  --color-side-ink: #ffffff;
+  --color-side-muted: #c3cdf0;
 
-  --font-serif: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
+  --font-serif: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
@@ -36,7 +41,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html {
@@ -48,7 +53,7 @@ body {
   background: var(--color-night);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-size: 14.5px;
+  font-size: 15px;
   line-height: 1.5;
   font-variant-numeric: tabular-nums lining-nums;
   overflow-x: hidden;
@@ -95,7 +100,7 @@ body {
   .title em,
   .subtitle {
     font-family: var(--font-serif);
-    font-style: italic;
+    font-style: normal;
     font-weight: 400;
     color: var(--color-ink-2);
   }
@@ -245,12 +250,12 @@ body {
   .btn-primary {
     background: var(--color-accent);
     border-color: var(--color-accent);
-    color: var(--color-night);
+    color: #ffffff;
     font-weight: 600;
   }
   .btn-primary:hover {
-    background: #ffc63a;
-    border-color: #ffc63a;
+    background: #1e40af;
+    border-color: #1e40af;
   }
   .btn-quiet {
     border-color: transparent;
@@ -416,7 +421,7 @@ body {
   }
   dialog.sheet::backdrop,
   dialog.modal::backdrop {
-    background: rgb(4 7 15 / 0.62);
+    background: rgb(11 18 32 / 0.45);
     transition: opacity 150ms ease, display 150ms allow-discrete, overlay 150ms allow-discrete;
     opacity: 0;
   }
