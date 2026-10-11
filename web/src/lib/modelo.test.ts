@@ -12,7 +12,7 @@ function porPico(cs: Cand[]) {
 }
 
 describe("recalcular (modelo en el navegador)", () => {
-  it("con pesos normales reproduce el % y el orden de analysis/v3/probabilidad.py", () => {
+  it("con pesos normales reproduce el % y el orden de analysis/probabilidad.py", () => {
     for (const pos of ["B_offset", "B_pico", "A"] as const) {
       for (const cs of porPico(v3.posiciones[pos].candidatas).values()) {
         const r = recalcular(cs, PESOS_BASE);

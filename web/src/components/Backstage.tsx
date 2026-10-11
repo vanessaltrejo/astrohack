@@ -39,7 +39,7 @@ function Barra({ label, valor, max, texto, color = "#1d4ed8" }: { label: ReactNo
 
 function Figura({ src, pie }: { src: string; pie: string }) {
   return (
-    <figure className="rounded-md border border-rule bg-white p-2">
+    <figure className="max-w-[60rem] rounded-md border border-rule bg-white p-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={assetUrl(src)} alt={pie} className="w-full" loading="lazy" />
       <figcaption className="mt-1 text-[0.78rem] text-muted">{pie}</figcaption>
@@ -57,10 +57,10 @@ export default function Backstage({ v3, spectra }: { v3: V3; spectra: Spectra })
   const maxCenso = Math.max(...b.censo_por_atomos.map((x) => x.n));
 
   return (
-    <div className="mx-auto max-w-[62rem] space-y-6">
+    <div className="space-y-6">
       <p className="text-[0.95rem] text-ink-2">
         Todo lo que ve la pantalla <b className="text-ink">Analizar</b> sale de estos pasos. Cada número es reproducible con el código del repositorio
-        (<span className="tabular-nums text-[0.85em]">analysis/v3/</span>).
+        (<span className="tabular-nums text-[0.85em]">analysis/</span>).
       </p>
 
       <Paso n={1} titulo="Los datos, sin tocar">

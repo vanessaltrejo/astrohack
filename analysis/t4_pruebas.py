@@ -6,7 +6,7 @@
 (c) Línea más brillante de la banda.
 (d) Sensibilidad a los supuestos: priors ×2 y ÷2, T de población 150/500 K.
 
-Salida: analysis/v3/outputs/pruebas_T4.json + impresión en pantalla.
+Salida: analysis/outputs/pruebas_T4.json + impresión en pantalla.
 """
 import copy
 import json
@@ -104,4 +104,4 @@ for k, val in {"T_pob_K": 150.0, "T_pob_K ": 500.0}.items():
 M.PARAM.update(orig)
 res["sensibilidad"] = sens
 (Path(__file__).resolve().parent / "outputs/pruebas_T4.json").write_text(json.dumps(res, ensure_ascii=False, indent=1))
-(Path(__file__).resolve().parents[2] / "web/public/data/pruebas.json").write_text(json.dumps(res, ensure_ascii=False, allow_nan=False))
+(Path(__file__).resolve().parents[1] / "web/public/data/pruebas.json").write_text(json.dumps(res, ensure_ascii=False, allow_nan=False))

@@ -2,6 +2,7 @@
 
 import type { WindowSpectra, PosKey, WinKey } from "@/lib/data";
 import type { Feature } from "@/lib/modelo";
+import { dopplerVelocity } from "@/lib/spectro";
 
 /**
  * Huellas: cada línea fuerte de la molécula, vista en velocidad (−8 … +8 km/s alrededor de la velocidad dada).
@@ -33,7 +34,7 @@ export default function Huellas({
         const xs: number[] = [];
         const ys: number[] = [];
         for (let i = 0; i < fr.length; i++) {
-          const vel = c * (1 - (fr[i] * 1000) / f.nu_reposo_MHz);
+          const vel = dopplerVelocity(fr[i], f.nu_reposo_MHz, c);
           if (vel >= v - 8 && vel <= v + 8) {
             xs.push(vel);
             ys.push(y[i]);

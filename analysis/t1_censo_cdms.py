@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 s = (ROOT / "data/externos/cdms_molecules_2026-09.html").read_text()
 tabla = re.findall(r"<table.*?</table>", s, flags=re.S)[0]
 filas = re.findall(r"<tr.*?</tr>", tabla, flags=re.S)

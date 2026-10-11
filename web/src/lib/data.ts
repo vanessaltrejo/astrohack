@@ -1,7 +1,6 @@
 /**
- * Cargadores tipados para web/public/data/*.json.
- * El contrato está en docs/DATA_SCHEMA.md. Los archivos son de solo lectura.
- * peaks.json y species_scores.json pueden no existir todavía: se cargan como null.
+ * Cargadores tipados de web/public/data/*.json (los escriben analysis/exportar_base_web.py y analysis/probabilidad.py).
+ * JSON estricto: un archivo inválido o ausente falla de forma visible.
  */
 
 export const POSITION_KEYS = ["B_offset", "B_pico", "A"] as const;
@@ -64,18 +63,6 @@ export interface CatalogLine {
   qn_up: string;
   qn_lo: string;
   window: WinKey | null;
-}
-
-export interface Continuum {
-  nx: number;
-  ny: number;
-  pixel_arcsec: number;
-  unit: string;
-  crop?: { x0: number; y0: number; nx: number; ny: number };
-  data: (number | null)[][];
-  positions: Record<PosKey, { x: number; y: number }>;
-  beam_arcsec?: [number, number];
-  beam_pa_deg?: number;
 }
 
 export type PeakFlag = "blend" | "absorption" | "edge" | "weak" | "asymmetric" | string;
@@ -164,32 +151,18 @@ export interface CoreLoad {
   meta: Meta;
   spectra: Spectra;
   catalog: CatalogLine[];
-  continuum: Continuum | null;
 }
 
 export async function loadCore(): Promise<CoreLoad> {
-  const [meta, spectra, catalog, continuum] = await Promise.all([
-    fetchJson<Meta>("meta.json"),
-    fetchJson<Spectra>("spectra.json"),
-    fetchJson<CatalogLine[]>("catalog.json"),
-    fetchJson<Continuum>("continuum.json", { optional: true }),
+  const [meta, spectra, catalog] = await Promise.all([
+    loadJson<Meta>("meta.json"),
+    loadJson<Spectra>("spectra.json"),
+    loadJson<CatalogLine[]>("catalog.json"),
   ]);
-  for (const [name, r] of [
-    ["meta.json", meta],
-    ["spectra.json", spectra],
-    ["catalog.json", catalog],
-  ] as const) {
-    if (r.status !== "ok") throw new Error(r.status === "error" ? r.message : `${name} no encontrado`);
-  }
-  return {
-    meta: (meta as { value: Meta }).value,
-    spectra: (spectra as { value: Spectra }).value,
-    catalog: (catalog as { value: CatalogLine[] }).value,
-    continuum: continuum.status === "ok" ? continuum.value : null,
-  };
+  return { meta, spectra, catalog };
 }
 
-/** peaks.json: líneas detectadas por el motor v3 (analysis/v3/probabilidad.py). Si falta, devuelve null. */
+/** peaks.json: líneas detectadas por el motor v3 (analysis/probabilidad.py). Si falta, devuelve null. */
 export async function loadPeaks(): Promise<Peaks | null> {
   const pk = await fetchJson<unknown>("peaks.json", { optional: true });
   return pk.status === "ok" ? sanitizePeaks(pk.value) : null;

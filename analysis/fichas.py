@@ -24,7 +24,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from formulas import composicion  # noqa: E402
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 
 FACTOR_ENTORNO = {"hot_corino": 1.0, "ubicua": 1.0, "nube_fria": 0.5, "circunestelar": 0.1, "atmosfera_lab": 0.1}
 

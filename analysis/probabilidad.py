@@ -7,8 +7,8 @@ Datos crudos (sin limpiar ni suavizar). Única transformación: observado -> rep
 
 más la opción "fuera del catálogo". Todos los parámetros están en PARAM (se copian a la salida).
 
-Uso:  .venv/bin/python analysis/v3/probabilidad.py            (universo completo)
-Salida: analysis/v3/outputs/probabilidad_{pos}.csv (pico × candidata), picos_{pos}.csv, resumen_especies.csv,
+Uso:  .venv/bin/python analysis/probabilidad.py            (universo completo)
+Salida: analysis/outputs/probabilidad_{pos}.csv (pico × candidata), picos_{pos}.csv, resumen_especies.csv,
         web/public/data/probabilidad.json
 """
 from __future__ import annotations
@@ -23,7 +23,7 @@ from scipy.ndimage import median_filter
 from scipy.optimize import curve_fit
 from scipy.signal import find_peaks
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 OUT = Path(__file__).resolve().parent / "outputs"
 C = 299792.458  # km/s
 
@@ -402,7 +402,7 @@ def exportar_web(guardado, cat):
                                 baseline_mJy=round(rz["baseline"] * 1000, 2), n_tramos=len(rz["segmentos"]),
                                 tramos_GHz="; ".join(f"{a:.9f}-{b:.9f}" for a, b in rz["segmentos"]), metodo=rz["metodo"]))
     sp_path.write_text(json.dumps(spectra, ensure_ascii=False, separators=(",", ":")))
-    pd.DataFrame(filas_ruido).to_csv(OUT / "ruido_v3.csv", index=False)
+    pd.DataFrame(filas_ruido).to_csv(OUT / "ruido.csv", index=False)
 
 
 if __name__ == "__main__":

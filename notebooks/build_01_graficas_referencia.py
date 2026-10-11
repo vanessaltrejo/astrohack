@@ -124,9 +124,9 @@ pico = frag.loc[frag.B_offset_Jy_beam.idxmax()]
 print(f"Pico más alto: {pico.frecuencia_LSRK_GHz:.6f} GHz observado, {pico.B_offset_Jy_beam:.3f} Jy/haz")
 candidatos(pico.frecuencia_LSRK_GHz)[["especie", "frecuencia_reposo_MHz", "incertidumbre_MHz", "E_superior_K", "delta_MHz"]]"""),
     md("""## Figura 4 · Ruido empírico (cuaderno oficial)
-`ruido_empirico()` sin cambios. Intervalos sin rasgos visibles: los segmentos de `analysis/outputs/ruido.csv`
+`ruido_empirico()` sin cambios. Intervalos sin rasgos visibles: los tramos de `analysis/outputs/ruido.csv`
 (sombreados), para que cualquiera pueda revisarlos sobre la gráfica. Son los tramos que elige el motor v3
-(`analysis/v3/probabilidad.py`); aquí σ se calcula con la función oficial (sólo mediana restada)."""),
+(`analysis/probabilidad.py`); aquí σ se calcula con la función oficial (sólo mediana restada)."""),
     code("""def ruido_empirico(ventana, intervalos_GHz, posicion="B_offset"):
     d=esp[ventana]; f=d.frecuencia_LSRK_GHz.to_numpy(); y=d[posicion+"_Jy_beam"].to_numpy()
     piezas=[]
@@ -136,7 +136,7 @@ candidatos(pico.frecuencia_LSRK_GHz)[["especie", "frecuencia_reposo_MHz", "incer
         piezas.append(z-np.median(z))
     return np.std(np.concatenate(piezas),ddof=1)
 
-seg = pd.read_csv(ROOT / "analysis/v3/outputs/ruido_v3.csv")   # tramos sin líneas del motor v3
+seg = pd.read_csv(ROOT / "analysis/outputs/ruido.csv")   # tramos sin líneas que elige el motor
 fig, axes = plt.subplots(2, 1, figsize=(14, 6), layout="constrained")
 sigma = {}
 for ax, i in zip(axes, (1, 2)):

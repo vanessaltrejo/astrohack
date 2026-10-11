@@ -1,4 +1,0 @@
-posicion,v_kms,scatter_kms,err_kms,n_lines,from_verdict,species,v_pass1_kms,v_ccf_kms,v_ccf_err_kms
-B_offset,2.618,0.129,0.029,32,fuerte,"['C2H5CN', 'CH2DOH', 'CH3CHO', 'CH3CN']",2.618,,
-B_pico,2.607,0.135,0.029,33,fuerte,"['C2H5CN', 'CH2DOH', 'CH3CHO', 'CH3CN']",2.607,2.541,0.033
-A,3.707,0.841,0.608,3,fuerte,['CH3CN'],3.707,3.352,0.408

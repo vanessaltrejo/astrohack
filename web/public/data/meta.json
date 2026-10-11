@@ -6,7 +6,7 @@
  "c_kms": 299792.458,
  "positions": {
   "B_offset": {
-   "label": "B \u00b7 offset",
+   "label": "B offset",
    "v_start_kms": 2.7,
    "ra_deg": 248.0940936440771,
    "dec_deg": -24.47577002233051,
@@ -16,7 +16,7 @@
    ]
   },
   "B_pico": {
-   "label": "B \u00b7 pico",
+   "label": "B pico",
    "v_start_kms": 2.7,
    "ra_deg": 248.09422793427086,
    "dec_deg": -24.4757089116645,

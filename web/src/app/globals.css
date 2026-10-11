@@ -1,14 +1,10 @@
 @import "tailwindcss";
 
 /*
- * Sparks — tokens.
- * Tres colores de interfaz: navy casi negro (lienzo), ámbar (acento) y azul frío (dato
- * secundario). Los colores de especie viven sólo dentro de los gráficos y su leyenda.
- * Tipografía: Newsreader (títulos y la única cifra grande), IBM Plex Sans (todo lo demás,
- * con cifras tabulares) e IBM Plex Mono únicamente para identificadores (picos, entradas).
+ * Sparks — tema claro de alto contraste (texto ≥ 7:1 sobre blanco) con sidebar azul marino.
+ * Tipografía: Inter para texto y datos; Space Grotesk para títulos.
  */
 @theme {
-  /* Tema claro de alto contraste (texto ≥ 7:1 sobre blanco). Sidebar azul marino. */
   --color-night: #ffffff;
   --color-plate: #f4f6f9;
   --color-plate-2: #e6ebf2;
@@ -20,24 +16,17 @@
   --color-accent: #1d4ed8;
   --color-accent-dim: #1d4ed81a;
   --color-data: #0e7490;
-  --color-data-dim: #0e74901a;
   --color-focus: #1d4ed8;
   --color-good: #15803d;
   --color-warning: #b45309;
-  --color-serious: #c2410c;
   --color-critical: #b91c1c;
   --color-side: #0f1f4b;
   --color-side-2: #1b2f6b;
   --color-side-ink: #ffffff;
   --color-side-muted: #c3cdf0;
 
-  /* Inter para texto y datos; Space Grotesk para títulos y cifras destacadas */
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Space Grotesk Variable", "Inter Variable", ui-sans-serif, sans-serif;
-
-  --ease-enter: cubic-bezier(0, 0, 0, 1);
-  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
-  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 :root {
@@ -46,7 +35,6 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 4.5rem;
 }
 
 body {
@@ -82,60 +70,13 @@ h4 {
 
 @layer components {
   /* ---------- texto ---------- */
-  .serif {
-    font-family: var(--font-display);
-    font-variation-settings: "opsz" 36;
-  }
   .id {
-    font-family: var(--font-sans);
     font-size: 0.86em;
-  }
-  .wordmark {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-variation-settings: "opsz" 48;
-    letter-spacing: -0.015em;
-    line-height: 1;
-  }
-  .title {
-    font-family: var(--font-display);
-    font-weight: 500;
-    font-variation-settings: "opsz" 36;
-    letter-spacing: -0.012em;
-    font-size: 1.85rem;
-    line-height: 1.05;
-  }
-  .title em,
-  .subtitle {
-    font-family: var(--font-display);
-    font-style: normal;
-    font-weight: 400;
-    color: var(--color-ink-2);
-  }
-  .subtitle {
-    font-size: 1.05rem;
-    font-variation-settings: "opsz" 18;
-  }
-  .label {
-    font-size: 0.74rem;
-    font-weight: 500;
-    color: var(--color-muted);
   }
   .caption {
     font-size: 0.78rem;
     color: var(--color-muted);
     line-height: 1.45;
-  }
-  .fig {
-    font-family: var(--font-display);
-    font-weight: 400;
-    font-variation-settings: "opsz" 72;
-    letter-spacing: -0.02em;
-    line-height: 0.9;
-    color: var(--color-ink);
-  }
-  .katex {
-    font-size: 1.04em;
   }
   .icon {
     width: 1em;
@@ -156,18 +97,8 @@ h4 {
     border: 1px solid var(--color-rule);
     border-radius: 4px;
   }
-  .kv {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    column-gap: 0.9rem;
-    row-gap: 0.2rem;
-    font-size: 0.82rem;
-  }
-  .kv dt {
-    color: var(--color-muted);
-  }
-  .kv dd {
-    color: var(--color-ink);
+  .pending-stripes {
+    background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgb(11 18 32 / 0.035) 10px 20px);
   }
 
   /* ---------- controles ---------- */
@@ -186,6 +117,7 @@ h4 {
     color: var(--color-ink-2);
     font-size: 0.78rem;
     font-weight: 500;
+    white-space: nowrap;
     transition: background-color 120ms ease, color 120ms ease;
   }
   .seg button + button {
@@ -201,38 +133,6 @@ h4 {
     font-weight: 600;
   }
 
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.14rem 0.5rem 0.14rem 0.4rem;
-    border-radius: 2px;
-    border: 1px solid var(--color-rule);
-    font-size: 0.78rem;
-    color: var(--color-muted);
-    background: transparent;
-    white-space: nowrap;
-    transition: border-color 120ms ease, color 120ms ease, background-color 120ms ease, transform 80ms ease;
-  }
-  .chip:hover {
-    border-color: var(--color-rule-strong);
-    color: var(--color-ink-2);
-  }
-  .chip[aria-pressed="true"] {
-    color: var(--color-ink);
-    border-color: var(--color-rule-strong);
-    background: var(--color-plate-2);
-  }
-  .chip .dot {
-    width: 0.55rem;
-    height: 0.55rem;
-    border-radius: 1px;
-    flex: none;
-  }
-  .chip[aria-pressed="false"] .dot {
-    opacity: 0.3;
-  }
-
   .btn {
     display: inline-flex;
     align-items: center;
@@ -244,8 +144,8 @@ h4 {
     font-size: 0.78rem;
     font-weight: 500;
     background: var(--color-plate);
-    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease, transform 80ms ease;
     white-space: nowrap;
+    transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
   }
   .btn:hover {
     background: var(--color-plate-2);
@@ -275,79 +175,6 @@ h4 {
     background: var(--color-plate-2);
     border-color: transparent;
   }
-  .btn-quiet[aria-pressed="true"] {
-    color: var(--color-ink);
-    background: var(--color-plate-2);
-  }
-  .btn:active,
-  .chip:active,
-  .seg button:active {
-    transform: translateY(0.5px) scale(0.985);
-  }
-
-  input[type="range"],
-  input[type="checkbox"] {
-    accent-color: var(--color-accent);
-  }
-
-  /* control de velocidad: pista dibujada a mano, pulgar grande para proyector */
-  .vslider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 28px;
-    background: transparent;
-    cursor: ew-resize;
-  }
-  .vslider::-webkit-slider-runnable-track {
-    height: 2px;
-    background: var(--color-rule-strong);
-  }
-  .vslider::-moz-range-track {
-    height: 2px;
-    background: var(--color-rule-strong);
-  }
-  .vslider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 24px;
-    margin-top: -11px;
-    border-radius: 2px;
-    background: var(--color-accent);
-    border: 2px solid var(--color-night);
-  }
-  .vslider::-moz-range-thumb {
-    width: 10px;
-    height: 22px;
-    border-radius: 2px;
-    background: var(--color-accent);
-    border: 2px solid var(--color-night);
-  }
-  .vtick {
-    position: absolute;
-    top: 6px;
-    width: 1px;
-    height: 16px;
-    background: var(--color-ink-2);
-    pointer-events: none;
-  }
-  .vtick span {
-    position: absolute;
-    top: 17px;
-    left: 50%;
-    transform: translateX(-50%);
-    white-space: nowrap;
-    font-size: 0.68rem;
-    color: var(--color-muted);
-  }
-  .vtick.above {
-    top: -4px;
-    height: 12px;
-  }
-  .vtick.above span {
-    top: auto;
-    bottom: 13px;
-  }
 
   .field {
     background: var(--color-night);
@@ -359,28 +186,14 @@ h4 {
     transition: border-color 120ms ease;
   }
   .field:focus {
-    border-color: var(--color-accent);
     outline: none;
+    border-color: var(--color-accent);
   }
   .field::placeholder {
     color: var(--color-muted);
   }
-  .field-icon {
-    position: relative;
-  }
-  .field-icon > .icon {
-    position: absolute;
-    left: 0.55rem;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--color-muted);
-    pointer-events: none;
-  }
-  .field-icon > .field {
-    padding-left: 1.8rem;
-  }
 
-  /* ---------- tablas ---------- */
+  /* ---------- tabla de Evidencia ---------- */
   .dtable {
     width: 100%;
     border-collapse: collapse;
@@ -405,237 +218,7 @@ h4 {
     border-bottom: 1px solid var(--color-rule);
     vertical-align: top;
   }
-  .dtable tbody tr {
-    transition: background-color 120ms ease;
-  }
-  .dtable tbody tr:hover,
-  .dtable tbody tr[aria-selected="true"] {
+  .dtable tbody tr:hover {
     background: var(--color-plate-2);
-  }
-  .dtable td.r,
-  .dtable th.r {
-    text-align: right;
-  }
-
-  /* ---------- diálogos nativos ---------- */
-  dialog.sheet,
-  dialog.modal {
-    color: var(--color-ink);
-    background: var(--color-plate);
-    border: 1px solid var(--color-rule-strong);
-    padding: 0;
-    max-width: none;
-    max-height: none;
-  }
-  dialog.sheet::backdrop,
-  dialog.modal::backdrop {
-    background: rgb(11 18 32 / 0.45);
-    transition: opacity 150ms ease, display 150ms allow-discrete, overlay 150ms allow-discrete;
-    opacity: 0;
-  }
-  dialog.sheet[open]::backdrop,
-  dialog.modal[open]::backdrop {
-    opacity: 1;
-  }
-  @starting-style {
-    dialog.sheet[open]::backdrop,
-    dialog.modal[open]::backdrop {
-      opacity: 0;
-    }
-  }
-  dialog.sheet {
-    position: fixed;
-    inset: 0 0 0 auto;
-    width: min(100vw, 72rem);
-    height: 100dvh;
-    margin: 0;
-    border-top: 0;
-    border-bottom: 0;
-    border-right: 0;
-    transform: translateX(1.5rem);
-    opacity: 0;
-    transition: transform 200ms var(--ease-enter), opacity 200ms var(--ease-enter), display 200ms allow-discrete, overlay 200ms allow-discrete;
-  }
-  dialog.sheet[open] {
-    transform: none;
-    opacity: 1;
-  }
-  @starting-style {
-    dialog.sheet[open] {
-      transform: translateX(1.5rem);
-      opacity: 0;
-    }
-  }
-  dialog.modal {
-    margin: auto;
-    width: min(calc(100vw - 2rem), 62rem);
-    border-radius: 4px;
-    transform: scale(0.97);
-    opacity: 0;
-    transition: transform 200ms var(--ease-enter), opacity 200ms var(--ease-enter), display 200ms allow-discrete, overlay 200ms allow-discrete;
-  }
-  dialog.modal[open] {
-    transform: none;
-    opacity: 1;
-  }
-  @starting-style {
-    dialog.modal[open] {
-      transform: scale(0.97);
-      opacity: 0;
-    }
-  }
-  dialog.modal.narrow {
-    width: min(calc(100vw - 2rem), 34rem);
-  }
-
-  /* ---------- movimiento ---------- */
-  .reveal {
-    opacity: 0;
-    transform: translateY(8px);
-    transition: opacity 250ms var(--ease-enter), transform 250ms var(--ease-enter);
-  }
-  .reveal.is-in {
-    opacity: 1;
-    transform: none;
-  }
-  .reveal .reveal-item {
-    opacity: 0;
-    transform: translateY(6px);
-    transition: opacity 250ms var(--ease-enter), transform 250ms var(--ease-enter);
-    transition-delay: calc(min(var(--i, 0), 8) * 40ms);
-  }
-  .reveal.is-in .reveal-item {
-    opacity: 1;
-    transform: none;
-  }
-  @keyframes fade-swap {
-    from {
-      opacity: 0.35;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  .fade-swap {
-    animation: fade-swap 250ms var(--ease-enter);
-  }
-  @keyframes toast-in {
-    from {
-      opacity: 0;
-      transform: translate(-50%, 6px);
-    }
-    to {
-      opacity: 1;
-      transform: translate(-50%, 0);
-    }
-  }
-  .toast {
-    animation: toast-in 200ms var(--ease-enter);
-  }
-  @keyframes draw {
-    to {
-      stroke-dashoffset: 0;
-    }
-  }
-  .draw-once {
-    stroke-dasharray: 1;
-    stroke-dashoffset: 1;
-    animation: draw 500ms var(--ease-enter) forwards;
-  }
-  .masthead {
-    transition: background-color 150ms ease;
-  }
-  .masthead .masthead-row {
-    transition: padding 150ms var(--ease-standard);
-  }
-  .masthead.shrunk .masthead-row {
-    padding-top: 0.3rem;
-    padding-bottom: 0.3rem;
-  }
-  @keyframes ring {
-    from {
-      r: 2;
-      opacity: 0.9;
-    }
-    to {
-      r: 9;
-      opacity: 0;
-    }
-  }
-  .ring-once {
-    animation: ring 600ms var(--ease-enter) forwards;
-  }
-  @keyframes flash {
-    from {
-      background-size: 100% 1px;
-    }
-    to {
-      background-size: 0% 1px;
-    }
-  }
-  .flash-once {
-    background-image: linear-gradient(var(--color-accent), var(--color-accent));
-    background-repeat: no-repeat;
-    background-position: left bottom;
-    animation: flash 700ms var(--ease-exit) forwards;
-  }
-  .skeleton {
-    background: var(--color-plate-2);
-    border-radius: 3px;
-  }
-  .hairline-progress {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: 1px;
-    background: var(--color-accent);
-    transform-origin: left;
-    transform: scaleX(0);
-    opacity: 0;
-    transition: transform 300ms var(--ease-standard), opacity 200ms ease;
-  }
-  .hairline-progress.busy {
-    transform: scaleX(1);
-    opacity: 1;
-  }
-
-  /* plotly: barra de herramientas sólo al pasar el cursor */
-  .js-plotly-plot .plotly .modebar {
-    background: transparent !important;
-    opacity: 0;
-    transition: opacity 150ms ease;
-  }
-  .js-plotly-plot:hover .plotly .modebar,
-  .js-plotly-plot:focus-within .plotly .modebar {
-    opacity: 1;
-  }
-  .js-plotly-plot .plotly .modebar-btn path {
-    fill: var(--color-muted) !important;
-  }
-  .js-plotly-plot .plotly .modebar-btn.active path,
-  .js-plotly-plot .plotly .modebar-btn:hover path {
-    fill: var(--color-ink) !important;
-  }
-
-  .pending-stripes {
-    background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgb(255 255 255 / 0.025) 10px 20px);
-  }
-  .mapmark:focus,
-  .mapmark:focus-visible {
-    outline: none;
-  }
-  .mapmark:focus-visible .mapmark-hit {
-    stroke: var(--color-focus);
-  }
-  kbd {
-    font-family: var(--font-sans);
-    font-size: 0.72rem;
-    padding: 0.05rem 0.35rem;
-    border: 1px solid var(--color-rule-strong);
-    border-bottom-width: 2px;
-    border-radius: 3px;
-    color: var(--color-ink-2);
-    background: var(--color-night);
   }
 }

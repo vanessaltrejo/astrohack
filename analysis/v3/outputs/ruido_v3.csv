@@ -1,7 +1,0 @@
-posicion,ventana,sigma_mJy,baseline_mJy,n_tramos,tramos_GHz,metodo
-B_offset,W1,26.09,0.94,6,348.856908300-348.870091300; 348.966278600-348.983611800; 349.065639500-349.088099400; 349.149132000-349.164268000; 349.183798400-349.205526000; 349.220173800-349.235798100,ruido_empirico oficial (mediana restada) en 6 tramos sin líneas; máscara 3σ0 dilatada ±6 canales
-B_offset,W2,26.17,-6.01,6,349.356157600-349.372758400; 349.454297900-349.471387000; 349.515330400-349.530954700; 349.582954400-349.595405100; 349.649846100-349.666935200; 349.697939700-349.710878600,ruido_empirico oficial (mediana restada) en 6 tramos sin líneas; máscara 3σ0 dilatada ±6 canales
-B_pico,W1,38.22,-0.07,6,348.915011200-348.932100400; 348.966278600-348.983611800; 349.065639500-349.087855300; 349.149376100-349.168662400; 349.183798400-349.205526000; 349.220173800-349.235798100,ruido_empirico oficial (mediana restada) en 6 tramos sin líneas; máscara 3σ0 dilatada ±6 canales
-B_pico,W2,39.08,-9.87,6,349.356157600-349.372758400; 349.454297900-349.471142900; 349.514598000-349.530954700; 349.546334900-349.559517900; 349.649601900-349.666691000; 349.698183800-349.710878600,ruido_empirico oficial (mediana restada) en 6 tramos sin líneas; máscara 3σ0 dilatada ±6 canales
-A,W1,19.35,28.93,0,,envolvente inferior (percentil 25 del rms local en ventanas de 25 canales): A casi no tiene tramos libres
-A,W2,21.53,29.31,0,,envolvente inferior (percentil 25 del rms local en ventanas de 25 canales): A casi no tiene tramos libres

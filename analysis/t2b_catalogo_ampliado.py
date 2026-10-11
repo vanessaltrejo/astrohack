@@ -20,7 +20,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from formulas import composicion  # noqa: E402
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 
 # nombre químico normalizado (Splatalogue) -> fórmula tal como aparece en el censo CDMS, o None
 CENSO = {

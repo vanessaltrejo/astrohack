@@ -1,2 +1,10 @@
-# Dependencias del análisis (el tablero web usa npm, ver web/README.md)
--r analysis/requirements.txt
+# Análisis (Python 3.13). Instalar con: pip install -r requirements.txt
+numpy
+pandas
+scipy
+matplotlib
+astropy
+astroquery      # sólo para volver a descargar las transiciones de Splatalogue (los CSV ya están en data/externos)
+nbformat
+nbclient
+ipykernel

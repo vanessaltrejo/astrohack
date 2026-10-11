@@ -12,7 +12,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 loc = pd.read_csv(ROOT / "data/catalogos/catalogo_local.csv", dtype={"entrada": str})
 sp = pd.read_csv(ROOT / "data/externos/splatalogue_CDMS_JPL_348.80-349.80GHz.csv")
 sp["g"] = pd.to_numeric(sp.upperStateDegen, errors="coerce")

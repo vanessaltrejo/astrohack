@@ -1,6 +1,7 @@
 "use client";
 
 import type { ComponentType, SVGProps } from "react";
+import { assetUrl } from "@/lib/data";
 
 export type SideItem = {
   id: string;
@@ -16,7 +17,8 @@ export default function Sidebar({ items }: { items: SideItem[] }) {
   return (
     <nav aria-label="Secciones" className="fixed left-0 top-0 z-40 flex h-screen w-[92px] flex-col bg-side py-4 text-side-ink">
       <div className="mb-5 flex flex-col items-center gap-1.5 px-2" aria-label="Sparks">
-        <SparksMark />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={assetUrl("/brand/sparks-logo.png")} alt="" width={44} height={44} />
         <span className="text-[0.95rem] font-semibold tracking-[0.04em]">Sparks</span>
       </div>
       {items.map((it) => (
@@ -37,23 +39,5 @@ export default function Sidebar({ items }: { items: SideItem[] }) {
         </button>
       ))}
     </nav>
-  );
-}
-
-/** Logo: destello de cuatro puntas con dos chispas menores (línea espectral → idea). */
-function SparksMark() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden>
-      <defs>
-        <linearGradient id="sparks-g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#ffd166" />
-          <stop offset="1" stopColor="#ff9f1c" />
-        </linearGradient>
-      </defs>
-      <rect x="1" y="1" width="38" height="38" rx="10" fill="#1b2f6b" />
-      <path d="M18 7 C19 15 21 17 29 18 C21 19 19 21 18 29 C17 21 15 19 7 18 C15 17 17 15 18 7 Z" fill="url(#sparks-g)" />
-      <path d="M30 24 C30.4 27 31 27.6 34 28 C31 28.4 30.4 29 30 32 C29.6 29 29 28.4 26 28 C29 27.6 29.6 27 30 24 Z" fill="#ffffff" />
-      <circle cx="28.5" cy="10" r="1.6" fill="#ffffff" />
-    </svg>
   );
 }

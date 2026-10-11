@@ -1,6 +1,6 @@
 /**
  * Recalcula la probabilidad por línea en el navegador con pesos por factor (0 = apagado, 1 = normal, 2 = doble).
- * Con todos los pesos en 1 reproduce exactamente analysis/v3/probabilidad.py:
+ * Con todos los pesos en 1 reproduce exactamente analysis/probabilidad.py:
  *   P(s | línea) ∝ L_ν^w · L_A^w · L_rep^w · π_átomos^w · π_espacio^w · f_entorno^w   (+ «fuera del catálogo»)
  */
 import type { PosKey, WinKey } from "./data";

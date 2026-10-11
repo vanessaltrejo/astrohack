@@ -7,6 +7,7 @@ import { findPeak, loadCore, loadJson, loadPeaks, type CatalogLine, type CoreLoa
 import { loadRows, loadTeam, saveRows, saveTeam, type EvidenceRow } from "@/lib/evidence";
 import { prefillRow } from "@/lib/prefill";
 import { prettyFormula } from "@/lib/formula";
+import { toRestFrameGHz } from "@/lib/spectro";
 import { TEAM_NAME_DEFAULT } from "@/lib/config";
 import { esBase, FACTORES, FUERA, nivel, NIVEL, PESOS_BASE, pct, recalcular, type Cand, type FactorKey, type Nivel, type Pesos, type V3 } from "@/lib/modelo";
 import Sidebar from "./Sidebar";
@@ -42,9 +43,9 @@ type Vista = "analizar" | "backstage" | "moleculas" | "graficas" | "evidencia";
 function Pagina({ titulo, subtitulo, children }: { titulo: string; subtitulo: string; children: React.ReactNode }) {
   return (
     <section>
-      <header className="mb-6">
-        <h1 className="text-[1.8rem] font-semibold leading-tight">{titulo}</h1>
-        <p className="mt-1 max-w-[80ch] text-ink-2">{subtitulo}</p>
+      <header className="mb-5">
+        <h1 className="text-[1.35rem] font-semibold leading-tight">{titulo}</h1>
+        <p className="text-[0.88rem] text-ink-2">{subtitulo}</p>
       </header>
       {children}
     </section>
@@ -176,7 +177,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
 
   // ---------- gráfico ----------
   const sp = spectra[win];
-  const xRest = useMemo(() => sp.freq_GHz.map((f) => f / (1 - v / C)), [sp, v, C]);
+  const xRest = useMemo(() => sp.freq_GHz.map((f) => toRestFrameGHz(f, v, C)), [sp, v, C]);
   const top5 = useMemo(() => alternativas.slice(0, 5), [alternativas]);
   const traces = useMemo(() => {
     const t: Plotly.Data[] = [
@@ -289,19 +290,20 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
         ]}
       />
 
-      <main className="mx-auto max-w-[1500px] px-4 pb-16 pt-6 md:px-6">
+      <main className="px-4 pb-16 pt-5 md:px-8">
         {vista === "analizar" ? (
           <>
-        <header className="mb-5">
-          <h1 className="text-[1.6rem] font-semibold leading-tight">¿Qué molécula produce cada línea?</h1>
-          <p className="mt-1 max-w-[80ch] text-ink-2">
-            IRAS 16293-2422 · ALMA banda 7. Para cada línea del espectro, la herramienta ordena las moléculas candidatas y explica por qué.
-            <b className="text-ink"> La decisión final es tuya.</b>
-          </p>
-          <ol className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-[0.86rem] text-ink-2">
-            {["Elige posición y ventana", "Toca una línea (gráfico o tabla)", "Compara candidatas y revisa el porqué", "Añádela a Evidencia"].map((t, i) => (
-              <li key={t} className="flex items-center gap-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[0.72rem] font-bold text-white">{i + 1}</span>
+        <header className="mb-4 flex flex-wrap items-end justify-between gap-x-8 gap-y-2">
+          <div>
+            <h1 className="text-[1.35rem] font-semibold leading-tight">¿Qué molécula produce cada línea?</h1>
+            <p className="text-[0.88rem] text-ink-2">
+              IRAS 16293-2422 · ALMA banda 7 · ordena las candidatas de cada línea y explica por qué. <b className="text-ink">La decisión final es tuya.</b>
+            </p>
+          </div>
+          <ol className="flex flex-wrap gap-x-5 gap-y-1 text-[0.8rem] text-ink-2">
+            {["Elige posición y ventana", "Toca una línea", "Compara candidatas", "Añádela a Evidencia"].map((t, i) => (
+              <li key={t} className="flex items-center gap-1.5">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-accent text-[0.64rem] font-bold text-white">{i + 1}</span>
                 {t}
               </li>
             ))}
@@ -354,10 +356,10 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
               <span className="text-[0.82rem] text-muted">Pesos del modelo (todos normales)</span>
             )}
           </div>
-          <div className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(21rem,1fr))] gap-x-8 gap-y-2">
             {FACTORES.map((f) => (
               <div key={f.key} className="flex items-center justify-between gap-2">
-                <span className="text-[0.86rem]" title={f.ayuda}>
+                <span className="whitespace-nowrap text-[0.86rem]" title={f.ayuda}>
                   {f.label}
                 </span>
                 <div className="seg">
@@ -402,7 +404,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
         </section>
 
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_32rem]">
-          <div className="min-w-0 space-y-4">
+          <div className="flex min-w-0 flex-col gap-4">
             {/* gráfico */}
             <div className="min-w-0 rounded-lg border border-rule bg-white p-2">
               <div className="flex flex-wrap items-center justify-between gap-2 px-2 pt-1">
@@ -450,8 +452,8 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
             </div>
 
             {/* tabla */}
-            <div className="min-w-0 overflow-hidden rounded-lg border border-rule">
-              <div className="max-h-[440px] overflow-auto">
+            <div className="relative min-h-[24rem] min-w-0 flex-1 overflow-hidden rounded-lg border border-rule">
+              <div className="absolute inset-0 overflow-auto">
                 <table className="w-full min-w-[40rem] text-[0.88rem]">
                   <thead className="sticky top-0 z-10 bg-plate text-left text-[0.74rem] uppercase tracking-wide text-muted">
                     <tr>
@@ -507,7 +509,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
           </div>
 
           {/* panel de la línea seleccionada */}
-          <aside className="min-w-0 self-start xl:sticky xl:top-4">
+          <aside className="min-w-0 self-start">
             {actual ? (
               <div className="rounded-lg border-2 border-ink bg-white">
                 <div className="border-b border-rule px-4 py-3">

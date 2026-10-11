@@ -84,7 +84,7 @@ Nuestra primera versión (`analysis/pipeline.py` y el primer tablero) seguía un
 
 ### 3.4 Qué conservamos y qué retiramos de la versión anterior
 
-| Elemento de v1 | En la versión actual (v3) | Por qué |
+| Elemento de v1 | En la versión actual | Por qué |
 |---|---|---|
 | Ruido por desviación estándar en tramos sin líneas | **Se conserva**, reimplementado (§5) | Está en la Guía y el cuaderno oficial. |
 | Candidata por frecuencia | **Se conserva** (factor de frecuencia) | Documento base. |
@@ -95,14 +95,17 @@ Nuestra primera versión (`analysis/pipeline.py` y el primer tablero) seguía un
 | Estimación de la velocidad | **Se retira** | La velocidad viene dada. |
 | Error de velocidad por pico, coherencia, p-value/FAP, veredictos por umbrales | **Se retiran** | No es lo que piden los jueces; difícil de defender. |
 
-El código de v1 permanece en `analysis/` como referencia histórica, con un aviso; **el tablero ya no lo usa**.
+Retiramos el código de v1 del repositorio para que no se confunda con el actual; queda disponible en el historial de git.
 
 ### 3.5 Otros cambios de diseño
 | Cambio | Resultado |
 |---|---|
 | Reproducir las gráficas de las instrucciones con un único paso sobre los datos (observado → reposo) | `notebooks/01_graficas_referencia.ipynb` y sección "Gráficas Python" en el tablero. |
-| Una sola fuente de picos para todo el tablero | `peaks.json` sale del motor v3, con ruido, picos y ajustes propios (§5). |
-| Navegación en un sidebar lateral y paneles para la base de moléculas y las gráficas | Tablero actual (§9). |
+| Una sola fuente de picos para todo el tablero | `peaks.json` sale del motor, con ruido, picos y ajustes propios (§5). |
+| Sidebar delgado a la izquierda; cada sección (Analizar, Cómo lo calculamos, Moléculas, Gráficas Python, Evidencia) es una pantalla completa | Tablero actual (§9). |
+| Tema claro de alto contraste, tipografías Inter (texto) y Space Grotesk (títulos), ancho completo | Lectura más clara en pantallas grandes y proyector. |
+| Controles de peso por factor, comparación de candidatas y huellas | Interactividad para ver qué tan robusta es cada respuesta (§9). |
+| Rango de Einstein de los jueces dentro del factor Einstein | §6.2. |
 | Población del nivel dentro del factor Einstein | Se conserva (§6.3). |
 | Isotopólogos fuera del catálogo oficial = no confirmados | Opción adoptada (§6.5). |
 
@@ -119,6 +122,8 @@ El código de v1 permanece en `analysis/` como referencia histórica, con un avi
 | 46 transiciones sin degeneración g_u (CH₂Cl₂, fenol) producían `NaN` en la intensidad esperada y un JSON inválido | Prueba automática que compara el cálculo del navegador con el de Python | "Utilizable" exige Aij **y** g_u; el JSON se escribe en modo estricto para que un `NaN` detenga el proceso. |
 | Estilos rotos al compilar con el servidor de desarrollo encendido | Revisión visual | Compilamos con el servidor apagado. |
 | Primer método de ruido para A no convergía (σ ≈ 180 mJy) | Comparación con v1 | A usa estimador de envolvente inferior (§5). |
+| El cargador de la web reemplazaba en silencio los `NaN` por `null`, lo que ocultaba archivos inválidos | Revisión de código | Eliminado: un archivo inválido ahora falla de forma visible. |
+| Código sin uso heredado de v1 (veredictos, mapa, controles de velocidad, utilidades) | Revisión de código | Eliminado; las conversiones Doppler viven en una sola función con pruebas. |
 | El ruido del cuaderno (26.2 mJy) y el del motor (25.5 mJy) no coincidían: el motor restaba una recta por tramo y el cuaderno la mediana; además los límites de los tramos se guardaban redondeados a 10 kHz | Revisión del panel «Cómo lo calculamos» | Un solo método, el oficial (`ruido_empirico`), y límites con precisión completa: cuaderno, motor y tablero dan el mismo σ. |
 
 ---
@@ -133,10 +138,10 @@ El código de v1 permanece en `analysis/` como referencia histórica, con un avi
 | Archivo | Qué es | Cómo lo obtuvimos |
 |---|---|---|
 | `splatalogue_CDMS_JPL_348.80-349.80GHz.csv` | 8 977 transiciones (424 entradas) de CDMS y JPL en la banda, con log Aij, E_sup, g_sup | `astroquery` → Splatalogue |
-| `catalogo_local_con_aij.csv` | El catálogo oficial + Aij de la **misma** transición (|tag|, g_sup, E_sup ±0.05 K, Δν < 1 MHz) | `analysis/v3/t2_aij_catalogo_local.py` |
-| `censo_cdms_2026-09.csv` | Censo CDMS estructurado: fórmula, nº de átomos (por columna), estado, año | `analysis/v3/t1_censo_cdms.py` |
-| `catalogo_ampliado.csv` | 7 105 transiciones: 348 oficiales + 6 757 de CDMS/JPL; 6 997 utilizables (con Aij y g_u publicados e incertidumbre ≤ 1 MHz) | `analysis/v3/t2b_catalogo_ampliado.py` |
-| `fichas_moleculas.json` | 436 fichas (descripción, entorno, relevancia biótica). **Borrador de IA, pendiente de verificar** | `analysis/v3/fichas.py` |
+| `catalogo_local_con_aij.csv` | El catálogo oficial + Aij de la **misma** transición (|tag|, g_sup, E_sup ±0.05 K, Δν < 1 MHz) | `analysis/t2_aij_catalogo_local.py` |
+| `censo_cdms_2026-09.csv` | Censo CDMS estructurado: fórmula, nº de átomos (por columna), estado, año | `analysis/t1_censo_cdms.py` |
+| `catalogo_ampliado.csv` | 7 105 transiciones: 348 oficiales + 6 757 de CDMS/JPL; 6 997 utilizables (con Aij y g_u publicados e incertidumbre ≤ 1 MHz) | `analysis/t2b_catalogo_ampliado.py` |
+| `fichas_moleculas.json` | 436 fichas (descripción, entorno, relevancia biótica). **Borrador de IA, pendiente de verificar** | `analysis/fichas.py` |
 
 Detalles y límites:
 - **Aij**: 340 de 348 filas oficiales lo tienen. Las 8 restantes (glicolaldehído, E_sup 800–1340 K) quedan vacías porque
@@ -149,7 +154,7 @@ Detalles y límites:
 
 ## 5. Del espectro a los picos
 
-Código: `analysis/v3/probabilidad.py`.
+Código: `analysis/probabilidad.py`.
 
 1. **Observado → reposo** (el único paso sobre los datos): `ν_reposo = ν_LSRK / (1 − v/c)`, c = 299 792.458 km/s,
    v = 2.7 km/s (B_offset, B_pico) y 3.2 km/s (A). Una sola vez; el catálogo no se toca.
@@ -158,7 +163,7 @@ Código: `analysis/v3/probabilidad.py`.
    - **B**: `ruido_empirico()` del cuaderno oficial (desviación estándar con la mediana de cada tramo restada) sobre los
      **6 tramos sin líneas más largos** (≥ 15 canales). Los tramos salen de enmascarar |y − base| > 3σ₀ (σ₀ = percentil 25
      del rms local en ventanas de 25 canales) con dilatación de ±6 canales. Intervalos publicados, con precisión completa,
-     en `analysis/v3/outputs/ruido_v3.csv`. El cuaderno de gráficas usa exactamente los mismos tramos y obtiene el mismo σ.
+     en `analysis/outputs/ruido.csv`. El cuaderno de gráficas usa exactamente los mismos tramos y obtiene el mismo σ.
    - **A**: casi no tiene tramos libres (líneas de ~6 km/s) → usamos σ₀ de envolvente inferior, y lo declaramos.
    - Resultado: σ(B_offset) = 26.1 / 26.2 mJy/beam (W1 / W2); B_pico 38.2 / 39.1; A 19.4 / 21.5.
      En B queda dentro de ~8 % del valor de la versión anterior (que usaba otros tramos).
@@ -231,7 +236,7 @@ ventanas espectrales (una línea fuera de W1/W2 no se puede comprobar con este p
 
 ## 7. Pruebas (B_offset)
 
-Resultados completos: `analysis/v3/outputs/pruebas_T4.txt`.
+Resultados completos: `analysis/outputs/pruebas_T4.txt`.
 
 | Prueba | Resultado |
 |---|---|
@@ -261,8 +266,9 @@ Resultados completos: `analysis/v3/outputs/pruebas_T4.txt`.
 
 ## 9. El tablero (`web/`)
 
-Diseño: fondo blanco, texto casi negro (alto contraste), tipografía sans serif y sidebar azul marino a la izquierda con el
-logo de Sparks y: **Analizar · Cómo lo calculamos · Moléculas (348) · Gráficas Python · Evidencia.**
+Diseño: fondo blanco, texto casi negro (alto contraste), Inter para texto y Space Grotesk para títulos, ancho completo
+de la pantalla y sidebar azul marino a la izquierda con el logo de Sparks. Cada sección es una **pantalla completa**:
+**Analizar · Cómo lo calculamos · Moléculas (348) · Gráficas Python · Evidencia.**
 
 ### Pantalla «Analizar»
 Responde una sola pregunta: *¿qué molécula produce esta línea?*
@@ -305,24 +311,23 @@ teclado y los veredictos por p-value.
 ## 10. Cómo reproducir
 
 ```bash
-python3 -m venv .venv && .venv/bin/pip install numpy pandas scipy matplotlib astropy astroquery nbformat nbclient ipykernel
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 
-# datos añadidos (internet sólo la primera vez; los CSV ya están en el repositorio)
-.venv/bin/python analysis/v3/t2_aij_catalogo_local.py
-.venv/bin/python analysis/v3/t1_censo_cdms.py
-.venv/bin/python analysis/v3/t2b_catalogo_ampliado.py
-.venv/bin/python analysis/v3/fichas.py
+.venv/bin/python analysis/exportar_base_web.py        # meta, catálogo y espectros del tablero
+.venv/bin/python analysis/t2_aij_catalogo_local.py    # coeficiente de Einstein del catálogo oficial
+.venv/bin/python analysis/t1_censo_cdms.py            # censo CDMS de 348 moléculas
+.venv/bin/python analysis/t2b_catalogo_ampliado.py    # catálogo ampliado etiquetado con el censo
+.venv/bin/python analysis/fichas.py                   # fichas de moléculas
+.venv/bin/python analysis/probabilidad.py             # ruido, líneas y probabilidad por línea
+.venv/bin/python analysis/t4_pruebas.py               # robustez y sensibilidad
+.venv/bin/python notebooks/build_01_graficas_referencia.py && cp notebooks/figs/*.png web/public/figs/
 
-# motor v3 → web/public/data/{probabilidad,peaks,spectra}.json
-.venv/bin/python analysis/v3/probabilidad.py
-.venv/bin/python analysis/v3/t4_pruebas.py
-
-# gráficas de referencia
-.venv/bin/python notebooks/build_01_graficas_referencia.py
-
-# tablero (compilar con el servidor de desarrollo apagado)
-cd web && npm ci && npm run dev      # o: npm run build && npm test
+cd web && npm ci && npm run dev                       # tablero en http://localhost:3000
+npm test && npm run build                             # con el servidor de desarrollo apagado
 ```
+
+Comprobamos que este orden regenera todos los resultados desde cero y da los mismos números de este documento.
+Publicación: Vercel con **Root Directory = `web`**.
 
 ---
 
@@ -330,7 +335,7 @@ cd web && npm ci && npm run dev      # o: npm run build && npm test
 
 | Herramienta | Tareas | Qué conservamos | Cómo lo verificamos |
 |---|---|---|---|
-| Claude (Anthropic) vía Claude Code | Lectura de documentos, planificación, extracción de catálogos (Splatalogue/CDMS), código del motor v3 y del tablero, borrador de fichas, documentación; también la versión anterior (v1) | Código en `analysis/v3/`, `web/`, `notebooks/`; fichas marcadas como pendientes | Contraste con los documentos de la competencia; pruebas de robustez y sensibilidad; revisión de ganadores uno a uno; archivos idénticos al paquete (SHA256); compilación y 25 pruebas del tablero |
+| Claude (Anthropic) vía Claude Code | Lectura de documentos, planificación, extracción de catálogos (Splatalogue/CDMS), código del motor y del tablero, borrador de fichas, documentación; también la versión anterior (v1) | Código en `analysis/`, `web/`, `notebooks/`; fichas marcadas como pendientes | Contraste con los documentos de la competencia; pruebas de robustez y sensibilidad; revisión de ganadores uno a uno; archivos idénticos al paquete (SHA256); compilación y pruebas automáticas del tablero (incluida la que comprueba que el navegador reproduce exactamente el cálculo de Python) |
 
 Aportes de cada integrante: **por completar por el equipo**.
 

@@ -1,38 +1,23 @@
-# AstroHack SATEM 2026 — equipo "Sparks" (tablero antes llamado "Huellas")
+# Sparks · AstroHack SATEM 2026
 
-Team project for an astro-hackathon: identify prebiotic molecules in real ALMA Band 7 spectra of the
-protostar **IRAS 16293‑2422** (ALMA 2013.1.00278.S, PILS; ARI‑L products). 4 people, ~12 active hours.
-Deliverables: 2–3 page PDF report + ≤10 slides + reproducible ZIP + filled `evidencia` table + AI‑use declaration.
-Rubric: ID 25 · astrobiology 20 · **creativity/tools 25** · presentation 20 · clarity/authorship 10.
+Decision-support tool: for each line of the ALMA Band 7 spectrum of IRAS 16293-2422 (2013.1.00278.S), rank candidate
+molecules and explain why. Full documentation (Spanish, team voice): `docs/DOCUMENTACION_COMPLETA.md`.
+
+## Priority of sources
+The team's criteria together with the judges' feedback > the competition documents (`Datos de ALMA/`, `Instrucciones/`,
+`Presentacion de inicio/`, `Resultados y Evidencias de los Participantes/`) > existing code.
+
+## Science rules (do not violate)
+- Only transformation of the data: observed → rest, ν_rest = ν_LSRK / (1 − v/c), c = 299792.458 km/s, applied once.
+  v is GIVEN (B 2.7, A 3.2 km/s); never estimate or fit it. Do not clean, smooth or question the data.
+- Model: P(s|line) ∝ L_freq · L_Einstein · L_repeat · π_atoms · π_space · f_environment, plus "outside the catalogue".
+  Einstein includes level population and the judges' range (A ≥ 1e-6 probable; ÷10 per decade below).
+  π_atoms uses the CDMS census of 348 molecules; isotopologues outside the official catalogue count as unconfirmed.
+- Never stitch W1/W2. Jy/beam ≠ abundance. Unresolved catalogue rows = one feature. Flag absorption, never delete.
+- No p-values/FAP, no velocity fitting. Write strict JSON (no NaN); never patch symptoms — fix at the source.
+- Credit: ADS/JAO.ALMA#2013.1.00278.S; ARI-L; Jørgensen et al. 2016 (PILS); CDMS/JPL.
 
 ## Layout
-- `data/` — organizer package (CSV spectra, local catalog, provenance). Cubes are gitignored (symlinks). Never edit.
-- `analysis/` — Python pipeline (`pipeline.py` → peaks, Gaussian fits, Doppler candidate matching,
-  velocity‑consistency score per species). `figures.py`, `sensibilidad.py`, `validate_outputs.py`. Outputs in `analysis/outputs/`.
-  README (Spanish) documents every formula/threshold. Run: `pip install -r analysis/requirements.txt && python analysis/pipeline.py && python analysis/figures.py`.
-- `web/` — Next.js 15 + TS + Tailwind v4 static dashboard (Plotly for spectrum, SVG/D3 for small multiples/map).
-  `npm run dev` / `npm run build` / `npm test` (vitest). Data contract: `docs/DATA_SCHEMA.md` → `web/public/data/*.json`.
-- `docs/` — schema, interpretation guide (GUIA_INTERPRETACION), candidate verification, pipeline explainer, design notes.
-- Root `README.md` / `PLAN_Y_TRACKER.md` belong to the team (vanessaltrejo/astrohack); keep them in sync when structure changes.
-- `analysis/verificar_candidatas.py` — Boltzmann-pattern + PILS-literature check (refs in `analysis/referencias_pils.csv`).
-
-## Science rules (from organizers — do not violate)
-- Radio Doppler, applied ONCE: ν_rest = ν_LSRK / (1 − v/c), c = 299792.458 km/s. **v is GIVEN by the organizers (B 2.7, A 3.2 km/s); it is never estimated or fitted** (judges' instruction, 11-oct). The data are not cleaned or questioned.
-- Never stitch W1 (348.834–349.302 GHz) and W2 (349.303–349.771 GHz). Units Jy/beam ≠ abundance. log10_I_300K ≠ Aij.
-- Unresolved catalog rows = one feature. Noise from line‑free segments only. Flag absorption/blends, never delete.
-- Credit line is mandatory: ADS/JAO.ALMA#2013.1.00278.S; cite ARI‑L, Jørgensen et al. 2016 (PILS), CDMS/JPL entries.
-
-## Current engine (v3) — supersedes pipeline v1 below
-`analysis/v3/` — per-line probability: frequency × Einstein A × repetition × atom-count prior (CDMS census, 348) ×
-seen-in-space prior × environment, plus a "outside the catalogue" option. Run `.venv/bin/python analysis/v3/probabilidad.py`.
-No p-value/FAP, no velocity fitting in the UI. Dashboard sidebar is on the LEFT. Priority: Vanessa's word > organizers' documents > code.
-
-## Old results (pipeline v1, kept for reference only; uses velocity fitting and FAP — not shown in the UI)
-Strong at B: CH3CN (10/10), CH2DOH (15/16), CH3CHO (7/7); C2H5CN (7/12) borderline; CH3OCHO tentative; **Glycine rejected**
-(matches at 1.69 km/s, ~6σ off source velocity; strong line at 349249.6 MHz absent). Brightest line in band
-(349627.8 MHz obs ≈ 349630.9 rest, SNR 73) is NOT in the local catalog → check full CDMS/JPL/Splatalogue. See `analysis/outputs/sin_identificar.csv`.
-Red‑shifted absorption ~1 km/s from most B lines = infall signature (Pineda et al. 2012).
-
-## Conventions
-- UI and documents in Spanish; code/comments English OK. Commit messages in English.
-- Don't fabricate data; every number in the report must trace to `analysis/outputs/`.
+- `analysis/` engine (run order in README.md); outputs in `analysis/outputs/`.
+- `web/` Next.js static site; data in `web/public/data/`; `npm test`, `npm run build` (stop the dev server first).
+- UI and documents in Spanish, team voice ("nosotros"), no personal names or session dates. Commit messages in English.

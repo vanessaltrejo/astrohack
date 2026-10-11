@@ -1,50 +1,68 @@
-# AstroHack SATEM 2026 · Sparks
+# Sparks · AstroHack SATEM 2026
 
-Identificación de moléculas prebióticas en espectros ALMA Banda 7 de la protoestrella
-**IRAS 16293-2422** (proyecto 2013.1.00278.S, productos ARI-L; ventanas W1 348.834–349.302 GHz y
-W2 349.303–349.771 GHz; posiciones B_offset, B_pico y A).
+**¿Qué molécula produce cada línea?** Una herramienta de **apoyo a la decisión** para el espectro de ALMA de la
+protoestrella **IRAS 16293-2422** (proyecto 2013.1.00278.S, banda 7, 348.83–349.77 GHz). Para cada línea, ordena las
+moléculas candidatas, da un porcentaje relativo y explica **por qué**. La decisión final es de quien analiza.
 
-Plan, reglas del concurso y tracker: [PLAN_Y_TRACKER.md](PLAN_Y_TRACKER.md).
-Qué hay que hacer ahora en la parte de interpretación: [docs/GUIA_INTERPRETACION.md](docs/GUIA_INTERPRETACION.md).
+```
+P(molécula | línea) ∝ frecuencia × coeficiente de Einstein × se repite × complejidad × visto en el espacio × entorno
+```
+
+La documentación completa (qué hicimos, por qué, el modelo, las pruebas y los límites) está en
+[`docs/DOCUMENTACION_COMPLETA.md`](docs/DOCUMENTACION_COMPLETA.md).
+
+## Qué le hacemos a los datos
+
+Un solo paso: de frecuencia observada (LSRK) a frecuencia en reposo, `ν_reposo = ν_LSRK / (1 − v/c)`, con la velocidad
+**dada** por los organizadores (B: 2.7 km/s; A: 3.2 km/s). No limpiamos, suavizamos ni recalibramos los datos.
 
 ## Estructura
 
-| Carpeta | Qué contiene |
+| Carpeta | Contenido |
 |---|---|
-| `data/` | copia del paquete de los organizadores (CSV, catálogo local, plantilla de evidencia, procedencia). **No se edita.** Los cubos FITS no van al repo. |
-| `analysis/` | pipeline científico en Python: ruido, picos, ajustes, Doppler, coherencia en velocidad por especie, FAP y veredictos. `README.md` documenta cada fórmula y umbral. Salidas en `analysis/outputs/`. |
-| `web/` | tablero **Sparks** (Next.js, exportación estática): espectro interactivo, huellas por especie, mapa del continuo, candidatas y registro de evidencia exportable. |
-| `docs/` | contrato de datos, guía de interpretación, verificación de candidatas, explicación del pipeline, notas de diseño. Aquí irán el informe y las diapositivas. |
-| `notebooks/` | exploración y figuras adicionales del equipo. |
+| `data/` | Copia ligera del paquete oficial (espectros CSV, catálogo local, procedencia, plantilla de evidencia, continuo). No se edita. |
+| `data/externos/` | Datos que añadimos: transiciones de CDMS/JPL (Splatalogue) con coeficientes de Einstein, censo CDMS de 348 moléculas, catálogo ampliado y fichas de moléculas. |
+| `analysis/` | Motor en Python: catálogos, fichas, probabilidad por línea y pruebas. Resultados en `analysis/outputs/`. |
+| `notebooks/` | Gráficas de referencia de las instrucciones, reproducidas (`01_graficas_referencia.ipynb`). |
+| `web/` | Tablero (Next.js, sitio estático). Sus datos están en `web/public/data/`. |
+| `docs/` | Documentación completa. |
 
 ## Reproducir
 
 ```bash
-pip install -r analysis/requirements.txt
-python analysis/pipeline.py             # ~1 min: picos, ajustes, veredictos, figuras
-python analysis/verificar_candidatas.py # patrón de Boltzmann + contraste con PILS
-python analysis/validate_outputs.py     # contrato docs/DATA_SCHEMA.md (salida 0 = OK)
-cd web && npm install && npm run dev    # tablero en http://localhost:3000
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+
+# 1. Datos base del tablero (meta, catálogo, espectros)
+.venv/bin/python analysis/exportar_base_web.py
+
+# 2. Catálogos y fichas (los CSV ya están en data/externos; sólo hace falta internet para volver a descargar Splatalogue)
+.venv/bin/python analysis/t2_aij_catalogo_local.py     # coeficiente de Einstein del catálogo oficial
+.venv/bin/python analysis/t1_censo_cdms.py             # censo CDMS de 348 moléculas
+.venv/bin/python analysis/t2b_catalogo_ampliado.py     # catálogo ampliado etiquetado con el censo
+.venv/bin/python analysis/fichas.py                    # fichas de moléculas
+
+# 3. Motor: ruido, líneas, probabilidad por línea → web/public/data/{peaks,probabilidad,spectra}.json
+.venv/bin/python analysis/probabilidad.py
+.venv/bin/python analysis/t4_pruebas.py                # robustez y sensibilidad
+
+# 4. Gráficas de referencia
+.venv/bin/python notebooks/build_01_graficas_referencia.py && cp notebooks/figs/*.png web/public/figs/
+
+# 5. Tablero
+cd web && npm ci && npm run dev          # http://localhost:3000
+npm test && npm run build                # pruebas y sitio estático (con el servidor de desarrollo apagado)
 ```
 
-`npm run build` genera `web/out/` para publicar en Vercel (Root Directory = `web`).
+**Publicar en Vercel:** importar el repositorio con **Root Directory = `web`** (Next.js, sin variables de entorno).
 
-## Resultados actuales (B_offset)
+## Resultados principales (B offset)
 
-| Especie | Veredicto | Líneas | v (km/s) |
-|---|---|---|---|
-| CH₃CN, CH₂DOH, CH₃CHO | fuerte | 10/10, 15/16, 7/7 | 2.5–2.7 |
-| C₂H₅CN | probable (fuerte en el límite) | 5 limpias | 2.57 |
-| CH₃OCHO | tentativa (físicamente sólida) | 7/22 | 2.60 |
-| Glicina‑I | descartada (control negativo) | 9 "coincidencias" a 1.69 km/s, 1 ausente | — |
-
-Velocidad adoptada 2.62 ± 0.03 km/s (B_offset), 3.71 ± 0.61 km/s (A). Detalle y referencias en
-[docs/VERIFICACION_CANDIDATAS.md](docs/VERIFICACION_CANDIDATAS.md).
+- Moléculas que más líneas explican: CH₂DOH, CH₃CN, CH₃CHO, CH₃OCHO y C₂H₅CN, las mismas que reporta PILS para esta fuente.
+- Robustez: con 13 especies o con 30, la molécula más probable no cambia en ninguna línea (51/51); con las 380 especies, cambia en 3 de 51.
+- Glicina: candidata en 13 líneas, probabilidad máxima 2.3 %; no gana ninguna.
+- La línea más brillante de la banda (349 631 MHz en reposo) queda **ambigua**: sin identificación firme.
 
 ## Créditos
 
-This paper makes use of the following ALMA data: ADS/JAO.ALMA#2013.1.00278.S. ALMA is a
-partnership of ESO (representing its member states), NSF (USA) and NINS (Japan), together with
-NRC (Canada), NSTC and ASIAA (Taiwan), and KASI (Republic of Korea), in cooperation with the
-Republic of Chile. The Joint ALMA Observatory is operated by ESO, AUI/NRAO and NAOJ.
-Productos ARI-L · PILS (Jørgensen et al. 2016, A&A 595, A117) · catálogos CDMS y JPL.
+This project makes use of the following ALMA data: ADS/JAO.ALMA#2013.1.00278.S. Productos ARI-L.
+Contexto PILS: Jørgensen et al. 2016, A&A 595, A117. Catálogos CDMS (Colonia) y JPL, consultados vía Splatalogue.
