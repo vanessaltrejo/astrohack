@@ -1,10 +1,11 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight } from "lucide-react";
-import type { PosKey, WinKey } from "@/lib/data";
+import { ChevronDown, ChevronRight, Plus } from "lucide-react";
+import type { Peaks, PosKey, WinKey } from "@/lib/data";
+import { findPeak } from "@/lib/data";
 
-type Cand = {
+export type ProbCandidate = {
   pico: string;
   ventana: WinKey;
   nu_obs_MHz: number;
@@ -34,11 +35,15 @@ type Cand = {
   origen?: string | null;
   lista?: string | null;
   isotopologo?: boolean | null;
+  tag?: number | null;
+  catalog_id: number;
+  unc_MHz?: number | null;
+  nu_cat_MHz?: number | null;
 };
 type Resumen = { molecula: string; picos_ganados: number; P_media: number | null; P_acumulada: number };
 type Datos = {
   parametros: { v_kms: Record<PosKey, number> };
-  posiciones: Record<PosKey, { candidatas: Cand[]; resumen: Resumen[] }>;
+  posiciones: Record<PosKey, { candidatas: ProbCandidate[]; resumen: Resumen[] }>;
 };
 
 const FUERA = "(fuera del catálogo)";
@@ -50,12 +55,16 @@ export default function LineProbability({
   active,
   win,
   setWin,
+  peaks,
   onZoom,
+  onLog,
 }: {
   active: PosKey;
   win: WinKey;
   setWin: (w: WinKey) => void;
+  peaks: Peaks | null;
   onZoom: (w: WinKey, fGHz: number) => void;
+  onLog: (c: ProbCandidate) => void;
 }) {
   const [datos, setDatos] = useState<Datos | null>(null);
   const [abierto, setAbierto] = useState<string | null>(null);
@@ -70,7 +79,7 @@ export default function LineProbability({
 
   const picos = useMemo(() => {
     if (!datos) return [];
-    const m = new Map<string, Cand[]>();
+    const m = new Map<string, ProbCandidate[]>();
     for (const c of datos.posiciones[active]?.candidatas ?? []) {
       if (c.ventana !== win) continue;
       m.set(c.pico, [...(m.get(c.pico) ?? []), c]);
@@ -129,7 +138,8 @@ export default function LineProbability({
             <th className="py-1.5">ν obs (GHz)</th>
             <th>ν reposo (MHz)</th>
             <th className="text-right">Jy/haz</th>
-            <th className="pr-4 text-right">S/N</th>
+            <th className="text-right">S/N</th>
+            <th className="pr-4 text-right">FWHM</th>
             <th>probabilidad por molécula</th>
           </tr>
         </thead>
@@ -156,7 +166,21 @@ export default function LineProbability({
                   </td>
                   <td className="id">{p.nu_reposo_MHz.toFixed(2)}</td>
                   <td className="text-right">{p.Jy.toFixed(2)}</td>
-                  <td className="pr-4 text-right">{p.snr.toFixed(0)}</td>
+                  <td className="text-right">{p.snr.toFixed(0)}</td>
+                  <td className="pr-4 text-right">
+                    {(() => {
+                      const pk = findPeak(peaks, p.pico)?.peak;
+                      const fw = pk?.fit?.ok ? pk.fit.fwhm_kms : undefined;
+                      return fw ? (
+                        <span title={pk?.flags?.includes("blend") ? "posible mezcla (residuo del ajuste)" : "ancho del ajuste gaussiano, km/s"}>
+                          {fw.toFixed(1)}
+                          {pk?.flags?.includes("blend") ? <span className="ml-0.5 text-warning">*</span> : null}
+                        </span>
+                      ) : (
+                        <span className="text-muted">—</span>
+                      );
+                    })()}
+                  </td>
                   <td className="py-1">
                     <div className="flex h-5 w-full overflow-hidden bg-plate">
                       {cs.map((c, i) => (
@@ -180,7 +204,7 @@ export default function LineProbability({
                 {open ? (
                   <tr className="border-b border-rule bg-plate">
                     <td />
-                    <td colSpan={5} className="py-2">
+                    <td colSpan={6} className="py-2">
                       <table className="w-full text-[0.76rem]">
                         <thead className="text-left text-muted">
                           <tr>
@@ -195,6 +219,7 @@ export default function LineProbability({
                             <th className="text-right">átomos → complejidad</th>
                             <th className="text-right">visto en el espacio</th>
                             <th className="text-right">entorno</th>
+                            <th />
                           </tr>
                         </thead>
                         <tbody>
@@ -234,6 +259,11 @@ export default function LineProbability({
                                     {c.visto_en_espacio} → {n(c.prior_espacio, 1)}
                                   </td>
                                   <td className="text-right">{n(c.factor_entorno, 1)}</td>
+                                  <td className="pl-2 text-right">
+                                    <button type="button" className="btn btn-quiet px-1.5 py-0.5" title="Añadir a Evidencia" onClick={() => onLog(c)}>
+                                      <Plus className="icon" />
+                                    </button>
+                                  </td>
                                 </>
                               )}
                             </tr>

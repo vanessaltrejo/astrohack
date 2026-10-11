@@ -1,0 +1,41 @@
+13 (catálogo oficial)    especies=  13  picos=104  fuera_del_catálogo=53
+30 (13 + 17 del censo)   especies=  30  picos=104  fuera_del_catálogo=43
+todas                    especies= 380  picos=104  fuera_del_catálogo=10
+
+13 -> 30 (13 + 17 del censo): mismo ganador en 51/51 picos (100%)
+  P (con 13) de los picos que cambian: []
+  nuevos ganadores: {}
+
+13 -> todas: mismo ganador en 47/51 picos (92%)
+  P (con 13) de los picos que cambian: [0.78, 0.5, 0.55, 0.95]
+  nuevos ganadores: {'13CCCCH': 1, 'HS2': 1, '13CH2OHCHO': 1, 'CCH v2 = 1': 1}
+
+13 (catálogo oficial): picos ganados por especie oficial -> {'CH2DOH': 15, 'CH3CN': 10, 'CH3CHO': 9, 'CH3OCHO': 7, 'C2H5CN': 7, 'C2H5OH': 1, 'CH3OH': 1, 'CH3OCH3': 1}
+
+30 (13 + 17 del censo): picos ganados por especie oficial -> {'CH2DOH': 15, 'CH3CN': 10, 'CH3CHO': 9, 'CH3OCHO': 7, 'C2H5CN': 7, 'C2H5OH': 1, 'CH3OH': 1, 'CH3OCH3': 1}
+
+todas: picos ganados por especie oficial -> {'CH2DOH': 15, 'CH3CN': 9, 'CH3CHO': 7, 'CH3OCHO': 7, 'C2H5CN': 7, 'C2H5OH': 1, 'CH3OH': 1}
+
+(b) Glicina-I: aparece como candidata en 13 picos; P máxima = 0.023; gana en 0 picos
+           pico    Jy     P  rango  L_frecuencia  L_Einstein  L_repeticion  lineas_presentes  lineas_fuertes  prior_complejidad  prior_espacio
+B_offset-W1-021 0.156 0.023      7         0.672       0.971         0.476               9.0            19.0              0.052            0.1
+B_offset-W2-057 0.225 0.022      5         0.149       0.511         0.476               9.0            19.0              0.052            0.1
+B_offset-W1-029 0.933 0.018      5         0.923       0.972         0.476               9.0            19.0              0.052            0.1
+
+(c) Línea más brillante: B_offset-W2-047  ν_obs = 349627.874 MHz  ν_reposo = 349631.023 MHz  1.76 Jy/haz
+             especie     P  delta_MHz  L_frecuencia  L_Einstein  L_repeticion    Eu_K
+                D2CO 0.860     -0.416         0.778       1.000         0.500  80.407
+ g-n-C3H7CN, v30 = 2 0.071     -0.133         0.963       0.296         0.438 862.356
+(fuera del catálogo) 0.067        NaN           NaN         NaN           NaN     NaN
+   gG'a-CH3CHOHCH2OH 0.001     -0.230         0.917       0.019         0.562 729.875
+          CCH v2 = 1 0.001     -0.331         0.849       0.001         0.600 576.516
+
+(d) Sensibilidad (fracción de picos con el mismo ganador que la versión base):
+  complejidad ^2 (más fuerte)    93%
+  complejidad ^0.5 (más débil)   87%
+  sin complejidad                83%
+  no detectada = 0.2             100%
+  no detectada = 0.05            100%
+  sin entorno                    92%
+  T población 150 K              98%
+  T población 500 K              96%

@@ -38,6 +38,7 @@ export interface Meta {
 
 export interface NoiseInfo {
   sigma_Jy: number;
+  baseline_Jy?: number;
   method?: string;
   segments_GHz?: [number, number][];
 }
@@ -268,17 +269,14 @@ export interface AnalysisLoad {
 
 /** Carga (o recarga) los productos del pipeline. Nunca lanza: si faltan, devuelve null. */
 export async function loadAnalysis(fresh = false): Promise<AnalysisLoad> {
-  const [pk, sc, pm] = await Promise.all([
-    fetchJson<unknown>("peaks.json", { optional: true, fresh }),
-    fetchJson<unknown>("species_scores.json", { optional: true, fresh }),
-    fetchJson<PipelineMeta>("pipeline_meta.json", { optional: true, fresh }),
-  ]);
+  // Sólo peaks.json (lista de picos del motor v3). Los veredictos por p-value del pipeline v1 ya no se cargan.
+  const pk = await fetchJson<unknown>("peaks.json", { optional: true, fresh });
   return {
-    pipeline: pm.status === "ok" && isObject(pm.value) ? pm.value : null,
+    pipeline: null,
     peaks: pk.status === "ok" ? sanitizePeaks(pk.value) : null,
-    scores: sc.status === "ok" ? sanitizeScores(sc.value) : null,
+    scores: null,
     peaksState: pk.status,
-    scoresState: sc.status,
+    scoresState: "missing",
   };
 }
 

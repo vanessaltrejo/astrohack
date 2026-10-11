@@ -1,3 +1,8 @@
+> **AVISO (11-oct-2026): este pipeline es la primera iteración (v1) y ya NO lo usa el tablero.**
+> Estima la velocidad, calcula p-value/FAP y emite veredictos; los jueces pidieron otra cosa (velocidad dada, datos sin
+> cuestionar, probabilidad por línea con 4 factores). El motor vigente está en [`analysis/v3/`](v3/) y se documenta en
+> [`docs/DOCUMENTACION_COMPLETA.md`](../docs/DOCUMENTACION_COMPLETA.md). Se conserva como referencia histórica.
+
 # Pipeline científico · AstroHack SATEM 2026
 
 IRAS 16293-2422 · ALMA 2013.1.00278.S (ARI-L, 12 m) · ventanas W1 (348.834–349.302 GHz) y

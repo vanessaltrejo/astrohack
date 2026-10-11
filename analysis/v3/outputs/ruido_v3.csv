@@ -1,0 +1,7 @@
+posicion,ventana,sigma_mJy,baseline_mJy,n_tramos,tramos_GHz,metodo
+B_offset,W1,24.68,0.94,6,348.85691-348.87009; 348.96628-348.98361; 349.06564-349.08810; 349.14913-349.16427; 349.18380-349.20553; 349.22017-349.23580,desviación estándar de 6 tramos sin líneas (línea base lineal por tramo; máscara 3σ0 dilatada ±6 canales)
+B_offset,W2,25.46,-6.01,6,349.35616-349.37276; 349.45430-349.47139; 349.51533-349.53095; 349.58295-349.59541; 349.64985-349.66694; 349.69794-349.71088,desviación estándar de 6 tramos sin líneas (línea base lineal por tramo; máscara 3σ0 dilatada ±6 canales)
+B_pico,W1,37.2,-0.07,6,348.91501-348.93210; 348.96628-348.98361; 349.06564-349.08786; 349.14938-349.16866; 349.18380-349.20553; 349.22017-349.23580,desviación estándar de 6 tramos sin líneas (línea base lineal por tramo; máscara 3σ0 dilatada ±6 canales)
+B_pico,W2,37.45,-9.87,6,349.35616-349.37276; 349.45430-349.47114; 349.51460-349.53095; 349.54633-349.55952; 349.64960-349.66669; 349.69818-349.71088,desviación estándar de 6 tramos sin líneas (línea base lineal por tramo; máscara 3σ0 dilatada ±6 canales)
+A,W1,19.35,28.93,0,,envolvente inferior (percentil 25 del rms local en ventanas de 25 canales): A casi no tiene tramos libres
+A,W2,21.53,29.31,0,,envolvente inferior (percentil 25 del rms local en ventanas de 25 canales): A casi no tiene tramos libres

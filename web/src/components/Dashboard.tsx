@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { Atom, AudioWaveform, BookOpen, ChartBarBig, ClipboardList, Fingerprint, Images, Keyboard, RefreshCw, Table2 } from "lucide-react";
+import { Atom, AudioWaveform, BookOpen, ChartBarBig, ClipboardList, Fingerprint, Images, Keyboard, RefreshCw } from "lucide-react";
 import {
   findPeak,
   loadAnalysis,
@@ -9,8 +9,6 @@ import {
   type AnalysisLoad,
   type CatalogLine,
   type CoreLoad,
-  type Peak,
-  type PeakCandidate,
   type PosKey,
   type WinKey,
 } from "@/lib/data";
@@ -22,7 +20,6 @@ import { prefillRow } from "@/lib/prefill";
 import { f } from "@/lib/format";
 import { useReveal, useScrollSpy } from "@/lib/motion";
 import SpectrumSection from "./SpectrumSection";
-import PeaksTable from "./PeaksTable";
 import Fingerprints from "./Fingerprints";
 import FieldMap from "./FieldMap";
 import EvidenceLog from "./EvidenceLog";
@@ -32,13 +29,13 @@ import MoleculesPanel from "./MoleculesPanel";
 import ReferencePlots from "./ReferencePlots";
 import LineProbability from "./LineProbability";
 import { groupOfRow, loadV3, speciesRows, type V3Data } from "@/lib/probabilidad";
+import type { ProbCandidate } from "./LineProbability";
 import { Tex, SYM } from "./Tex";
 
 const SECTIONS = [
   { id: "espectro", label: "Espectro", key: "1" },
   { id: "probabilidad", label: "Probabilidad", key: "2" },
   { id: "huellas", label: "Huellas", key: "3" },
-  { id: "candidatas", label: "Candidatas", key: "4" },
 ] as const;
 const SECTION_IDS = SECTIONS.map((s) => s.id);
 
@@ -116,7 +113,6 @@ function Loaded({
 }) {
   const { meta, spectra, catalog, continuum } = core;
   const peaks = analysis?.peaks ?? null;
-  const pipeline = analysis?.pipeline ?? null;
   const peaksState = analysis ? analysis.peaksState : "missing";
   const [v3, setV3] = useState<V3Data | null>(null);
   useEffect(() => {
@@ -155,7 +151,6 @@ function Loaded({
   const [vPulse, setVPulse] = useState(0);
   const current = useScrollSpy(SECTION_IDS);
   const revHuellas = useReveal<HTMLElement>();
-  const revCand = useReveal<HTMLElement>();
   const headRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -271,15 +266,6 @@ function Loaded({
     [setRows],
   );
 
-  const logCandidate = useCallback(
-    (w: WinKey, p: PosKey, peak: Peak, cand: PeakCandidate) => {
-      const line = catalogById.get(cand.catalog_id);
-      if (!line) return;
-      addEvidence(prefillRow({ team, line, win: w, pos: p, peak, noise: spectra[w].noise[p] }));
-    },
-    [catalogById, addEvidence, team, spectra],
-  );
-
   const logLine = useCallback(
     (line: CatalogLine, w: WinKey | null, peakId: string | null) => {
       const found = peakId ? findPeak(peaks, peakId) : null;
@@ -297,6 +283,41 @@ function Loaded({
       );
     },
     [peaks, active, v3Rows, addEvidence, team, spectra],
+  );
+
+  /** registra en Evidencia una candidata de la tabla de probabilidad (motor v3) */
+  const logProbabilidad = useCallback(
+    (c: ProbCandidate) => {
+      const oficial = c.catalog_id >= 0 ? catalogById.get(c.catalog_id) : undefined;
+      const line: CatalogLine = oficial ?? {
+        id: c.catalog_id,
+        species: c.especie,
+        catalog: c.lista ?? "",
+        entry: String(Math.abs(c.tag ?? 0)).padStart(6, "0"),
+        rest_MHz: c.nu_cat_MHz ?? c.nu_reposo_MHz,
+        unc_MHz: c.unc_MHz ?? 0,
+        logI_300K: 0,
+        Eu_K: c.Eu_K ?? 0,
+        El_cm1: 0,
+        gu: 0,
+        qn_up: c.QN ?? "",
+        qn_lo: "",
+        window: c.ventana,
+      };
+      const found = findPeak(peaks, c.pico);
+      addEvidence(
+        prefillRow({
+          team,
+          line,
+          win: c.ventana,
+          pos: active,
+          peak: found?.peak ?? null,
+          noise: spectra[c.ventana].noise[active],
+          decision: `pendiente (P = ${(c.P * 100).toFixed(0)} % en esta línea)`,
+        }),
+      );
+    },
+    [catalogById, peaks, active, team, spectra, addEvidence],
   );
 
   const showInSpectrum = useCallback((sp: string, vv: number) => {
@@ -362,7 +383,7 @@ function Loaded({
   );
 
   const sigma = spectra[win].noise[active]?.sigma_Jy ?? 0;
-  const baseline = pipeline?.noise?.[win]?.[active]?.baseline_Jy ?? 0;
+  const baseline = spectra[win].noise[active]?.baseline_Jy ?? 0;
   const activePeaks = peaks?.[win]?.[active] ?? null;
   // velocidad DADA por los organizadores (Guía p. 8, diapositiva 22); no se estima
   const vPipeline = meta.positions[active].v_start_kms;
@@ -380,7 +401,7 @@ function Loaded({
           ...SECTIONS.map((sec) => ({
             id: sec.id,
             label: sec.label,
-            Icon: { espectro: AudioWaveform, probabilidad: ChartBarBig, huellas: Fingerprint, candidatas: Table2 }[sec.id],
+            Icon: { espectro: AudioWaveform, probabilidad: ChartBarBig, huellas: Fingerprint }[sec.id],
             onClick: () => scrollTo(sec.id),
             active: current === sec.id,
             title: `${sec.label} (${sec.key})`,
@@ -504,7 +525,14 @@ function Loaded({
         {/* ---------- probabilidad por línea (motor v3) ---------- */}
         <section id="probabilidad" aria-labelledby="probabilidad-title" className="pt-16">
           <SectionHead id="probabilidad" title="Probabilidad por línea" subtitle="qué molécula explica cada pico, y por qué" />
-          <LineProbability active={active} win={win} setWin={setWin} onZoom={(w, fGHz) => zoomTo(w, active, fGHz)} />
+          <LineProbability
+            active={active}
+            win={win}
+            setWin={setWin}
+            peaks={peaks}
+            onZoom={(w, fGHz) => zoomTo(w, active, fGHz)}
+            onLog={logProbabilidad}
+          />
         </section>
 
         {/* ---------- huellas ---------- */}
@@ -528,11 +556,6 @@ function Loaded({
           />
         </section>
 
-        {/* ---------- candidatas ---------- */}
-        <section id="candidatas" aria-labelledby="candidatas-title" className="reveal pb-10 pt-16" ref={revCand}>
-          <SectionHead id="candidatas" title="Candidatas" subtitle={<>picos de S/N ≥ 4 y las transiciones que podrían explicarlos</>} />
-          <PeaksTable peaks={peaks} peaksState={peaksState} active={active} vAdopted={vPipeline} onZoom={zoomTo} onLog={logCandidate} />
-        </section>
       </main>
 
       <footer className="mt-10 border-t border-rule">

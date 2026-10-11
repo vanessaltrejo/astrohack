@@ -226,7 +226,7 @@ export function MethodBody() {
 
 export function ShortcutsBody() {
   const rows: [string, string][] = [
-    ["1 · 2 · 3 · 4", "ir a Espectro, Probabilidad, Huellas, Candidatas"],
+    ["1 · 2 · 3", "ir a Espectro, Probabilidad, Huellas"],
     ["e", "abrir el registro de evidencia"],
     ["m", "ver el método"],
     ["w", "cambiar de ventana (W1 / W2)"],
