@@ -397,7 +397,7 @@
  },
  {
   "formula": "n-C3H7CN",
-  "nombre": "gauche-n-butyronitrile, v28 = 1",
+  "nombre": "anti-n-butyronitrile, v29 = 1",
   "n_atomos": "12",
   "visto_en_espacio": "detectada",
   "en_censo": true,
@@ -2071,7 +2071,7 @@
  },
  {
   "formula": "CH3CH2SH",
-  "nombre": "Ethanethiol, anti",
+  "nombre": "Ethanethiol, gauche",
   "n_atomos": "9",
   "visto_en_espacio": "detectada",
   "en_censo": true,
@@ -6453,7 +6453,7 @@
   "especie_laboratorio": "c-C6H5CHO"
  },
  {
-  "formula": "O81BrO",
+  "formula": "O79BrO",
   "nombre": "Bromine Dioxide",
   "n_atomos": "3",
   "visto_en_espacio": "no detectada",
@@ -6469,7 +6469,7 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "O81BrO"
+  "especie_laboratorio": "O79BrO"
  },
  {
   "formula": "H2CCCHNC",
@@ -6643,7 +6643,7 @@
   "especie_laboratorio": "37ClONO2"
  },
  {
-  "formula": "ClOOCl",
+  "formula": "37ClOOCl",
   "nombre": "Chlorine peroxide",
   "n_atomos": "4",
   "visto_en_espacio": "no detectada",
@@ -6659,7 +6659,7 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "ClOOCl"
+  "especie_laboratorio": "37ClOOCl"
  },
  {
   "formula": "ClClOO",
@@ -6814,7 +6814,7 @@
   "especie_laboratorio": "aa-(C2H5)2O"
  },
  {
-  "formula": "CH2F2 v4=1",
+  "formula": "CH2F2 v=0",
   "nombre": "Difluoromethane",
   "n_atomos": "5",
   "visto_en_espacio": "no detectada",
@@ -6830,10 +6830,10 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "CH2F2 v4=1"
+  "especie_laboratorio": "CH2F2 v=0"
  },
  {
-  "formula": "CH2OHCOCH2OH v29=1",
+  "formula": "CH2OHCOCH2OH v28=1",
   "nombre": "Dihydroxyacetone",
   "n_atomos": "12",
   "visto_en_espacio": "no detectada",
@@ -6849,7 +6849,7 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "CH2OHCOCH2OH v29=1"
+  "especie_laboratorio": "CH2OHCOCH2OH v28=1"
  },
  {
   "formula": "c-C4H4O2",
@@ -7327,7 +7327,7 @@
   "especie_laboratorio": "(c-C3H2)CH2 (C4H4)"
  },
  {
-  "formula": "HNO3 v5=1/v9=2",
+  "formula": "DNO3",
   "nombre": "Nitric acid",
   "n_atomos": "5",
   "visto_en_espacio": "no detectada",
@@ -7343,7 +7343,7 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "HNO3 v5=1/v9=2"
+  "especie_laboratorio": "DNO3"
  },
  {
   "formula": "NO2",
@@ -7422,7 +7422,7 @@
   "especie_laboratorio": "c-C3H6O"
  },
  {
-  "formula": "O218O-asym",
+  "formula": "O217O-sym, v2 = 0",
   "nombre": "Ozone",
   "n_atomos": "3",
   "visto_en_espacio": "no detectada",
@@ -7438,7 +7438,7 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "O218O-asym"
+  "especie_laboratorio": "O217O-sym, v2 = 0"
  },
  {
   "formula": "HOONO2",
@@ -7555,7 +7555,7 @@
   "especie_laboratorio": "C3H8"
  },
  {
-  "formula": "HCCCH2OH",
+  "formula": "HCCCH2OD",
   "nombre": "Propargyl Alcohol",
   "n_atomos": "8",
   "visto_en_espacio": "no detectada",
@@ -7571,7 +7571,7 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "HCCCH2OH"
+  "especie_laboratorio": "HCCCH2OD"
  },
  {
   "formula": "HCCCH2NH2",
@@ -7878,7 +7878,7 @@
   "especie_laboratorio": "c-C3H5CN"
  },
  {
-  "formula": "AA-n-C4H9CN",
+  "formula": "GA-n-C4H9CN",
   "nombre": "n-Butyl cyanide",
   "n_atomos": "15",
   "visto_en_espacio": "no detectada",
@@ -7894,7 +7894,7 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "AA-n-C4H9CN"
+  "especie_laboratorio": "GA-n-C4H9CN"
  },
  {
   "formula": "t-C4H9CN",
@@ -7916,7 +7916,7 @@
   "especie_laboratorio": "t-C4H9CN"
  },
  {
-  "formula": "CH3CHNH2COOH - I",
+  "formula": "CH3CHNH2COOH - II",
   "nombre": "α-Alanine",
   "n_atomos": "13",
   "visto_en_espacio": "no detectada",
@@ -7932,6 +7932,6 @@
   "url_cdms": "",
   "verificacion": "pendiente",
   "fuente_texto": "borrador IA (Claude)",
-  "especie_laboratorio": "CH3CHNH2COOH - I"
+  "especie_laboratorio": "CH3CHNH2COOH - II"
  }
 ]

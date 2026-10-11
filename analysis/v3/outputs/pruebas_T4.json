@@ -1,0 +1,56 @@
+{
+ "robustez": {
+  "30 (13 + 17 del censo)": {
+   "picos_asignados_con_13": 53,
+   "mismo_ganador": 52,
+   "fraccion": 0.9811320754716981
+  },
+  "todas": {
+   "picos_asignados_con_13": 53,
+   "mismo_ganador": 47,
+   "fraccion": 0.8867924528301887
+  }
+ },
+ "glicina": {
+  "picos_candidata": 13,
+  "P_max": 0.022834117113311517,
+  "gana": 0
+ },
+ "linea_brillante": [
+  {
+   "especie": "D2CO",
+   "P": 0.8596319037,
+   "delta_MHz": -0.41625761
+  },
+  {
+   "especie": "g-n-C3H7CN, v30 = 2",
+   "P": 0.0706310999,
+   "delta_MHz": -0.13275761
+  },
+  {
+   "especie": "(fuera del catálogo)",
+   "P": 0.0667334533,
+   "delta_MHz": null
+  },
+  {
+   "especie": "gG'a-CH3CHOHCH2OH",
+   "P": 0.0014510571,
+   "delta_MHz": -0.22975761
+  },
+  {
+   "especie": "CCH v2 = 1",
+   "P": 0.0013700528,
+   "delta_MHz": -0.33085761
+  }
+ ],
+ "sensibilidad": {
+  "complejidad ^2 (más fuerte)": 0.908256880733945,
+  "complejidad ^0.5 (más débil)": 0.8990825688073395,
+  "sin complejidad": 0.8532110091743119,
+  "no detectada = 0.2": 1.0,
+  "no detectada = 0.05": 1.0,
+  "sin entorno": 0.9174311926605505,
+  "T población 150 K": 0.981651376146789,
+  "T población 500 K": 0.9541284403669725
+ }
+}

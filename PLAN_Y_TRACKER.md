@@ -278,10 +278,10 @@ Interés prebiótico/biótico: **pendiente de decisión de Vanessa** (ver 11.4 #
 
 | ID | Hora | Paso | Resultado | Estado |
 |---|---|---|---|---|
-| T1 | 06:30–07:30 | **Base de datos de las 348 moléculas** (lista limpia del censo CDMS citado en la diapositiva 5): fórmula, nombre, nº de átomos, detectada/tentativa, descripción, condiciones abióticas favorables, relevancia biótica/prebiótica. Fichas redactadas con IA marcadas como borrador; las ~15 relevantes, verificadas con cita | `data/moleculas_348.json` | ⬜ |
-| T2 | 06:30–07:30 | **Catálogo ampliado con Aij**: transiciones de moléculas del censo en 348.8–349.8 GHz desde CDMS/JPL (vía Splatalogue), con Aij, Eu, g_u e incertidumbre. El catálogo local queda intacto | `data/catalogo_ampliado.csv` | ⬜ |
-| T3 | 07:30–08:30 | **Motor v3**: datos crudos, v fija, ruido oficial, picos, factores 11.2, opción "fuera del catálogo" | `analysis/probabilidad.py`, `outputs/probabilidad_lineas.csv` | ⬜ |
-| T4 | 08:30–09:00 | **Pruebas**: (a) mismo ranking con el catálogo local (13–15), con ~30 y con el ampliado; (b) glicina baja; (c) línea SNR 73 → "fuera del catálogo" o candidata nueva; (d) detecciones PILS conocidas arriba | tabla de robustez | ⬜ |
+| T1 | 06:30–07:30 | **Base de datos de las 348 moléculas** (lista limpia del censo CDMS citado en la diapositiva 5): fórmula, nombre, nº de átomos, detectada/tentativa, descripción, condiciones abióticas favorables, relevancia biótica/prebiótica. Fichas redactadas con IA marcadas como borrador; las ~15 relevantes, verificadas con cita | `data/externos/censo_cdms_2026-09.csv`, `fichas_moleculas.json` | ✅ (fichas: borrador IA, verificación pendiente) |
+| T2 | 06:30–07:30 | **Catálogo ampliado con Aij**: transiciones de moléculas del censo en 348.8–349.8 GHz desde CDMS/JPL (vía Splatalogue), con Aij, Eu, g_u e incertidumbre. El catálogo local queda intacto | `data/externos/catalogo_local_con_aij.csv`, `catalogo_ampliado.csv` | ✅ |
+| T3 | 07:30–08:30 | **Motor v3**: datos crudos, v fija, ruido oficial, picos, factores 11.2, opción "fuera del catálogo" | `analysis/v3/probabilidad.py`, `analysis/v3/outputs/` | ✅ |
+| T4 | 08:30–09:00 | **Pruebas**: (a) mismo ranking con el catálogo local (13–15), con ~30 y con el ampliado; (b) glicina baja; (c) línea SNR 73 → "fuera del catálogo" o candidata nueva; (d) detecciones PILS conocidas arriba | `analysis/v3/t4_pruebas.py`, `outputs/pruebas_T4.json` | ✅ |
 | T5 | 08:00–09:00 | **Gráficas de referencia** reproducidas del cuaderno oficial: espectro W1/W2 B_offset, ruido, `candidatos`, `ajustar` (gauss + residuos), verificación del cubo | `notebooks/01_graficas_referencia.ipynb` + PNG en `web/public/figs/` | ✅ (falta mostrarlas en el sidebar, T6) |
 | T6 | 09:00–10:00 | **Dashboard**: (1) quitar los botones y la navegación de arriba; (2) **sidebar delgado a la derecha** con las secciones existentes + "Moléculas (348)" con buscador y ficha + "Gráficas de referencia (Python)"; (3) barras de probabilidad por línea; (4) quitar el control de velocidad (v fija) | `web/` | ⬜ |
 | T7 | 10:00–10:15 | Congelar código, `npm run build`, revisión final | | ⬜ |
@@ -296,3 +296,9 @@ Interés prebiótico/biótico: **pendiente de decisión de Vanessa** (ver 11.4 #
 | Hora | Paso | Resultado |
 |---|---|---|
 | 06:25 | T5 | 6 gráficas oficiales reproducidas. Única transformación: observado → reposo (v = 2.7 B, 3.2 A). Comprobado: hashes idénticos al paquete, 2.7 km/s = 3.14 MHz a 349 GHz, extracción del cubo exacta. Ajuste CH3CN 19₀–18₀: centro 2.37 km/s, FWHM 1.41 km/s, con caída al rojo en los residuos (descriptivo) |
+| 06:30 | T2 | Aij de CDMS/JPL (Splatalogue) pegado a la MISMA transición: 340/348 filas oficiales. 8 de glicolaldehído sin Aij (Splatalogue trunca g_u). Glicolaldehído oficial = versión CDMS 2026 (frecuencias distintas hasta 0.69 MHz) |
+| 06:33 | T1 | Censo CDMS 09/2026: 349 filas, 348 cuentan (H2C(CH)3CN cuestionada). Glicina y dihidroxiacetona: 'not yet detected' según CDMS |
+| 06:34 | T2b | Catálogo ampliado: todas las especies CDMS/JPL en banda, etiquetadas con el censo mediante tabla revisada a mano (la composición confunde isómeros: glicina ↔ carbamato de metilo) |
+| 06:36 | T1 | 436 fichas (32 manuales). Entorno → factor (hot corino/ubicua 1, nube fría 0.5, circunestelar/atmósfera 0.1). Corregidos: NO/HO2 y ArH+/HeH+ mal clasificados |
+| 06:40 | T3 | Motor v3. Errores encontrados y corregidos al revisar: (1) 18OD con Eu = 16 597 K ganaba un pico → término de población de Boltzmann en el factor Einstein; (2) filas con incertidumbre de cientos de MHz → se excluyen > 1 MHz y L_frecuencia normalizada; (3) misma transición en CDMS y JPL contada 2 veces (D2CO) → deduplicación por E_sup y Δν < 1 MHz |
+| 06:45 | T4 | Robustez: 13→30 especies, mismo ganador 98 %; 13→todas, 89 %. Glicina: P máx 0.023, nunca gana. Línea más brillante (349631.0 MHz reposo, SNR 73) → D2CO 6(2,5)–5(2,4), P 0.86, 1 sola línea (tentativa). Sensibilidad a supuestos: 85–100 % igual |

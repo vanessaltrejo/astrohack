@@ -112,16 +112,29 @@ sp = pd.read_csv(ROOT / "data/externos/splatalogue_CDMS_JPL_348.80-349.80GHz.csv
 
 # 1) filas de Splatalogue que NO son de las especies del catálogo oficial (ésas van con sus filas oficiales)
 tags_loc = set(loc.tag_original.abs())
-clave_loc = set(zip(loc.frecuencia_reposo_MHz.round(1), loc.E_superior_K.round(0)))
-dup_loc = [((f, e) in clave_loc) for f, e in zip(sp.orderedfreq.round(1), sp.upper_state_energy_K.round(0))]
-ext = sp[~sp.moleculeTag.abs().isin(tags_loc) & ~np.array(dup_loc)].copy()
+# misma transición = misma E_sup (±0.5 K) y frecuencia a < 1 MHz (CDMS y JPL pueden diferir hasta ~0.7 MHz)
+lf_, le_ = loc.frecuencia_reposo_MHz.to_numpy(), loc.E_superior_K.to_numpy()
+dup_loc = np.array([bool(np.any((np.abs(lf_ - f) < 1.0) & (np.abs(le_ - e) < 0.5)))
+                    for f, e in zip(sp.orderedfreq, sp.upper_state_energy_K)])
+ext = sp[~sp.moleculeTag.abs().isin(tags_loc) & ~dup_loc].copy()
 
 # 2) una sola lista por transición: si CDMS y JPL repiten la misma, se queda CDMS
 ext["nq"] = ext.chemical_name.map(norm)
 ext["iso"] = ext.name.map(es_isotopologo)
-ext["_k"] = list(zip(ext.nq, ext.name.str.replace(r"\s.*", "", regex=True), ext.orderedfreq.round(1),
-                     ext.upper_state_energy_K.round(0)))
-ext = ext.sort_values("linelist").drop_duplicates("_k", keep="first")   # "CDMS" < "JPL"
+ext["_base"] = ext.name.map(lambda s: re.split(r"\s", html.unescape(re.sub(r"<[^>]+>", "", s)).strip())[0])
+ext = ext.sort_values(["linelist", "orderedfreq"]).reset_index(drop=True)          # "CDMS" < "JPL"
+quitar = set()
+for _, g in ext.groupby(["nq", "_base"]):
+    if g.linelist.nunique() < 2:
+        continue
+    cd, jp = g[g.linelist == "CDMS"], g[g.linelist == "JPL"]
+    for j, r in jp.iterrows():
+        if np.any((np.abs(cd.orderedfreq - r.orderedfreq) < 1.0) &
+                  (np.abs(cd.upper_state_energy_K - r.upper_state_energy_K) < 0.5)):
+            quitar.add(j)
+# además, filas repetidas exactas dentro de una misma lista
+ext = ext.drop(index=list(quitar)).drop_duplicates(["nq", "_base", "orderedfreq", "upper_state_energy_K"])
+print("duplicados CDMS/JPL eliminados:", len(quitar))
 
 avisos = sorted(set(ext.nq) - set(CENSO))
 ext["formula_censo"] = ext.nq.map(lambda k: CENSO.get(k))
