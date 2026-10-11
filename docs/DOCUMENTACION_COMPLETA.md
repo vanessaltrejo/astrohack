@@ -367,7 +367,7 @@ npm test && npm run build                             # con el servidor de desar
 ```
 
 Comprobamos que este orden regenera todos los resultados desde cero y da los mismos números de este documento.
-Publicación: Vercel importando el repositorio tal cual; `vercel.json` construye sólo `web/` y publica `web/out` (sitio estático, sin backend).
+Publicación: Vercel con **Root Directory = `web`** y el preset Next.js (sitio estático, sin backend).
 
 ---
 

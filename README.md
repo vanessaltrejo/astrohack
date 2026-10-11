@@ -62,7 +62,7 @@ cd web && npm ci && npm run dev          # http://localhost:3000
 npm test && npm run build                # pruebas y sitio estático (con el servidor de desarrollo apagado)
 ```
 
-**Publicar en Vercel:** importar el repositorio tal cual. `vercel.json` (en la raíz) construye sólo `web/` y publica el sitio estático `web/out`; no hay backend ni variables de entorno. Python sólo se usa en local para generar los datos, que ya están en `web/public/data/`.
+**Publicar en Vercel:** importar el repositorio con **Root Directory = `web`** y el preset **Next.js** (sitio estático; sin backend ni variables de entorno). Python sólo se usa en local para generar los datos, que ya están en `web/public/data/`.
 
 ## Resultados principales (B offset)
 
