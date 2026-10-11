@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Atom, ClipboardList, Images, Plus, RotateCcw, ScanSearch, Workflow, ZoomIn, ZoomOut } from "lucide-react";
+import { Atom, ClipboardList, Plus, RotateCcw, ScanSearch, Workflow, ZoomIn, ZoomOut } from "lucide-react";
 import { findPeak, loadCore, loadJson, loadPeaks, type CatalogLine, type CoreLoad, type Peaks, type PosKey, type WinKey } from "@/lib/data";
 import { loadRows, loadTeam, saveRows, saveTeam, type EvidenceRow } from "@/lib/evidence";
 import { prefillRow } from "@/lib/prefill";
@@ -12,10 +12,10 @@ import { TEAM_NAME_DEFAULT } from "@/lib/config";
 import { esBase, FACTORES, FUERA, nivel, NIVEL, PESOS_BASE, pct, recalcular, type Cand, type FactorKey, type Nivel, type Pesos, type V3 } from "@/lib/modelo";
 import Sidebar from "./Sidebar";
 import EvidenceLog from "./EvidenceLog";
-import MoleculesPanel, { type Ficha } from "./MoleculesPanel";
-import ReferencePlots from "./ReferencePlots";
+import MoleculesPanel, { type Explica, type Ficha } from "./MoleculesPanel";
 import Backstage from "./Backstage";
 import Huellas from "./Huellas";
+import FactorIcon from "./FactorIcon";
 
 const Plot = dynamic(() => import("./Plot"), { ssr: false });
 
@@ -38,7 +38,7 @@ const BIO: Record<string, string> = {
 };
 const CAND_COLORS = ["#1d4ed8", "#7c3aed", "#0e7490"];
 
-type Vista = "analizar" | "backstage" | "moleculas" | "graficas" | "evidencia";
+type Vista = "analizar" | "backstage" | "moleculas" | "evidencia";
 
 function Pagina({ titulo, subtitulo, children }: { titulo: string; subtitulo: string; children: React.ReactNode }) {
   return (
@@ -275,6 +275,14 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
     [catalogById, peaks, team, pos, spectra, setRows, pesos],
   );
 
+  const explica = useMemo(() => {
+    const m: Explica = {};
+    for (const p of Object.keys(v3.posiciones) as PosKey[])
+      for (const c of v3.posiciones[p].candidatas)
+        if (c.rango === 1 && c.especie !== FUERA) m[c.molecula] = { ...m[c.molecula], [p]: (m[c.molecula]?.[p] ?? 0) + 1 };
+    return m;
+  }, [v3]);
+
   const feats = enfocada ? (data.especies[enfocada.especie]?.fuertes ?? null) : null;
   const fichaFoco = enfocada ? fichaDe(enfocada) : undefined;
 
@@ -285,7 +293,6 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
           { id: "analizar", label: "Analizar", Icon: ScanSearch, onClick: () => irA("analizar"), active: vista === "analizar" },
           { id: "backstage", label: "Cómo lo calculamos", Icon: Workflow, onClick: () => irA("backstage"), active: vista === "backstage" },
           { id: "moleculas", label: "Moléculas (348)", Icon: Atom, onClick: () => irA("moleculas"), active: vista === "moleculas" },
-          { id: "graficas", label: "Gráficas Python", Icon: Images, onClick: () => irA("graficas"), active: vista === "graficas" },
           { id: "evidencia", label: "Evidencia", Icon: ClipboardList, onClick: () => irA("evidencia"), active: vista === "evidencia", badge: rows.length },
         ]}
       />
@@ -314,7 +321,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
         <section className="mb-3 flex flex-wrap items-end gap-x-8 gap-y-3 rounded-lg border border-rule bg-plate px-4 py-3">
           <div>
             <p className="mb-1 text-[0.74rem] font-semibold uppercase tracking-wide text-muted">Posición</p>
-            <div className="seg">
+            <div className="seg seg-datos">
               {POS.map((p) => (
                 <button key={p.key} type="button" aria-pressed={pos === p.key} onClick={() => setPos(p.key)} title={p.hint}>
                   {p.label}
@@ -324,7 +331,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
           </div>
           <div>
             <p className="mb-1 text-[0.74rem] font-semibold uppercase tracking-wide text-muted">Ventana</p>
-            <div className="seg">
+            <div className="seg seg-datos">
               {(["W1", "W2"] as WinKey[]).map((w) => (
                 <button key={w} type="button" aria-pressed={win === w} onClick={() => setWin(w)}>
                   {w} · {meta.windows[w].range_GHz[0].toFixed(2)}–{meta.windows[w].range_GHz[1].toFixed(2)} GHz
@@ -359,10 +366,11 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
           <div className="grid grid-cols-[repeat(auto-fill,minmax(21rem,1fr))] gap-x-8 gap-y-2">
             {FACTORES.map((f) => (
               <div key={f.key} className="flex items-center justify-between gap-2">
-                <span className="whitespace-nowrap text-[0.86rem]" title={f.ayuda}>
+                <span className="flex items-center gap-2 whitespace-nowrap text-[0.88rem] font-medium" title={f.ayuda}>
+                  <FactorIcon k={f.key} />
                   {f.label}
                 </span>
-                <div className="seg">
+                <div className="seg seg-peso">
                   {(
                     [
                       [0, "Apagado"],
@@ -370,7 +378,13 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
                       [2, "Doble"],
                     ] as const
                   ).map(([val, t]) => (
-                    <button key={t} type="button" aria-pressed={pesos[f.key as FactorKey] === val} onClick={() => setPesos({ ...pesos, [f.key]: val })}>
+                    <button
+                      key={t}
+                      type="button"
+                      data-valor={val}
+                      aria-pressed={pesos[f.key as FactorKey] === val}
+                      onClick={() => setPesos({ ...pesos, [f.key]: val })}
+                    >
                       {t}
                     </button>
                   ))}
@@ -581,11 +595,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
           </Pagina>
         ) : vista === "moleculas" ? (
           <Pagina titulo="Moléculas" subtitulo="Las 348 del censo CDMS y las especies de laboratorio con líneas en nuestra banda.">
-            <MoleculesPanel />
-          </Pagina>
-        ) : vista === "graficas" ? (
-          <Pagina titulo="Gráficas Python" subtitulo="Las gráficas de las instrucciones, reproducidas con el único paso permitido sobre los datos.">
-            <ReferencePlots />
+            <MoleculesPanel explica={explica} />
           </Pagina>
         ) : (
           <Pagina titulo="Evidencia" subtitulo="Las líneas que el equipo decide defender, con las columnas de evidencia_plantilla.csv.">
@@ -716,7 +726,12 @@ function Comparar({ cs, foco, setFoco }: { cs: Cand[]; foco: Cand | undefined; s
         <tbody>
           {FACTORES.map((f) => (
             <tr key={f.key} className="border-t border-rule">
-              <td className="py-1 pr-2 font-medium">{f.label}</td>
+              <td className="py-1 pr-2 font-medium">
+                <span className="flex items-center gap-1.5">
+                  <FactorIcon k={f.key} size="sm" />
+                  {f.label}
+                </span>
+              </td>
               {cs.map((c) => {
                 const x = f.key === "complejidad" ? null : valorFactor(c, f.key);
                 const shown = valorFactor(c, f.key);
@@ -753,33 +768,37 @@ function Porque({ c, ficha }: { c: Cand; ficha: Ficha | undefined }) {
   const lf = c.L_frecuencia ?? null;
   const le = c.L_Einstein ?? null;
   const visto = c.visto_en_espacio ?? "—";
-  const filas: { k: string; v: string; x: number | null }[] = [
-    { k: "Frecuencia", v: `${lf != null && lf >= 0.6 ? "Coincide" : lf != null && lf >= 0.25 ? "Cerca" : "Lejos"}: a ${Math.abs(c.delta_MHz ?? 0).toFixed(2)} MHz del catálogo`, x: lf },
+  const filas: { key: FactorKey; k: string; v: string; x: number | null }[] = [
+    { key: "frecuencia", k: "Frecuencia", v: `${lf != null && lf >= 0.6 ? "Coincide" : lf != null && lf >= 0.25 ? "Cerca" : "Lejos"}: a ${Math.abs(c.delta_MHz ?? 0).toFixed(2)} MHz del catálogo`, x: lf },
     {
+      key: "einstein",
       k: "Coef. de Einstein",
       v: `A = ${sci(c.log10_Aij)} s⁻¹ ${(c.log10_Aij ?? 0) >= -6 ? "(en el rango probable 10⁻⁶–10⁻²)" : "(debajo de 10⁻⁶: muy improbable)"}, nivel a ${Math.round(c.Eu_K ?? 0)} K: ${le != null && le >= 0.6 ? "intensidad esperada compatible" : le != null && le >= 0.25 ? "algo distinta a la esperada" : "no debería verse tan intensa"}`,
       x: le,
     },
     {
+      key: "repite",
       k: "Se repite",
       v: (c.lineas_fuertes ?? 0) < 2 ? "sólo 1 línea fuerte en la banda: no se puede comprobar" : `${c.lineas_presentes} de ${c.lineas_fuertes} líneas fuertes aparecen (ver Huellas abajo)`,
       x: c.L_repeticion ?? null,
     },
-    { k: "Complejidad", v: `${c.n_atomos} átomos (${Math.round((c.prior_complejidad ?? 0) * 348)} de 348 moléculas conocidas)`, x: null },
+    { key: "complejidad", k: "Complejidad", v: `${c.n_atomos} átomos (${Math.round((c.prior_complejidad ?? 0) * 348)} de 348 moléculas conocidas)`, x: null },
     {
+      key: "espacio",
       k: "Visto en el espacio",
       v: visto === "detectada" ? "Sí (censo CDMS)" : visto === "tentativa" ? "Tentativa" : visto === "isotopólogo no confirmado" ? "Variante isotópica no confirmada" : "No",
       x: c.prior_espacio ?? null,
     },
-    { k: "Entorno", v: ficha ? (ENTORNO[ficha.entorno] ?? ficha.entorno) : "—", x: c.factor_entorno ?? null },
+    { key: "entorno", k: "Entorno", v: ficha ? (ENTORNO[ficha.entorno] ?? ficha.entorno) : "—", x: c.factor_entorno ?? null },
   ];
   return (
     <ul className="space-y-1.5">
       {filas.map((f) => (
-        <li key={f.k} className="grid grid-cols-[8.5rem_1fr] gap-2 text-[0.86rem]">
+        <li key={f.key} className="grid grid-cols-[11rem_1fr] items-start gap-2 text-[0.86rem]">
           <span className="flex items-center gap-1.5 font-semibold">
-            <span className="h-2.5 w-2.5 flex-none rounded-full" style={{ background: tono(f.x) }} />
+            <FactorIcon k={f.key} size="sm" />
             {f.k}
+            <span className="ml-auto h-2.5 w-2.5 flex-none rounded-full" style={{ background: tono(f.x) }} title="a favor / a medias / en contra" />
           </span>
           <span className="text-ink-2">{f.v}</span>
         </li>

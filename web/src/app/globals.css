@@ -133,6 +133,25 @@ h4 {
     font-weight: 600;
   }
 
+  /* posición y ventana: azul */
+  .seg-datos button[aria-pressed="true"] {
+    background: var(--color-accent);
+    color: #ffffff;
+  }
+  /* peso de cada factor: el color dice el valor (apagado gris · normal azul marino · doble ámbar) */
+  .seg-peso button[aria-pressed="true"][data-valor="0"] {
+    background: #64748b;
+    color: #ffffff;
+  }
+  .seg-peso button[aria-pressed="true"][data-valor="1"] {
+    background: var(--color-side);
+    color: #ffffff;
+  }
+  .seg-peso button[aria-pressed="true"][data-valor="2"] {
+    background: #b45309;
+    color: #ffffff;
+  }
+
   .btn {
     display: inline-flex;
     align-items: center;

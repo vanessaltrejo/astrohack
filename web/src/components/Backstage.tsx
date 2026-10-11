@@ -226,6 +226,20 @@ export default function Backstage({ v3, spectra }: { v3: V3; spectra: Spectra })
           <p className="text-muted">Cargando pruebas…</p>
         )}
       </Paso>
+
+      <section className="pt-2">
+        <h3 className="mb-1 text-[1.1rem] font-semibold">Recursos adicionales: el resto de las gráficas de las instrucciones</h3>
+        <p className="mb-3 text-[0.9rem] text-ink-2">
+          Reproducidas con <span className="id">notebooks/01_graficas_referencia.ipynb</span>, con el único paso permitido sobre los datos (observado →
+          reposo). El cuaderno comprueba que los archivos son idénticos al paquete oficial (SHA256), que 2.7 km/s equivalen a 3.14 MHz a 349 GHz y que el
+          espectro de la tabla es exactamente el píxel del cubo.
+        </p>
+        <div className="grid gap-4 xl:grid-cols-3">
+          <Figura src="/figs/fig3_fragmento_catalogo.png" pie="Fragmento de W1 · B offset con el catálogo en reposo (diapositiva 20 + función candidatos())." />
+          <Figura src="/figs/fig5_ajuste_gaussiano.png" pie="Ajuste gaussiano + residuos de CH₃CN 19₀–18₀ (función ajustar() del cuaderno oficial)." />
+          <Figura src="/figs/fig6_continuo_posiciones.png" pie="Mapa de continuo con las tres posiciones (extracción del cubo verificada)." />
+        </div>
+      </section>
     </div>
   );
 }

@@ -27,6 +27,15 @@ Un solo paso: de frecuencia observada (LSRK) a frecuencia en reposo, `ν_reposo 
 | `web/` | Tablero (Next.js, sitio estático). Sus datos están en `web/public/data/`. |
 | `docs/` | Documentación completa. |
 
+## El tablero
+
+| Pantalla | Qué muestra |
+|---|---|
+| **Analizar** | Espectro, tabla de líneas y, para la línea elegida, la molécula más probable, alternativas, comparación factor por factor, el porqué y las huellas. Pesos de cada factor ajustables. |
+| **Cómo lo calculamos** | Los 7 pasos de los datos a la probabilidad, con números y gráficas reales; al final, el resto de las gráficas de las instrucciones. |
+| **Moléculas (348)** | Censo CDMS y especies de laboratorio: resúmenes que filtran, moléculas que explican líneas en nuestro espectro y ficha de cada una. Átomos y estado vienen del censo CDMS; las líneas explicadas, del motor; entorno, relevancia y textos, de fichas en **borrador de IA pendiente de verificación**. |
+| **Evidencia** | Tabla con las columnas de `evidencia_plantilla.csv`, exportable a CSV. |
+
 ## Reproducir
 
 ```bash

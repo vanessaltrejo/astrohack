@@ -100,9 +100,9 @@ Retiramos el código de v1 del repositorio para que no se confunda con el actual
 ### 3.5 Otros cambios de diseño
 | Cambio | Resultado |
 |---|---|
-| Reproducir las gráficas de las instrucciones con un único paso sobre los datos (observado → reposo) | `notebooks/01_graficas_referencia.ipynb` y sección "Gráficas Python" en el tablero. |
+| Reproducir las gráficas de las instrucciones con un único paso sobre los datos (observado → reposo) | `notebooks/01_graficas_referencia.ipynb` y las gráficas de «Cómo lo calculamos» en el tablero. |
 | Una sola fuente de picos para todo el tablero | `peaks.json` sale del motor, con ruido, picos y ajustes propios (§5). |
-| Sidebar delgado a la izquierda; cada sección (Analizar, Cómo lo calculamos, Moléculas, Gráficas Python, Evidencia) es una pantalla completa | Tablero actual (§9). |
+| Sidebar delgado a la izquierda; cada sección (Analizar, Cómo lo calculamos, Moléculas, Evidencia) es una pantalla completa; las gráficas del cuaderno viven dentro de «Cómo lo calculamos» | Tablero actual (§9). |
 | Tema claro de alto contraste, tipografías Inter (texto) y Space Grotesk (títulos), ancho completo | Lectura más clara en pantallas grandes y proyector. |
 | Controles de peso por factor, comparación de candidatas y huellas | Interactividad para ver qué tan robusta es cada respuesta (§9). |
 | Rango de Einstein de los jueces dentro del factor Einstein | §6.2. |
@@ -266,45 +266,46 @@ Resultados completos: `analysis/outputs/pruebas_T4.txt`.
 
 ## 9. El tablero (`web/`)
 
-Diseño: fondo blanco, texto casi negro (alto contraste), Inter para texto y Space Grotesk para títulos, ancho completo
-de la pantalla y sidebar azul marino a la izquierda con el logo de Sparks. Cada sección es una **pantalla completa**:
-**Analizar · Cómo lo calculamos · Moléculas (348) · Gráficas Python · Evidencia.**
+Diseño: fondo blanco, texto casi negro (alto contraste), Inter para texto y Space Grotesk para títulos, ancho completo y
+sidebar azul marino a la izquierda con el logo de Sparks. Cada sección es una **pantalla completa**:
+**Analizar · Cómo lo calculamos · Moléculas (348) · Evidencia.**
 
 ### Pantalla «Analizar»
 Responde una sola pregunta: *¿qué molécula produce esta línea?*
-1. **Pasos de uso** y **controles de datos**: posición (B offset recomendada, B pico, A), ventana (W1, W2) y la velocidad
-   como dato fijo.
-2. **Peso de cada factor** (interactivo): cada uno de los 6 factores se puede poner en *apagado*, *normal* o *doble*.
-   Todos los % se recalculan al instante con la misma fórmula del motor (con pesos normales reproduce exactamente el
-   cálculo de Python; lo comprueba una prueba automática). El tablero indica cuántas líneas cambian de molécula y las
-   marca en la tabla. Sirve para ver **qué tan robusta** es cada respuesta frente a nuestros supuestos.
-3. **Resumen**: líneas con confianza alta (≥ 70 %), media (40–70 %), baja (< 40 %) o sin identificar; moléculas más
-   frecuentes (las variantes isotópicas se marcan).
-4. **Espectro** en reposo con las líneas detectadas coloreadas por confianza. «Acercar y ver candidatas» muestra la línea
-   de cerca con las frecuencias de catálogo de sus 5 candidatas.
-5. **Tabla de líneas** (S/N, molécula más probable con su nombre, %, confianza).
-6. **Panel de la línea seleccionada**: molécula más probable; «si no es esa, ¿cuál podría ser?» (6 alternativas);
-   **comparar candidatas** (matriz factor × candidata; al tocar una se muestran su porqué, su ficha y sus huellas);
-   «¿Por qué?» en palabras; botón **Añadir a Evidencia**.
-7. **Huellas** (debajo, para no saturar la parte superior): las líneas fuertes de la candidata elegida vistas en velocidad,
-   con ✓ si aparece pico en la velocidad dada y ✗ si falta. Es la prueba visual del factor «se repite».
+1. **Datos** (botones azules): posición (B offset recomendada, B pico, A) y ventana (W1, W2). La velocidad es un dato fijo.
+2. **Peso de cada factor** (interactivo): cada factor tiene un **ícono y un color propios** (frecuencia, coeficiente de
+   Einstein, se repite, complejidad, visto en el espacio, entorno), los mismos que aparecen en la matriz de comparación y en
+   el «¿Por qué?». Cada uno se pone en *apagado* (gris), *normal* (azul marino) o *doble* (ámbar); los % se recalculan al
+   instante con la misma fórmula del motor (una prueba automática comprueba que con pesos normales el navegador reproduce
+   exactamente el cálculo de Python). Se indica cuántas líneas cambian de molécula.
+3. **Resumen**: líneas con confianza alta (≥ 70 %), media (40–70 %), baja (< 40 %) o sin identificar.
+4. **Espectro** en reposo con las líneas coloreadas por confianza; «Acercar y ver candidatas» muestra las 5 candidatas.
+5. **Tabla de líneas**, que ocupa la altura del panel derecho.
+6. **Panel de la línea**: molécula más probable, alternativas, **comparar candidatas** (matriz factor × candidata),
+   «¿Por qué?» en palabras (punto verde/ámbar/rojo = a favor / a medias / en contra), ficha breve y **Añadir a Evidencia**.
+7. **Huellas**: las líneas fuertes de la candidata elegida en velocidad, ✓ si aparecen y ✗ si faltan.
 
 La etiqueta de confianza es **orientativa** (se deriva del %); no es un veredicto.
 
-### «Cómo lo calculamos» (detrás de cámaras)
-Recorrido visual en 7 pasos con datos reales: (1) los datos sin tocar; (2) observado → reposo; (3) ruido, con sus tramos y
-σ por posición; (4) líneas detectadas; (5) catálogos (oficial → Splatalogue → ampliado → utilizables) y el censo por
-número de átomos que define la complejidad; (6) los seis factores; (7) pruebas: robustez al tamaño de la base,
-sensibilidad a supuestos, control de glicina y la línea más brillante.
+### «Cómo lo calculamos»
+Recorrido en 7 pasos con datos reales (datos, observado → reposo, ruido, líneas, catálogos y censo, factores, pruebas) y,
+al final, **recursos adicionales**: el resto de las gráficas de las instrucciones reproducidas con el cuaderno
+(fragmento con el catálogo, ajuste gaussiano y mapa de continuo).
 
-| Otros paneles | Qué muestra | Datos |
-|---|---|---|
-| Moléculas (348) | Censo + especies de laboratorio en la banda: ficha, entorno, relevancia biótica | `fichas_moleculas.json` |
-| Gráficas Python | Las 6 gráficas de referencia reproducidas | `web/public/figs/` |
-| Evidencia | Tabla con las columnas de `evidencia_plantilla.csv`, exportable a CSV | navegador |
+### «Moléculas (348)»
+Pensada para entenderse sin tener que abrir cada ficha:
+- **Cuatro resúmenes que también filtran la lista**: número de átomos (censo CDMS), ¿vista en el espacio? (censo CDMS),
+  entorno típico y relevancia prebiótica (fichas).
+- **«En nuestro espectro»**: las moléculas que son la candidata más probable de alguna línea y en cuántas (motor).
+- **Lista** (con su propio scroll, ordenada por líneas explicadas) y **ficha** (con su propio scroll): estado, átomos,
+  entorno, relevancia, líneas por posición, complejidad relativa al censo, descripción y condiciones.
 
-Retiramos de versiones anteriores del tablero lo que no ayudaba a la pregunta principal: el mapa del campo, los atajos de
-teclado y los veredictos por p-value.
+**De dónde sale cada dato:** número de átomos y estado → censo CDMS (`data/externos/censo_cdms_2026-09.csv`); líneas que
+explica → nuestro motor (`web/public/data/probabilidad.json`); familia, entorno, relevancia y textos → fichas
+(`data/externos/fichas_moleculas.json`), **borrador de IA pendiente de verificación**, y así se indica en cada ficha.
+
+### «Evidencia»
+Tabla con las columnas de `evidencia_plantilla.csv`, exportable a CSV. Se guarda en el navegador de quien la usa.
 
 ---
 
