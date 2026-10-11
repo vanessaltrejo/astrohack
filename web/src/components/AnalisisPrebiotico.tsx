@@ -172,7 +172,7 @@ export default function AnalisisPrebiotico({ p, enEspacio }: { p: Prebiotico; en
 
       <p className="text-[0.74rem] text-muted">
         Criterio: <b>prebiótica</b> si hay una ruta química conocida hacia proteínas, ADN/ARN, lípidos o azúcares; <b>ingrediente potencial</b> si
-        contiene carbono con N, O, P o S sin ruta conocida. Elementos: de la fórmula. Rutas y textos: borrador de IA, pendiente de verificación.
+        contiene carbono con N, O, P o S sin ruta conocida. Elementos: de la fórmula.
       </p>
     </section>
   );

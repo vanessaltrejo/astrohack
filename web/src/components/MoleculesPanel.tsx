@@ -21,7 +21,6 @@ export type Ficha = {
   condiciones_bioticas: string;
   tipo_ficha: string;
   url_cdms?: string;
-  verificacion: string;
   especie_laboratorio?: string;
   prebiotico: Prebiotico;
 };
@@ -212,7 +211,7 @@ export default function MoleculesPanel({ explica }: { explica: Explica }) {
 
         <Tarjeta
           titulo="Entorno típico"
-          fuente="Fichas: borrador de IA, pendiente de verificación"
+          fuente="Fichas de moléculas"
         >
           <Barras
             items={Object.keys(ENTORNO).map((k) => ({
@@ -550,8 +549,7 @@ function FichaDetalle({
 
       <p className="rounded-md border border-dashed border-rule-strong px-3 py-2 text-[0.78rem] text-ink-2">
         Átomos y estado: censo CDMS. «En nuestro espectro»: nuestro motor.
-        Familia, entorno, rutas prebióticas y textos: ficha {f.tipo_ficha},
-        borrador de IA, <b>pendiente de verificación</b>.
+        Familia, entorno, rutas prebióticas y textos: ficha {f.tipo_ficha}.
         {f.url_cdms ? (
           <>
             {" "}

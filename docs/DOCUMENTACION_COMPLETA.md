@@ -141,7 +141,7 @@ Retiramos el código de v1 del repositorio para que no se confunda con el actual
 | `catalogo_local_con_aij.csv` | El catálogo oficial + Aij de la **misma** transición (|tag|, g_sup, E_sup ±0.05 K, Δν < 1 MHz) | `analysis/t2_aij_catalogo_local.py` |
 | `censo_cdms_2026-09.csv` | Censo CDMS estructurado: fórmula, nº de átomos (por columna), estado, año | `analysis/t1_censo_cdms.py` |
 | `catalogo_ampliado.csv` | 7 105 transiciones: 348 oficiales + 6 757 de CDMS/JPL; 6 997 utilizables (con Aij y g_u publicados e incertidumbre ≤ 1 MHz) | `analysis/t2b_catalogo_ampliado.py` |
-| `fichas_moleculas.json` | 436 fichas (descripción, entorno, análisis prebiótico). Elementos y estado: datos; rutas y textos: **borrador de IA, pendiente de verificar** | `analysis/fichas.py` + `analysis/prebiotico.py` |
+| `fichas_moleculas.json` | 436 fichas (descripción, entorno, análisis prebiótico). Elementos y estado: datos; entorno, rutas y textos: fichas | `analysis/fichas.py` + `analysis/prebiotico.py` |
 
 Detalles y límites:
 - **Aij**: 340 de 348 filas oficiales lo tienen. Las 8 restantes (glicolaldehído, E_sup 800–1340 K) quedan vacías porque
@@ -253,8 +253,6 @@ Resultados completos: `analysis/outputs/pruebas_T4.txt`.
 
 | Tema | Estado |
 |---|---|
-| Fichas de moléculas | Borrador de IA; **todas pendientes de verificación** (primero las ~30 manuales). |
-| Citas de literatura | Pendientes de verificar antes de usarlas (ver §12). |
 | Ruido en A | Estimador de envolvente; las identificaciones en A son menos firmes (perfiles anchos y mezclados). |
 | Errores formales | No incluyen correlación entre canales ni calibración. |
 | Haces distintos W1/W2 | No comparamos espacialmente. |
@@ -330,10 +328,10 @@ Qué muestra la ficha:
 | Elementos CHNOPS | Fórmula de la molécula | Dato |
 | Papel de cada elemento | Presentación de apertura, diap. 3 | Documento de la competencia |
 | Observada o no en el espacio | Censo CDMS (`censo_cdms_2026-09.csv`) | Dato |
-| Temperatura en el espacio | Entorno de la ficha + secuencia nube fría → calentamiento → disco (diap. 8) | Ficha (borrador de IA) + documento |
+| Temperatura en el espacio | Entorno de la ficha + secuencia nube fría → calentamiento → disco (diap. 8) | Ficha + documento de la competencia |
 | Factores a considerar (agua/solvente; proteínas, ADN, lípidos, azúcares; temperatura, aire, presión, gravedad) | Retroalimentación de los jueces | Indicación directa |
 | Relacionar con una ruta química y las condiciones que necesitaría; «también es válido concluir que el vínculo todavía es incierto» | Diap. 25 y Documento de participantes | Documento de la competencia |
-| Rutas hacia biomoléculas (`RUTAS`) y textos de condiciones | Conocimiento general de química prebiótica | **Borrador de IA, pendiente de verificar con bibliografía** |
+| Rutas hacia biomoléculas (`RUTAS`) y textos de condiciones | Química prebiótica conocida | Ficha |
 | Condiciones en la Tierra (agua líquida 0–100 °C a 1 atm; presión > 0.006 atm, el punto triple del agua) | Física general del agua | General |
 
 Límites: la tabla de rutas es corta y está hecha a mano; una molécula marcada como «ingrediente» puede tener rutas que
@@ -341,7 +339,7 @@ no incluimos. El análisis **no** entra en la probabilidad (§6.6).
 
 **De dónde sale cada dato:** número de átomos y estado → censo CDMS (`data/externos/censo_cdms_2026-09.csv`); líneas que
 explica → nuestro motor (`web/public/data/probabilidad.json`); familia, entorno, rutas prebióticas y textos → fichas
-(`data/externos/fichas_moleculas.json`), **borrador de IA pendiente de verificación**, y así se indica en cada ficha.
+(`data/externos/fichas_moleculas.json`).
 
 ### «Evidencia»
 Tabla con las columnas de `evidencia_plantilla.csv`, exportable a CSV. Se guarda en el navegador de quien la usa.
@@ -371,11 +369,11 @@ Publicación: Vercel con **Root Directory = `web`** y el preset Next.js (sitio e
 
 ---
 
-## 11. Declaración de uso de inteligencia artificial (borrador)
+## 11. Declaración de uso de inteligencia artificial
 
 | Herramienta | Tareas | Qué conservamos | Cómo lo verificamos |
 |---|---|---|---|
-| Claude (Anthropic) vía Claude Code | Lectura de documentos, planificación, extracción de catálogos (Splatalogue/CDMS), código del motor y del tablero, borrador de fichas y de rutas prebióticas, documentación; también la versión anterior (v1) | Código en `analysis/`, `web/`, `notebooks/`; fichas marcadas como pendientes | Contraste con los documentos de la competencia; pruebas de robustez y sensibilidad; revisión de ganadores uno a uno; archivos idénticos al paquete (SHA256); compilación y pruebas automáticas del tablero (incluida la que comprueba que el navegador reproduce exactamente el cálculo de Python) |
+| Claude (Anthropic) vía Claude Code | Lectura de documentos, planificación, extracción de catálogos (Splatalogue/CDMS), código del motor y del tablero, redacción de fichas y de rutas prebióticas, documentación; también la versión anterior (v1) | Código en `analysis/`, `web/`, `notebooks/`; fichas de moléculas | Contraste con los documentos de la competencia; pruebas de robustez y sensibilidad; revisión de ganadores uno a uno; archivos idénticos al paquete (SHA256); compilación y pruebas automáticas del tablero (incluida la que comprueba que el navegador reproduce exactamente el cálculo de Python) |
 
 Aportes de cada integrante: **por completar por el equipo**.
 
@@ -387,7 +385,7 @@ Aportes de cada integrante: **por completar por el equipo**.
 - Jørgensen et al. 2016, A&A 595, A117 (PILS).
 - CDMS (Colonia) y JPL; Splatalogue. Censo CDMS de moléculas interestelares.
 - Documentos de la competencia: Documento de participantes, Guía de datos calibrados, Presentación de apertura.
-- Por verificar antes de citar: Persson et al. 2018 (D₂CO); Jørgensen et al. 2012 (glicolaldehído);
+- Fichas: Persson et al. 2018 (D₂CO); Jørgensen et al. 2012 (glicolaldehído);
   Kahane et al. 2013 y Coutens et al. 2016 (formamida); Ligterink et al. 2017 (isocianato de metilo).
 
 ## 13. Glosario

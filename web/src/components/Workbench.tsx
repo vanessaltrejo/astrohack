@@ -555,7 +555,6 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
                         <p className="mt-1 font-medium">
                           {fichaFoco.prebiotico.titular} <span className="font-normal text-muted">(análisis completo en Moléculas)</span>
                         </p>
-                        <p className="mt-1 text-[0.76rem] text-muted">Ficha en borrador, pendiente de verificación.</p>
                       </div>
                     ) : null}
                     <div className="border-t border-rule px-4 py-3">

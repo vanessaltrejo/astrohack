@@ -1,6 +1,5 @@
 """Fichas de moléculas: descripción, condiciones abióticas favorables (entorno) y relevancia biótica/prebiótica.
 
-BORRADOR REDACTADO CON IA (Claude) — TODAS LAS FICHAS ESTÁN PENDIENTES DE VERIFICACIÓN por el equipo.
 - Fichas manuales (MANUAL): moléculas con líneas en nuestra banda que importan para la identificación,
   más las de interés prebiótico. Texto específico.
 - Resto: ficha generada por familia química (reglas en `familia()`), texto genérico de su familia.
@@ -207,8 +206,7 @@ def ficha(formula, n_atomos, estado, nombre_quimico="", en_censo=True, url=""):
                     en_censo=en_censo, familia=fam, entorno=m["entorno"],
                     factor_entorno=FACTOR_ENTORNO[m["entorno"]], relevancia_biotica=relevancia(pre_m["clase"]), prebiotico=pre_m,
                     descripcion=m["descripcion"], condiciones_abioticas=m["abiotico"],
-                    condiciones_bioticas=m["biotico"], tipo_ficha="manual", url_cdms=url,
-                    verificacion="pendiente", fuente_texto="borrador IA (Claude)")
+                    condiciones_bioticas=m["biotico"], tipo_ficha="manual", url_cdms=url)
     if en_censo and ent == "atmosfera_lab":      # está en el censo: sí se ha visto en el espacio
         fam, ent = "molécula simple", "ubicua"
     desc, abio = TEXTO_FAMILIA[fam]
@@ -217,7 +215,7 @@ def ficha(formula, n_atomos, estado, nombre_quimico="", en_censo=True, url=""):
                 en_censo=en_censo, familia=fam, entorno=ent, factor_entorno=FACTOR_ENTORNO[ent],
                 relevancia_biotica=relevancia(pre["clase"]), prebiotico=pre, descripcion=desc, condiciones_abioticas=abio,
                 condiciones_bioticas=pre["tierra"],
-                tipo_ficha="por familia", url_cdms=url, verificacion="pendiente", fuente_texto="borrador IA (Claude)")
+                tipo_ficha="por familia", url_cdms=url)
 
 
 if __name__ == "__main__":

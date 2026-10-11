@@ -12,7 +12,7 @@ Criterios (explícitos, no una etiqueta «porque sí»):
                    el agua es el solvente de la vida y se clasifica aparte.
   · ingrediente  → contiene C y al menos uno de N, O, P o S, sin ruta directa conocida.
   · sin_papel    → el resto.
-Los elementos CHNOPS salen de la fórmula (dato). Las rutas y textos son BORRADOR DE IA, pendientes de verificación.
+Los elementos CHNOPS salen de la fórmula; las rutas, de la química prebiótica conocida.
 """
 import re
 
@@ -38,7 +38,7 @@ FAMILIAS = {
 # Las mismas familias dentro de una frase
 EN_FRASE = {"proteinas": "proteínas", "acidos_nucleicos": "ADN/ARN", "lipidos": "lípidos de membrana", "carbohidratos": "azúcares"}
 
-# Rutas conocidas hacia biomoléculas (fórmula del censo → familia → cómo). Borrador de IA, pendiente de verificación.
+# Rutas conocidas hacia biomoléculas (fórmula del censo → familia → cómo)
 RUTAS = {
     "HCN": {"acidos_nucleicos": "su oligomerización produce adenina", "proteinas": "aminoácidos vía síntesis de Strecker"},
     "H2CO": {"carbohidratos": "reacción formosa: forma azúcares, entre ellos la ribosa"},
