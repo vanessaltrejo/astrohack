@@ -18,6 +18,8 @@ import Huellas from "./Huellas";
 import FactorIcon from "./FactorIcon";
 
 const Plot = dynamic(() => import("./Plot"), { ssr: false });
+// Con config.responsive, Plotly mide el contenedor: necesita un alto explícito o queda en 0 px
+const ALTO_ESPECTRO = 360;
 
 const POS: { key: PosKey; label: string; hint: string }[] = [
   { key: "B_offset", label: "B offset", hint: "recomendada: líneas estrechas" },
@@ -30,11 +32,6 @@ const ENTORNO: Record<string, string> = {
   nube_fria: "nubes frías",
   circunestelar: "envolturas de estrellas viejas",
   atmosfera_lab: "sólo atmósfera / laboratorio",
-};
-const BIO: Record<string, string> = {
-  directa: "Interés prebiótico directo",
-  relacionada: "Relacionada con química prebiótica",
-  no_conocida: "Sin relevancia prebiótica conocida",
 };
 const CAND_COLORS = ["#1d4ed8", "#7c3aed", "#0e7490"];
 
@@ -363,9 +360,9 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
               <span className="text-[0.82rem] text-muted">Pesos del modelo (todos normales)</span>
             )}
           </div>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(21rem,1fr))] gap-x-8 gap-y-2">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(21rem,100%),1fr))] gap-x-8 gap-y-2">
             {FACTORES.map((f) => (
-              <div key={f.key} className="flex items-center justify-between gap-2">
+              <div key={f.key} className="flex flex-wrap items-center justify-between gap-2">
                 <span className="flex items-center gap-2 whitespace-nowrap text-[0.88rem] font-medium" title={f.ayuda}>
                   <FactorIcon k={f.key} />
                   {f.label}
@@ -438,7 +435,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
               <Plot
                 data={traces}
                 layout={{
-                  height: 360,
+                  height: ALTO_ESPECTRO,
                   autosize: true,
                   margin: { l: 56, r: 12, t: 10, b: 46 },
                   paper_bgcolor: "#ffffff",
@@ -453,7 +450,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
                 }}
                 config={{ displaylogo: false, responsive: true, modeBarButtonsToRemove: ["lasso2d", "select2d", "autoScale2d"] }}
                 useResizeHandler
-                style={{ width: "100%" }}
+                style={{ width: "100%", height: ALTO_ESPECTRO }}
                 onClick={(e) => {
                   const id = e.points?.[0]?.customdata as string | undefined;
                   if (id) setSel(id);
@@ -472,7 +469,7 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
                   <thead className="sticky top-0 z-10 bg-plate text-left text-[0.74rem] uppercase tracking-wide text-muted">
                     <tr>
                       <th className="px-3 py-2">Línea (reposo, MHz)</th>
-                      <th className="whitespace-nowrap px-3 py-2 text-right">Intensidad (Jy/haz)</th>
+                      <th className="whitespace-nowrap px-3 py-2 text-right">Intensidad <span className="normal-case">(Jy/haz)</span></th>
                       <th className="px-3 py-2 text-right">S/N</th>
                       <th className="px-3 py-2">Molécula más probable</th>
                       <th className="px-3 py-2 text-right">%</th>
@@ -548,14 +545,16 @@ function Loaded({ core, peaks, v3, fichas }: { core: CoreLoad; peaks: Peaks | nu
                 {enfocada ? (
                   <>
                     <div className="border-t border-rule px-4 py-3">
-                      <p className="mb-2 text-[0.76rem] font-semibold uppercase tracking-wide text-muted">¿Por qué {prettyFormula(enfocada.especie)}?</p>
+                      <p className="mb-2 text-[0.76rem] font-semibold uppercase tracking-wide text-muted">¿Por qué <span className="normal-case">{prettyFormula(enfocada.especie)}</span>?</p>
                       <Porque c={enfocada} ficha={fichaFoco} />
                     </div>
                     {fichaFoco ? (
                       <div className="border-t border-rule px-4 py-3 text-[0.86rem]">
                         <p className="mb-1 text-[0.76rem] font-semibold uppercase tracking-wide text-muted">Sobre la molécula</p>
                         <p>{fichaFoco.descripcion}</p>
-                        <p className="mt-1 font-medium">{BIO[fichaFoco.relevancia_biotica] ?? ""}</p>
+                        <p className="mt-1 font-medium">
+                          {fichaFoco.prebiotico.titular} <span className="font-normal text-muted">(análisis completo en Moléculas)</span>
+                        </p>
                         <p className="mt-1 text-[0.76rem] text-muted">Ficha en borrador, pendiente de verificación.</p>
                       </div>
                     ) : null}
@@ -794,13 +793,13 @@ function Porque({ c, ficha }: { c: Cand; ficha: Ficha | undefined }) {
   return (
     <ul className="space-y-1.5">
       {filas.map((f) => (
-        <li key={f.key} className="grid grid-cols-[11rem_1fr] items-start gap-2 text-[0.86rem]">
+        <li key={f.key} className="grid grid-cols-[minmax(0,11rem)_minmax(0,1fr)] items-start gap-2 text-[0.86rem]">
           <span className="flex items-center gap-1.5 font-semibold">
             <FactorIcon k={f.key} size="sm" />
             {f.k}
             <span className="ml-auto h-2.5 w-2.5 flex-none rounded-full" style={{ background: tono(f.x) }} title="a favor / a medias / en contra" />
           </span>
-          <span className="text-ink-2">{f.v}</span>
+          <span className="break-words text-ink-2">{f.v}</span>
         </li>
       ))}
     </ul>

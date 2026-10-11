@@ -70,7 +70,7 @@ export default function EvidenceLog({ rows, setRows, team, setTeam, flashId }: E
           Exportar CSV
         </button>
         <span className="ml-auto text-[0.78rem] text-muted">
-          <span className="text-ink">{rows.length}</span> filas, guardadas en este navegador
+          <span className="text-ink">{rows.length}</span> {rows.length === 1 ? "fila guardada" : "filas guardadas"} en este navegador
         </span>
       </div>
       {rows.length === 0 ? (

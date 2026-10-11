@@ -104,6 +104,8 @@ h4 {
   /* ---------- controles ---------- */
   .seg {
     display: inline-flex;
+    flex-wrap: wrap;
+    max-width: 100%;
     border: 1px solid var(--color-rule-strong);
     border-radius: 3px;
     background: var(--color-night);

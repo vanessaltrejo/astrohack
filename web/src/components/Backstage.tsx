@@ -27,7 +27,7 @@ function Paso({ n, titulo, children }: { n: number; titulo: string; children: Re
 
 function Barra({ label, valor, max, texto, color = "#1d4ed8" }: { label: ReactNode; valor: number; max: number; texto: string; color?: string }) {
   return (
-    <div className="grid grid-cols-[minmax(12rem,19rem)_1fr_5rem] items-center gap-2 text-[0.86rem]">
+    <div className="grid grid-cols-[minmax(7rem,19rem)_1fr_4rem] items-center gap-2 text-[0.86rem]">
       <span>{label}</span>
       <span className="h-3 rounded-sm bg-plate-2">
         <span className="block h-full rounded-sm" style={{ width: `${Math.max(1, (valor / max) * 100)}%`, background: color }} />
@@ -89,8 +89,8 @@ export default function Backstage({ v3, spectra }: { v3: V3; spectra: Spectra })
             <thead className="bg-plate text-left text-[0.74rem] uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-3 py-1.5">Posición</th>
-                <th className="px-3 py-1.5 text-right">σ W1 (mJy/haz)</th>
-                <th className="px-3 py-1.5 text-right">σ W2 (mJy/haz)</th>
+                <th className="px-3 py-1.5 text-right normal-case">σ W1 (mJy/haz)</th>
+                <th className="px-3 py-1.5 text-right normal-case">σ W2 (mJy/haz)</th>
                 <th className="px-3 py-1.5">Método</th>
               </tr>
             </thead>
@@ -147,9 +147,9 @@ export default function Backstage({ v3, spectra }: { v3: V3; spectra: Spectra })
           de CDMS/JPL; no lo calculamos.
         </p>
         <h4 className="mb-1 mt-4 text-[0.9rem] font-semibold">El «estándar» de complejidad: las {b.censo} moléculas conocidas en el espacio, por número de átomos</h4>
-        <div className="flex h-32 items-end gap-1.5">
+        <div className="flex h-32 items-end gap-1">
           {b.censo_por_atomos.map((x) => (
-            <div key={x.atomos} className="flex flex-1 flex-col items-center gap-1">
+            <div key={x.atomos} className="flex min-w-0 flex-1 flex-col items-center gap-1">
               <span className="text-[0.72rem] tabular-nums">{x.n}</span>
               <span className="w-full rounded-t-sm bg-side" style={{ height: `${(x.n / maxCenso) * 90}px` }} />
               <span className="text-[0.72rem] text-muted">{x.atomos}</span>

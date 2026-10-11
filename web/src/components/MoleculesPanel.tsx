@@ -296,7 +296,7 @@ export default function MoleculesPanel({ explica }: { explica: Explica }) {
 
       {/* búsqueda y filtros activos */}
       <div className="flex flex-wrap items-center gap-2">
-        <label className="flex min-w-[18rem] flex-1 items-center gap-2 rounded-md border border-rule px-2 py-1.5">
+        <label className="flex min-w-[min(18rem,100%)] flex-1 items-center gap-2 rounded-md border border-rule px-2 py-1.5">
           <Search className="h-4 w-4 text-muted" aria-hidden />
           <input
             value={q}
@@ -325,7 +325,7 @@ export default function MoleculesPanel({ explica }: { explica: Explica }) {
           </button>
         ) : null}
         <span className="text-[0.84rem] text-muted">
-          {lista.length} moléculas
+          {lista.length} {lista.length === 1 ? "molécula" : "moléculas"}
         </span>
       </div>
 
