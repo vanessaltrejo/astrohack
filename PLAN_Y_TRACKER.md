@@ -168,7 +168,7 @@ para el tablero; se hará contraste LTE en CASSIS; la línea más brillante de l
 | 10-oct | Claude Code | Pipeline de identificación v1, verificación automatizada (Boltzmann, PILS), docs de interpretación | `analysis/`, `docs/` | `validate_outputs.py`, reproducción en otra máquina, contraste con Calcutt+18 / Jørgensen+18 / Drozdovskaya+19 | JP |
 | 10-oct | Claude Code | Tablero web Sparks (diseño, KaTeX, animaciones) con investigación de referencias | `web/` | `npm test`, `npm run build`, revisión visual del equipo | JP |
 
-## 10. Plan v2 (11‑oct, 06:00) · criterios de los jueces
+## 10. Plan v2 (11‑oct, 06:00) · ~~reemplazado por la sección 11~~
 
 **Pitch (validado por un juez):** herramienta de **apoyo a la decisión**, no un modelo que "lo haga solo".
 Para cada línea muestra qué moléculas la podrían explicar, **con qué probabilidad y por qué**; la decisión final es de la persona.
@@ -227,4 +227,68 @@ Para un pico observado y cada molécula candidata *s* (más la opción "no está
 - **Defensa**: el pipeline tiene ~1300 líneas y ~30 umbrales generados con IA. Todos deben poder explicar los **5 factores** y el flujo; no hace falta defender cada umbral.
 - **Aij**: el paquete advierte no convertir sin verificar Q(T) y degeneraciones → por eso P2 incluye validación contra Splatalogue.
 - **Priors**: son supuestos; se declaran y se muestra que las conclusiones fuertes no dependen de ellos.
+
+## 11. Plan v3 (11‑oct, 06:20) · VIGENTE
+
+### 11.0 Reglas de autoridad
+1. **La palabra de Vanessa (y lo que transmite de los jueces) va por encima de todo.**
+2. Después, los documentos base: `Datos de ALMA/`, `Instrucciones/`, `Presentacion de inicio/`, `Resultados y Evidencias de los Participantes/`.
+3. Al final, el código existente (`analysis/`, `web/`), que se adapta a lo anterior.
+
+Indicaciones de los jueces:
+- Los datos **no se limpian ni se cuestionan**.
+- La **velocidad es la dada**: B ≈ 2.7 km/s (Guía p. 8 y cuaderno oficial), A ≈ 3.2 km/s (diapositiva 22). **No se estima.**
+- Se usa el **universo de 348 moléculas** del censo (diapositiva 5), no sólo las del catálogo local. El modelo debe dar el mismo resultado con 15 que con 30 candidatas.
+- La herramienta combina matemática **y** factores externos de cada molécula (condiciones bióticas y abióticas).
+
+### 11.1 Qué se rescata del pipeline de JP y qué se elimina
+
+| Paso de JP | ¿Se queda? | Por qué |
+|---|---|---|
+| 1. Desviación estándar (ruido) | ✅ **simplificada** al método del cuaderno oficial (`ruido_empirico`: segmentos sin líneas, mediana restada) | Está en los documentos base. Se quitan la máscara iterativa, ρ/κ y el suavizado de A |
+| 2. Identificar candidata | ✅ = `candidatos()` del cuaderno oficial, con v **fija** | Base documental |
+| — Agrupar filas no resueltas en un rasgo | ✅ | Guía p. 7: no contarlas como evidencias independientes |
+| — Ajuste gaussiano | ✅ sólo descriptivo (FWHM, figuras) = `ajustar()` oficial | Base documental |
+| — Absorciones marcadas, no borradas | ✅ | Guía p. 8 |
+| — Lista de picos sin identificar | ✅ | Útil para la opción "fuera del catálogo" |
+| — Líneas hermanas presentes / ausentes | ✅ **es el factor "se repite"** de los jueces, ahora a velocidad fija | Lo piden los jueces |
+| 3. Error de velocidad por pico | ❌ | No se estima la velocidad. La cercanía en frecuencia ya entra en L_frecuencia |
+| 4. Coherencia contra ese error | ❌ | Depende del paso 3 |
+| 5. p‑value / FAP | ❌ | No lo pidieron. Lo sustituye la probabilidad por línea |
+| Velocidad adoptada, rejilla de v, correlación cruzada, ajuste de Boltzmann, ~30 umbrales de veredicto, `sensibilidad.py` | ❌ | Fuera del alcance pedido |
+| Infraestructura (carga de datos, exportar JSON a la web, validador) | ✅ | Se reutiliza |
+
+### 11.2 Modelo por línea (v3)
+Para cada pico, y cada molécula candidata *s* del catálogo ampliado, más la opción "fuera del catálogo":
+
+`P(s | línea) ∝ L_frecuencia · L_Einstein · L_repetición · Prior_complejidad · Prior_espacio · Factor_entorno`
+
+| Factor | Qué mide | Fuente |
+|---|---|---|
+| L_frecuencia | `exp(−½(Δν/tol)²)` con v dada, tol = canal ⊕ incertidumbre del catálogo | espectro + catálogo |
+| L_Einstein | intensidad esperada `∝ g_u·Aij·e^(−Eu/T)`. Una transición débil no explica un pico brillante | Aij de CDMS/JPL |
+| L_repetición | fracción de las líneas esperables de *s* en W1/W2 que sí aparecen a la v dada | espectro |
+| Prior_complejidad | nº de moléculas del censo con ese nº de átomos / 348 | diapositiva 5 |
+| Prior_espacio | detectada en ISM = 1 · tentativa (?) = 0.5 · no detectada = 0.1 | censo CDMS |
+| Factor_entorno | compatibilidad de sus condiciones abióticas favorables con un núcleo caliente protoestelar (IRAS 16293 B) | ficha de la molécula |
+
+Interés prebiótico/biótico: **pendiente de decisión de Vanessa** (ver 11.4 #2).
+
+### 11.3 Pasos (sólo la herramienta; pitch y ensayo quedan para después)
+
+| ID | Hora | Paso | Resultado | Estado |
+|---|---|---|---|---|
+| T1 | 06:30–07:30 | **Base de datos de las 348 moléculas** (lista limpia del censo CDMS citado en la diapositiva 5): fórmula, nombre, nº de átomos, detectada/tentativa, descripción, condiciones abióticas favorables, relevancia biótica/prebiótica. Fichas redactadas con IA marcadas como borrador; las ~15 relevantes, verificadas con cita | `data/moleculas_348.json` | ⬜ |
+| T2 | 06:30–07:30 | **Catálogo ampliado con Aij**: transiciones de moléculas del censo en 348.8–349.8 GHz desde CDMS/JPL (vía Splatalogue), con Aij, Eu, g_u e incertidumbre. El catálogo local queda intacto | `data/catalogo_ampliado.csv` | ⬜ |
+| T3 | 07:30–08:30 | **Motor v3**: datos crudos, v fija, ruido oficial, picos, factores 11.2, opción "fuera del catálogo" | `analysis/probabilidad.py`, `outputs/probabilidad_lineas.csv` | ⬜ |
+| T4 | 08:30–09:00 | **Pruebas**: (a) mismo ranking con el catálogo local (13–15), con ~30 y con el ampliado; (b) glicina baja; (c) línea SNR 73 → "fuera del catálogo" o candidata nueva; (d) detecciones PILS conocidas arriba | tabla de robustez | ⬜ |
+| T5 | 08:00–09:00 | **Gráficas de referencia** reproducidas del cuaderno oficial: espectro W1/W2 B_offset, ruido, `candidatos`, `ajustar` (gauss + residuos), verificación del cubo | `notebooks/01_graficas_referencia.ipynb` + PNG en `web/public/figs/` | ⬜ |
+| T6 | 09:00–10:00 | **Dashboard**: (1) quitar los botones y la navegación de arriba; (2) **sidebar delgado a la derecha** con las secciones existentes + "Moléculas (348)" con buscador y ficha + "Gráficas de referencia (Python)"; (3) barras de probabilidad por línea; (4) quitar el control de velocidad (v fija) | `web/` | ⬜ |
+| T7 | 10:00–10:15 | Congelar código, `npm run build`, revisión final | | ⬜ |
+| T8 | 10:15–11:00 | Mínimo entregable (informe, ZIP); secundario | | ⬜ |
+
+### 11.4 Puntos a resolver
+1. **Aij no viene en el paquete.** `catalogos/LEEME_catalogos.txt`: "No se entrega Aij…"; Guía p. 7: "El paquete no incluye ese coeficiente". Propuesta alineada con "escoger el adecuado": **tomar Aij tal cual de CDMS/JPL** (las bases oficiales que cita la guía), sin convertir nada nosotros.
+2. **Interés biótico en la probabilidad.** Recomendación: que las condiciones **abióticas** (entorno) sí entren como factor, y que la relevancia **biótica/prebiótica** se muestre al lado sin multiplicar. Si multiplica, la herramienta favorecería lo que "queremos encontrar" (p. ej. glicina). Decide Vanessa.
+3. **Dos "348" distintos.** El censo tiene 348 **moléculas**; el catálogo local, 348 **transiciones** de 13 especies (su LEEME dice 15 entradas). Usamos el censo como universo.
 
